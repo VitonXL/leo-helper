@@ -1,1 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leo Aide</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card-bg: white;
+      --text: #333;
+      --accent: #0088cc;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1e;
+        --card-bg: #2c2c2e;
+        --text: #f1f1f1;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h3>🔍 Проверка ссылки</h3>
+    <input type="text" id="url" placeholder="https://example.com" />
+    <button onclick="scanUrl()">Проверить</button>
+    <div id="scan-result"></div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    const VT_PROXY = "https://vt-leo-aide.onrender.com"; // ← Замените на ваш URL позже
+
+    async function scanUrl() {
+      const url = document.getElementById("url").value.trim();
+      if (!url.startsWith("http")) {
+        tg.showAlert("Введите корректную ссылку");
+        return;
+      }
+
+      document.getElementById("scan-result").innerHTML = "📡 Отправляю...";
+
+      try {
+        const res = await fetch(`${VT_PROXY}/scan/url`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await res.json();
+        if (data.scan_id) {
+          checkResult(data.scan_id);
+        } else {
+          document.getElementById("scan-result").innerHTML = "❌ Ошибка";
+        }
+      } catch (e) {
+        document.getElementById("scan-result").innerHTML = "❌ Сеть: " + e.message;
+      }
+    }
+
+    function checkResult(scan_id) {
+      document.getElementById("scan-result").innerHTML = "🔍 Проверяю...";
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`${VT_PROXY}/scan/result?id=${scan_id}`);
+          const result = await res.json();
+          clearInterval(interval);
+          if (result.safe) {
+            document.getElementById("scan-result").innerHTML = "🟢 Чисто: 0 угроз";
+          } else {
+            document.getElementById("scan-result").innerHTML = `🔴 Угроз: ${result.malicious}`;
+          }
+        } catch {}
+      }, 5000);
+    }
+  </script>
+
+</body>
+</html>
 
