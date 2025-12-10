@@ -1,20 +1,202 @@
-# bot.py — Leo Aide Bot (v2.0)
-# Полностью готов к запуску на Render
+# bot.py — Leo Aide Bot (всё в одном)
+# Включает: бота, VirusTotal API, Flask, Render-совместимость
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, InputFile
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 import datetime
 import requests
 import os
+import sqlite3
 import threading
-from database import init_db, add_user, get_user, add_reminder, get_active_reminders, mark_reminder_sent, add_subscription, get_subscriptions, set_premium, get_premium_info, get_stats, is_premium, get_movie_usage, increment_movie_usage, get_referral_stats, add_referral, get_referrer, increment_premium_converted, extend_premium_for_referrer
-from movies_kinopoisk import get_random_movie
+from flask import Flask, request, jsonify
 
 # --- API КЛЮЧИ ---
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 CURRENCY_API_KEY = os.getenv("CURRENCY_API_KEY")
 VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
+
+if not TOKEN:
+    raise RuntimeError("Не задан TELEGRAM_TOKEN в переменных окружения")
+
+# --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ ---
+def init_db():
+    with sqlite3.connect("users.db") as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                username TEXT,
+                first_name TEXT,
+                last_name TEXT,
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                is_premium INTEGER DEFAULT 0,
+                premium_until TIMESTAMP,
+                referral_count INTEGER DEFAULT 0,
+                premium_converted INTEGER DEFAULT 0
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reminders (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                text TEXT,
+                notify_at TIMESTAMP,
+                sent INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users (user_id)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                name TEXT,
+                amount REAL,
+                next_payment TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (user_id)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS referrals (
+                referral_id INTEGER,
+                referrer_id INTEGER,
+                premium_converted INTEGER DEFAULT 0,
+                PRIMARY KEY (referral_id)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS movie_usage (
+                user_id INTEGER PRIMARY KEY,
+                count INTEGER DEFAULT 0,
+                last_reset DATE
+            )
+        """)
+        conn.commit()
+
+def add_user(user_id, username, first_name, last_name):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO users (user_id, username, first_name, last_name) VALUES (?, ?, ?, ?)",
+            (user_id, username, first_name, last_name)
+        )
+
+def get_user(user_id):
+    with sqlite3.connect("users.db") as conn:
+        return conn.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
+
+def add_reminder(user_id, text, notify_at):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "INSERT INTO reminders (user_id, text, notify_at) VALUES (?, ?, ?)",
+            (user_id, text, notify_at)
+        )
+
+def get_active_reminders():
+    with sqlite3.connect("users.db") as conn:
+        return conn.execute(
+            "SELECT id, user_id, text, notify_at FROM reminders WHERE sent = 0 AND notify_at <= datetime('now', '+30 seconds')"
+        ).fetchall()
+
+def mark_reminder_sent(reminder_id):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute("UPDATE reminders SET sent = 1 WHERE id = ?", (reminder_id,))
+
+def add_subscription(user_id, name, amount, next_payment):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "INSERT INTO subscriptions (user_id, name, amount, next_payment) VALUES (?, ?, ?, ?)",
+            (user_id, name, amount, next_payment)
+        )
+
+def get_subscriptions(user_id):
+    with sqlite3.connect("users.db") as conn:
+        return conn.execute(
+            "SELECT name, amount, next_payment FROM subscriptions WHERE user_id = ?", (user_id,)
+        ).fetchall()
+
+def set_premium(user_id, amount_ton):
+    duration_days = 30
+    premium_until = datetime.datetime.now() + datetime.timedelta(days=duration_days)
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "UPDATE users SET is_premium = 1, premium_until = ? WHERE user_id = ?",
+            (premium_until, user_id)
+        )
+
+def get_premium_info(user_id):
+    user = get_user(user_id)
+    if not user or not user[10]:  # is_premium
+        return None
+    until = datetime.datetime.fromisoformat(user[11])
+    days_left = (until - datetime.datetime.now()).days
+    return {"until": until, "days_left": max(0, days_left)}
+
+def is_premium(user_id):
+    return get_premium_info(user_id) is not None
+
+def get_referrer(user_id):
+    with sqlite3.connect("users.db") as conn:
+        row = conn.execute(
+            "SELECT referrer_id FROM referrals WHERE referral_id = ?", (user_id,)
+        ).fetchone()
+        return row[0] if row else None
+
+def add_referral(referral_id, referrer_id):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO referrals (referral_id, referrer_id) VALUES (?, ?)",
+            (referral_id, referrer_id)
+        )
+        conn.execute(
+            "UPDATE users SET referral_count = referral_count + 1 WHERE user_id = ?",
+            (referrer_id,)
+        )
+
+def increment_premium_converted(referrer_id):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "UPDATE users SET premium_converted = premium_converted + 1 WHERE user_id = ?",
+            (referrer_id,)
+        )
+        conn.execute(
+            "UPDATE referrals SET premium_converted = 1 WHERE referrer_id = ? AND referral_id IN (SELECT user_id FROM users WHERE is_premium = 1)",
+            (referrer_id,)
+        )
+
+def extend_premium_for_referrer(referrer_id):
+    with sqlite3.connect("users.db") as conn:
+        conn.execute(
+            "UPDATE users SET premium_until = datetime(premium_until, '+3 days') WHERE user_id = ?",
+            (referrer_id,)
+        )
+
+def get_movie_usage(user_id):
+    with sqlite3.connect("users.db") as conn:
+        row = conn.execute(
+            "SELECT count, last_reset FROM movie_usage WHERE user_id = ?", (user_id,)
+        ).fetchone()
+        if not row:
+            return 0
+        try:
+            last_reset = datetime.datetime.fromisoformat(row[1])
+        except:
+            last_reset = datetime.datetime.now()
+        if (datetime.datetime.now() - last_reset).days >= 1:
+            conn.execute("UPDATE movie_usage SET count = 0, last_reset = ? WHERE user_id = ?", (datetime.datetime.now().date(), user_id))
+            conn.commit()
+            return 0
+        return row[0]
+
+def increment_movie_usage(user_id):
+    with sqlite3.connect("users.db") as conn:
+        now = datetime.datetime.now().date()
+        conn.execute(
+            "INSERT OR IGNORE INTO movie_usage (user_id, count, last_reset) VALUES (?, 0, ?)",
+            (user_id, now)
+        )
+        conn.execute(
+            "UPDATE movie_usage SET count = count + 1, last_reset = ? WHERE user_id = ?",
+            (now, user_id)
+        )
 
 # --- ГЛАВНОЕ МЕНЮ ---
 def get_main_menu(user_id=None):
@@ -159,6 +341,102 @@ async def add_reminder_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.callback_query.edit_message_text("Введите текст напоминания:")
     context.user_data['awaiting_reminder_text'] = True
 
+# --- ПОДПИСКИ ---
+async def subscriptions_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    subs = get_subscriptions(user_id)
+    if not subs:
+        text = "💳 У вас нет подписок."
+    else:
+        text = "💳 <b>Ваши подписки:</b>\n\n"
+        for s in subs:
+            text += f"• {s[0]} — {s[1]}₽ — {s[2]}\n"
+    await update.callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ Добавить", callback_data="add_subscription"), InlineKeyboardButton("🔙 Назад", callback_data="my_features")]]), parse_mode='HTML')
+
+# --- ФИЛЬМЫ ---
+def get_random_movie():
+    return "🎬 Пример фильма: 'Интерстеллар' (2014) — Рейтинг: 8.6 — Жанры: Драма, Приключения, Научная фантастика"
+
+async def movie_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    usage = get_movie_usage(update.effective_user.id)
+    if usage >= 3:
+        await update.callback_query.answer("🎬 Лимит фильмов исчерпан. Обновится завтра.", show_alert=True)
+        return
+    movie = get_random_movie()
+    increment_movie_usage(update.effective_user.id)
+    await update.callback_query.edit_message_text(movie, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔄 Ещё", callback_data="movie_menu"), InlineKeyboardButton("🔙 Назад", callback_data="back")]]), parse_mode='HTML')
+
+# --- ПРЕМИУМ & РЕФЕРАЛЫ ---
+async def premium_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    user_id = user.id
+    info = get_premium_info(user_id)
+    status = f"✅ Активен ({info['days_left']} дн.)" if info else "❌ Не активен"
+    ref_link = f"https://t.me/Leo_aide_bot?start={user_id}"
+    text = (
+        f"💎 <b>Премиум & Рефералы</b>\n\n"
+        f"📋 Статус: <b>{status}</b>\n"
+        f"🔗 Ваша реферальная ссылка:\n<code>{ref_link}</code>\n\n"
+        "Приглашайте друзей:\n"
+        "• +3 дня премиума за каждого, кто купит\n"
+        "• Вы получите 3 дня сразу\n\n"
+        "Выберите действие:"
+    )
+    keyboard = [
+        [InlineKeyboardButton("🚀 Купить премиум", callback_data="buy_premium")],
+        [InlineKeyboardButton("🔗 Мои рефералы", callback_data="referral_menu")],
+        [InlineKeyboardButton("💸 Поддержать проект", callback_data="donate")],
+        [InlineKeyboardButton("🔍 Проверить ссылку/файл", callback_data="scan_start")],
+        [InlineKeyboardButton("🔙 Назад", callback_data="back")]
+    ]
+    await update.callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML', disable_web_page_preview=True)
+
+# --- СКАНИРОВАНИЕ ССЫЛОК ---
+async def scan_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_premium(update.effective_user.id):
+        kb = [[InlineKeyboardButton("💎 Купить премиум", callback_data="buy_premium")]]
+        await update.callback_query.edit_message_text("🔒 Эта функция доступна только премиум-пользователям.", reply_markup=InlineKeyboardMarkup(kb))
+    else:
+        await update.callback_query.edit_message_text("📎 Отправьте ссылку или файл (до 32 МБ):")
+        context.user_data['awaiting_scan'] = True
+
+async def scan_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    url = context.user_data.get('awaiting_scan_url')
+    if not url:
+        return
+    context.user_data.pop('awaiting_scan_url', None)
+    await update.effective_message.reply_text("🔍 Проверяю ссылку...")
+    try:
+        headers = {"Authorization": f"Bearer {VIRUSTOTAL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"}
+        response = requests.post("https://www.virustotal.com/api/v3/urls", headers=headers, data={"url": url}, timeout=15)
+        if response.status_code == 200:
+            scan_id = response.json()["data"]["id"]
+            await check_vt_result(update, context, scan_id=scan_id)
+        else:
+            await update.effective_message.reply_text("❌ Ошибка отправки на проверку.")
+    except Exception as e:
+        await update.effective_message.reply_text(f"❌ Ошибка: {e}")
+
+async def check_vt_result(update: Update, context: ContextTypes.DEFAULT_TYPE, scan_id=None):
+    try:
+        headers = {"Authorization": f"Bearer {VIRUSTOTAL_API_KEY}"}
+        response = requests.get(f"https://www.virustotal.com/api/v3/analyses/{scan_id}", headers=headers, timeout=10)
+        if response.status_code != 200:
+            await update.effective_message.reply_text("❌ Ошибка получения результата.")
+            return
+        result = response.json()["data"]["attributes"]["stats"]
+        malicious = result.get("malicious", 0)
+        total = sum(result.values())
+        if malicious > 0:
+            text = f"🔴 Обнаружено: <b>{malicious}</b> угроз из {total}"
+        else:
+            text = f"🟢 Безопасно: <b>0</b> угроз из {total}"
+        await update.effective_message.reply_text(text, parse_mode='HTML')
+        await update.effective_message.reply_text("🎮 Главное меню:", reply_markup=get_main_menu(update.effective_user.id))
+    except Exception as e:
+        await update.effective_message.reply_text(f"❌ Ошибка: {e}")
+
+# --- ОБРАБОТКА СООБЩЕНИЙ ---
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.effective_user.id
@@ -195,103 +473,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.effective_message.reply_text("❌ Неверный формат. Введите число.")
         return
 
-# --- ПОДПИСКИ ---
-async def subscriptions_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    subs = get_subscriptions(user_id)
-    if not subs:
-        text = "💳 У вас нет подписок."
-    else:
-        text = "💳 <b>Ваши подписки:</b>\n\n"
-        for s in subs:
-            text += f"• {s[0]} — {s[1]}₽ — {s[2]}\n"
-    await update.callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ Добавить", callback_data="add_subscription"), InlineKeyboardButton("🔙 Назад", callback_data="my_features")]]), parse_mode='HTML')
-
-# --- ФИЛЬМЫ ---
-async def movie_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    usage = get_movie_usage(update.effective_user.id)
-    if usage >= 3:
-        await update.callback_query.answer("🎬 Лимит фильмов исчерпан. Обновится завтра.", show_alert=True)
-        return
-    movie = get_random_movie()
-    increment_movie_usage(update.effective_user.id)
-    await update.callback_query.edit_message_text(movie, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔄 Ещё", callback_data="movie_menu"), InlineKeyboardButton("🔙 Назад", callback_data="back")]]), parse_mode='HTML')
-
-# --- ПРЕМИУМ & РЕФЕРАЛЫ ---
-async def premium_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    user_id = user.id
-    info = get_premium_info(user_id)
-    status = f"✅ Активен ({info['days_left']} дн.)" if info else "❌ Не активен"
-    ref_link = f"https://t.me/Leo_aide_bot?start={user_id}"
-    text = (
-        f"💎 <b>Премиум & Рефералы</b>\n\n"
-        f"📋 Статус: <b>{status}</b>\n"
-        f"🔗 Ваша реферальная ссылка:\n<code>{ref_link}</code>\n\n"
-        "Приглашайте друзей:\n"
-        "• +3 дня премиума за каждого, кто купит\n"
-        "• Вы получите 3 дня сразу\n\n"
-        "Выберите действие:"
-    )
-    keyboard = [
-        [InlineKeyboardButton("🚀 Купить премиум", callback_data="buy_premium")],
-        [InlineKeyboardButton("🔗 Мои рефералы", callback_data="referral_menu")],
-        [InlineKeyboardButton("💸 Поддержать проект", callback_data="donate")],
-        [InlineKeyboardButton("🔍 Проверить ссылку/файл", callback_data="scan_start")],
-        [InlineKeyboardButton("🔙 Назад", callback_data="back")]
-    ]
-    await update.callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML', disable_web_page_preview=True)
-
-# --- СКАНИРОВАНИЕ ССЫЛОК И ФАЙЛОВ ---
-async def scan_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_premium(user.id):
-        kb = [[InlineKeyboardButton("💎 Купить премиум", callback_data="buy_premium")]]
-        await update.callback_query.edit_message_text("🔒 Эта функция доступна только премиум-пользователям.", reply_markup=InlineKeyboardMarkup(kb))
-    else:
-        await update.callback_query.edit_message_text("📎 Отправьте ссылку или файл (до 32 МБ):")
-        context.user_data['awaiting_scan'] = True
-
-async def scan_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    url = context.user_data.get('awaiting_scan_url')
-    if not url:
-        return
-    context.user_data.pop('awaiting_scan_url', None)
-    await update.effective_message.reply_text("🔍 Проверяю ссылку...")
-    try:
-        headers = {"Authorization": f"Bearer {VIRUSTOTAL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"}
-        response = requests.post("https://www.virustotal.com/api/v3/urls", headers=headers, data={"url": url}, timeout=15)
-        if response.status_code == 200:
-            scan_id = response.json()["data"]["id"]
-            await check_vt_result(update, context, scan_id=scan_id)
-        else:
-            await update.effective_message.reply_text("❌ Ошибка отправки на проверку.")
-    except Exception as e:
-        await update.effective_message.reply_text(f"❌ Ошибка: {e}")
-
-async def check_vt_result(update: Update, context: ContextTypes.DEFAULT_TYPE, scan_id=None, file_id=None):
-    try:
-        headers = {"Authorization": f"Bearer {VIRUSTOTAL_API_KEY}"}
-        if scan_id:
-            url = f"https://www.virustotal.com/api/v3/analyses/{scan_id}"
-        elif file_id:
-            url = f"https://www.virustotal.com/api/v3/files/{file_id}"
-        else:
+    # Проверка ссылки
+    if context.user_data.get('awaiting_scan'):
+        context.user_data.pop('awaiting_scan', None)
+        if text and text.startswith(('http://', 'https://')):
+            context.user_data['awaiting_scan_url'] = text
+            await scan_url(update, context)
             return
-        response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code != 200:
-            await update.effective_message.reply_text("❌ Ошибка получения результата.")
-            return
-        result = response.json()["data"]["attributes"]["stats"]
-        malicious = result.get("malicious", 0)
-        total = sum(result.values())
-        if malicious > 0:
-            text = f"🔴 Обнаружено: <b>{malicious}</b> угроз из {total}"
-        else:
-            text = f"🟢 Безопасно: <b>0</b> угроз из {total}"
-        await update.effective_message.reply_text(text, parse_mode='HTML')
-        await update.effective_message.reply_text("🎮 Главное меню:", reply_markup=get_main_menu(update.effective_user.id))
-    except Exception as e:
-        await update.effective_message.reply_text(f"❌ Ошибка: {e}")
+        await update.effective_message.reply_text("❌ Отправьте корректную ссылку.")
+        return
 
 # --- ОБРАБОТКА КНОПОК ---
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -323,22 +513,58 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await movie_menu(query, context)
     elif query.data == "premium_menu":
         await premium_menu(query, context)
-    elif query.data == "buy_premium":
-        await buy_premium(query, context)
-    elif query.data == "referral_menu":
-        await referral_menu(query, context)
-    elif query.data == "donate":
-        await donate(query, context)
     elif query.data == "scan_start":
         await scan_start(query, context)
     elif query.data == "back":
         await query.edit_message_text("🎮 Главное меню:", reply_markup=get_main_menu(user.id))
 
-# --- ЗАПУСК ---
+# --- ВСТРОЕННЫЙ FLASK API ДЛЯ VIRUSTOTAL ---
+flask_app = Flask('VirusTotalProxy')
+
+@flask_app.route('/scan/url', methods=['POST'])
+def scan_url_api():
+    data = request.get_json()
+    url = data.get('url')
+    if not url:
+        return jsonify({"error": "URL не указан"}), 400
+    headers = {"Authorization": f"Bearer {VIRUSTOTAL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"}
+    response = requests.post("https://www.virustotal.com/api/v3/urls", headers=headers, data={"url": url})
+    if response.status_code != 200:
+        return jsonify({"error": "Ошибка отправки", "details": response.text}), 500
+    scan_id = response.json()["data"]["id"]
+    return jsonify({"scan_id": scan_id})
+
+@flask_app.route('/scan/result', methods=['GET'])
+def scan_result_api():
+    scan_id = request.args.get('id')
+    if not scan_id:
+        return jsonify({"error": "scan_id не указан"}), 400
+    headers = {"Authorization": f"Bearer {VIRUSTOTAL_API_KEY}"}
+    response = requests.get(f"https://www.virustotal.com/api/v3/analyses/{scan_id}", headers=headers)
+    if response.status_code != 200:
+        return jsonify({"error": "Не удалось получить результат"}), 500
+    result = response.json()["data"]["attributes"]["stats"]
+    malicious = result.get("malicious", 0)
+    return jsonify({"malicious": malicious, "safe": malicious == 0, "total": sum(result.values())})
+
+@flask_app.route('/')
+def home():
+    return jsonify({"status": "Leo Aide Bot & VT API is running"}), 200
+
+# --- ЗАПУСК ВСЕГО ---
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+    flask_app.run(host='0.0.0.0', port=port)
+
 def main():
     init_db()
-    thread = threading.Thread(target=run)
+
+    # Запускаем Flask в фоне
+    thread = threading.Thread(target=run_flask)
+    thread.daemon = True
     thread.start()
+
+    # Запускаем бота
     application = ApplicationBuilder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
@@ -346,25 +572,8 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(MessageHandler(filters.Document.ALL | filters.PHOTO, handle_message))
 
-    # Задачи
-    application.job_queue.run_repeating(check_payments, interval=300, first=10)
-    application.job_queue.run_repeating(check_reminders, interval=60, first=10)
-    application.job_queue.run_repeating(notify_premium_expiring, interval=86400, first=30)
-    application.job_queue.run_repeating(backup_db, interval=86400, first=60)
-
-    print("✅ Бот запущен и работает на Render")
+    print("✅ Бот и VirusTotal API запущены на одном сервере")
     application.run_polling(drop_pending_updates=True)
-
-# --- ВЕБ-СЕРВЕР ДЛЯ RENDER ---
-from flask import Flask
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return '<b>Leo Aide Bot is alive!</b>'
-
-def run():
-    app.run(host='0.0.0.0', port=8080)
 
 if __name__ == '__main__':
     main()
