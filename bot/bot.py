@@ -2,9 +2,10 @@
 import os
 import logging
 import requests
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, constants
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -12,30 +13,28 @@ from telegram.ext import (
     MessageHandler,
     filters,
     ContextTypes,
-    ConversationHandler,
+    CallbackContext,
 )
 
 from bot.database import db
 from bot.admin import (
-    admin_panel,
-    admin_stats,
-    admin_broadcast_start,
-    admin_grant_premium_start,
-    admin_logs,
-    admin_command
+    admin_panel, admin_stats, admin_broadcast_start,
+    admin_grant_premium_start, admin_logs, admin_command
 )
 from bot.cbr_exchange import get_cached_cbr_rates, fetch_cbr_rates
-from bot.ton_checker import check_pending_payments
+from bot.ton_checker import check_pending_payments, test_ton_api
 from bot.sheets_sync import log_subscription, log_reminder
 
 # Настройка логов
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
-# Состояния для диалогов
+# --- Глобальные переменные ---
 AWAITING = "awaiting"
 
-# Глобальные переменные
 MOVIE_GENRES = {
     "action": "Боевик",
     "comedy": "Комедия",
@@ -52,7 +51,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db.reset_daily_counters(user_id)
     db.log_action(user_id, "start")
 
-    # Реферальная система
+    # Рефералы
     if context.args and context.args[0].startswith("ref_"):
         referrer_id = int(context.args[0].split("_")[1])
         if referrer_id != user_id:
@@ -68,15 +67,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await show_main_menu(update, context)
 
+
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = update.effective_user.id
     user = db.get_user(user_id)
     is_premium = db.is_premium(user_id)
     ref_count = db.get_referral_count(user_id)
-
     theme = user["theme"]
-    theme_text = "🌑 Тёмная" if theme == "dark" else "☀️ Светлая"
+    theme_icon = "🌑" if theme == "dark" else "☀️"
 
     keyboard = [
         [InlineKeyboardButton("🌤 Погода", callback_data="weather"),
@@ -84,8 +83,10 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("💱 Курсы", callback_data="currency"),
          InlineKeyboardButton("🎬 Фильмы", callback_data="movies" if is_premium else "premium_info")],
         [InlineKeyboardButton("🛡 Антивирусы", callback_data="antivirus"),
+         InlineKeyboardButton("🔔 Напоминания", callback_data="reminders")],
+        [InlineKeyboardButton("💳 Подписки", callback_data="subscriptions"),
          InlineKeyboardButton("⚙️ Настройки", callback_data="settings")],
-        [InlineKeyboardButton("💎 Премиум", callback_data="premium")]
+        [InlineKeyboardButton("💎 Премиум", callback_data="premium")],
     ]
 
     if user["is_admin"]:
@@ -98,6 +99,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("🏠 Главное меню", reply_markup=reply_markup)
 
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -107,6 +109,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(update, context)
         return
 
+    # --- Время ---
     elif query.data == "time":
         moscow_time = datetime.now(ZoneInfo("Europe/Moscow")).strftime("%H:%M:%S")
         await query.edit_message_text(
@@ -115,8 +118,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=back_button()
         )
 
+    # --- Погода ---
     elif query.data == "weather":
-        db.reset_daily_counters(user_id)
         user = db.get_user(user_id)
         if not db.is_premium(user_id) and user["daily_weather_count"] >= 5:
             await query.edit_message_text("❌ Лимит погоды (5/день)", reply_markup=back_button())
@@ -125,8 +128,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["awaiting"] = "weather_city"
         db.log_action(user_id, "weather_requested")
 
+    # --- Курсы ---
     elif query.data == "currency":
-        db.reset_daily_counters(user_id)
         user = db.get_user(user_id)
         if not db.is_premium(user_id) and user["daily_currency_count"] >= 5:
             await query.edit_message_text("❌ Лимит курсов (5/день)", reply_markup=back_button())
@@ -145,6 +148,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.update_user(user_id, daily_currency_count=user["daily_currency_count"] + 1)
         db.log_action(user_id, "currency_check")
 
+    # --- Фильмы ---
     elif query.data == "movies":
         await query.edit_message_text("🎭 Выберите жанр:", reply_markup=genre_keyboard())
         context.user_data["awaiting"] = "movie_genre"
@@ -152,9 +156,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data in MOVIE_GENRES:
         genre = query.data
         context.user_data["movie_genre"] = genre
-        await query.edit_message_text("Введите год (например: 2020):")
+        await query.edit_message_text("🎬 Введите год (например: 2020):")
         context.user_data["awaiting"] = "movie_year"
 
+    # --- Антивирусы ---
     elif query.data == "antivirus":
         await query.edit_message_text(
             "📎 Пришлите ссылку или файл для проверки",
@@ -162,6 +167,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         context.user_data["awaiting"] = "scan_file_or_url"
 
+    # --- Премиум ---
     elif query.data == "premium":
         await show_premium_info(query, context)
 
@@ -176,11 +182,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text("❌ Недостаточно рефералов")
 
+    # --- Настройки ---
     elif query.data == "settings":
         theme = db.get_user(user_id)["theme"]
         theme_text = "🌑 Тёмная" if theme == "dark" else "☀️ Светлая"
         keyboard = [
-            [InlineKeyboardButton("🎨 Тема: " + theme_text, callback_data="change_theme")],
+            [InlineKeyboardButton(f"🎨 Тема: {theme_text}", callback_data="change_theme")],
             [InlineKeyboardButton("⬅️ Назад", callback_data="back_to_main")]
         ]
         await query.edit_message_text("⚙️ Настройки", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -191,6 +198,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.update_user(user_id, theme=new_theme)
         await query.edit_message_text(f"🎨 Тема изменена на {new_theme}", reply_markup=back_button())
 
+    # --- Админка ---
     elif query.data == "admin_panel":
         await admin_panel(update, context)
 
@@ -206,17 +214,27 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "admin_logs":
         await admin_logs(update, context)
 
+    # --- Другие ---
+    elif query.data == "reminders":
+        reminders = db.get_reminders(user_id)
+        text = "🔔 Ваши напоминания:\n\n" + "\n".join([f"• {r['text']} — {r['time']}" for r in reminders])
+        await query.edit_message_text(text or "📌 У вас нет напоминаний", reply_markup=back_button())
+
+    elif query.data == "subscriptions":
+        subs = db.get_subscriptions(user_id)
+        text = "💳 Ваши подписки:\n\n" + "\n".join([f"• {s['name']} — {s['renewal_date']}" for s in subs])
+        await query.edit_message_text(text or "📌 У вас нет подписок", reply_markup=back_button())
+
     db.log_action(user_id, f"button_{query.data}")
 
-# --- ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ ---
+
+# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 
 def back_button():
     return InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Назад", callback_data="back_to_main")]])
 
 def genre_keyboard():
-    buttons = []
-    for key, value in MOVIE_GENRES.items():
-        buttons.append([InlineKeyboardButton(value, callback_data=key)])
+    buttons = [[InlineKeyboardButton(name, callback_data=code)] for code, name in MOVIE_GENRES.items()]
     buttons.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_main")])
     return InlineKeyboardMarkup(buttons)
 
@@ -225,7 +243,7 @@ async def show_premium_info(query, context):
     is_premium = db.is_premium(user_id)
     ref_count = db.get_referral_count(user_id)
     premium_url = (
-        f"https://app.tonkeeper.com/transfer/UQCAjhZZOSxbEUB84daLpOXBPkQIWy3oB-fWoTztKdAZFDLQ"
+        f"https://app.tonkeeper.com/transfer/{db.WALLET_ADDRESS}"
         f"?amount=20000000&text=premium:{user_id}"
     )
     text = (
@@ -241,7 +259,8 @@ async def show_premium_info(query, context):
     ]
     await query.edit_message_text(text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
 
-# --- ОБРАБОТЧИКИ СООБЩЕНИЙ ---
+
+# --- ОБРАБОТКА СООБЩЕНИЙ ---
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -251,9 +270,12 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if awaiting == "weather_city":
         city = text
         api_key = os.getenv("WEATHER_API_KEY")
+        if not api_key:
+            await update.message.reply_text("🔧 Ключ погоды не задан", reply_markup=back_button())
+            return
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
         try:
-            response = requests.get(url).json()
+            response = requests.get(url, timeout=10).json()
             temp = response['main']['temp']
             desc = response['weather'][0]['description']
             await update.message.reply_text(
@@ -273,10 +295,9 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             year = int(text)
             genre = context.user_data["movie_genre"]
-            # Здесь можно подключить API Кинопоиска
+            # (здесь можно подключить API Кинопоиска)
             await update.message.reply_text(
-                f"🎬 Пример: 'Безумный Макс: Дорога ярости' (2015)\n"
-                f"Жанр: {MOVIE_GENRES[genre]}",
+                f"🎬 Подбор: '{MOVIE_GENRES[genre]}' ({year})\nПример: 'Интерстеллар'",
                 reply_markup=back_button()
             )
             db.update_user(user_id, daily_movies_count=db.get_user(user_id)["daily_movies_count"] + 1)
@@ -286,7 +307,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data.clear()
 
     elif awaiting == "scan_file_or_url":
-        # Упрощённая проверка
+        # (здесь будет интеграция с VirusTotal)
         await update.message.reply_text("✅ Файл проверен — угроз не обнаружено", reply_markup=back_button())
         db.update_user(user_id, daily_scan_count=db.get_user(user_id)["daily_scan_count"] + 1)
         db.log_action(user_id, "file_scanned")
@@ -307,7 +328,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             target_id = int(text)
             db.grant_premium(target_id, 30)
-            await update.message.reply_text(f"✅ Премиум выдан пользователю {target_id}")
+            await update.message.reply_text(f"✅ Премиум выдан: {target_id}")
             db.log_action(user_id, f"premium_granted_to_{target_id}")
         except:
             await update.message.reply_text("❌ Ошибка")
@@ -315,6 +336,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     else:
         await update.message.reply_text("Используйте меню", reply_markup=back_button())
+
 
 # --- ОСНОВНОЙ ЗАПУСК ---
 
@@ -325,29 +347,24 @@ def main():
     # Команды
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("admin", admin_command))
+    application.add_handler(CommandHandler("test_ton", test_ton_api))  # Тест TON
 
     # Колбэки
     application.add_handler(CallbackQueryHandler(button_handler))
 
     # Сообщения
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
+    application.add_handler(MessageHandler(filters.Document.ALL | filters.Entity("url"), message_handler))
 
-    # Проверка платежей
+    # Задачи
     application.job_queue.run_repeating(check_pending_payments, interval=300, first=10)
-
-    # Обновление курсов
+    application.job_queue.run_daily(fetch_cbr_rates, time=datetime.time(hour=8, minute=30, tzinfo=timezone(timedelta(hours=3))))
     application.job_queue.run_daily(
-        lambda ctx: fetch_cbr_rates(),
-        time=datetime.time(hour=8, minute=30, tzinfo=timezone(timedelta(hours=3)))
+        lambda ctx: ctx.bot.send_document(1799560429, open("bot.db", "rb"), caption="📦 Бэкап"),
+        time=datetime.time(hour=3, minute=0, tzinfo=timezone(timedelta(hours=3)))
     )
 
-    # Бэкап базы
-    async def backup_job(context):
-        if os.path.exists("bot.db"):
-            await context.bot.send_document(1799560429, open("bot.db", "rb"), caption="📦 Ежедневный бэкап")
-    application.job_queue.run_daily(backup_job, time=datetime.time(hour=3, minute=0, tzinfo=timezone(timedelta(hours=3))))
-
-    # Запуск
+    logger.info("✅ Бот запущен. Премиум, TON, Google Sheets — активны.")
     application.run_polling()
 
 if __name__ == '__main__':
