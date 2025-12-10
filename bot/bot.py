@@ -1,7 +1,6 @@
 # bot/bot.py
 import os
 import logging
-import requests
 from datetime import datetime, timedelta, timezone, time as dt_time
 from zoneinfo import ZoneInfo
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -21,7 +20,6 @@ from bot.admin import (
 )
 from bot.cbr_exchange import get_cached_cbr_rates, fetch_cbr_rates
 from bot.ton_checker import check_pending_payments
-from bot.sheets_sync import log_subscription, log_reminder
 
 # Настройка логов
 logging.basicConfig(
@@ -31,8 +29,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- Глобальные переменные ---
-AWAITING = "awaiting"
-
 MOVIE_GENRES = {
     "action": "Боевик",
     "comedy": "Комедия",
@@ -342,33 +338,33 @@ def main():
     application.add_handler(MessageHandler(filters.Document.ALL | filters.Entity("url"), message_handler))
 
     # Задачи
-    from datetime import time as dt_time
+    application.job_queue.run_repeating(check_pending_payments, interval=300, first=10)
 
-# ...
-
-application.job_queue.run_daily(
-    fetch_cbr_rates,
-    time=dt_time(hour=8, minute=30),
-    job_kwargs={"timezone": timezone(timedelta(hours=3))}
-)
+    application.job_queue.run_daily(
+        fetch_cbr_rates,
+        time=dt_time(hour=8, minute=30),
+        job_kwargs={"timezone": timezone(timedelta(hours=3))}
+    )
 
     # Бэкап базы
-    async def backup_job(context):
+    async def backup_job(context: ContextTypes.DEFAULT_TYPE):
         if os.path.exists("bot.db"):
             await context.bot.send_document(
-                1799560429,
-                open("bot.db", "rb"),
+                chat_id=1799560429,  # ← замените на ваш ID
+                document=open("bot.db", "rb"),
                 caption="📦 Ежедневный бэкап"
             )
+
     application.job_queue.run_daily(
         backup_job,
         time=dt_time(hour=3, minute=0),
-        timezone=timezone(timedelta(hours=3))
+        job_kwargs={"timezone": timezone(timedelta(hours=3))}
     )
 
     # Запуск
     logger.info("✅ Бот запущен. Все модули активны.")
     application.run_polling()
+
 
 if __name__ == '__main__':
     main()
