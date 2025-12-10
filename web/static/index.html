@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leo Aide — Проверка ссылок</title>
+    <meta name="theme-color" content="#0088cc" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+    <div class="container">
+        <h1>🛡 Проверка ссылки</h1>
+        <p>Введите URL, чтобы проверить на вирусы</p>
 
+        <input type="text" id="urlInput" placeholder="https://example.com" />
+        <button id="scanBtn">🔍 Проверить</button>
+
+        <div id="result" class="hidden">
+            <div class="loader" id="loader"></div>
+            <div id="report"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
