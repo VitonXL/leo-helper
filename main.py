@@ -1,5 +1,3 @@
-# main.py — запускает и бота, и Flask
-
 import os
 import threading
 from bot.bot import main as start_bot
@@ -10,9 +8,9 @@ def run_flask():
     flask_app.run(host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
-    # Запускаем Flask в отдельном потоке
+    # Запускаем Flask в потоке
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
 
-    # Запускаем бота (главный поток)
+    # Запускаем бота
     start_bot()
