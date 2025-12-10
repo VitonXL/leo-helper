@@ -1,55 +1,61 @@
-# bot/ton_checker.py
-import httpx
-import logging
+# bot/cbr_exchange.py
+import requests
+import xml.etree.ElementTree as ET
 from datetime import datetime
+import logging
 from bot.database import db
 
-TON_API = "https://toncenter.com/api/v3"
+CBR_URL = "https://www.cbr.ru/scripts/XML_daily.asp"
 
-async def check_pending_payments(context: object):
-    """Проверяет входящие платежи"""
-    wallet = "UQCAjhZZOSxbEUB84daLpOXBPkQIWy3oB-fWoTztKdAZFDLQ"
+def fetch_cbr_rates():
+    """Получает курсы от ЦБ РФ и кэширует их"""
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{TON_API}/getTransactions",
-                params={"address": wallet, "limit": 50},
-                timeout=15
-            )
-            if response.status_code != 200:
-                logging.error(f"❌ Ошибка TON API: {response.status_code}")
-                return
+        date_req = datetime.now().strftime("%d/%m/%Y")
+        response = requests.get(CBR_URL, params={'date_req': date_req}, timeout=10)
 
-            transactions = response.json().get("transactions", [])
-            for tx in transactions:
-                try:
-                    tx_id = tx["transaction_id"]["hash"]
-                    if db.is_payment_processed(tx_id):
-                        continue
+        if response.status_code != 200:
+            logging.error(f"❌ Ошибка API ЦБ: {response.status_code}")
+            return None
 
-                    # Только входящие
-                    if tx["out_msgs"]:
-                        continue
+        root = ET.fromstring(response.content)
+        date = root.attrib['Date']
 
-                    amount = int(tx["in_msg"]["value"])
-                    comment = tx["in_msg"].get("decoded_body", {}).get("comment", "")
+        usd_rate = None
+        eur_rate = None
 
-                    if amount == 20000000 and comment.startswith("premium:"):
-                        user_id = int(comment.split(":")[1])
-                        if not db.is_premium(user_id):
-                            db.grant_premium(user_id, 30)
-                            await notify_user_paid(context, user_id)
-                        db.mark_payment_as_processed(tx_id)
-                except Exception as e:
-                    logging.error(f"❌ Ошибка транзакции: {e}")
+        for valute in root.findall('Valute'):
+            charcode = valute.find('CharCode').text
+            value = float(valute.find('Value').text.replace(',', '.'))
+            nominal = int(valute.find('Nominal').text)
+            rate = round(value / nominal, 2)
+
+            if charcode == 'USD':
+                usd_rate = rate
+            elif charcode == 'EUR':
+                eur_rate = rate
+
+        if usd_rate and eur_rate:
+            rates = {
+                'USD_RUB': usd_rate,
+                'EUR_RUB': eur_rate,
+                'date': date,
+                'timestamp': datetime.now().isoformat()
+            }
+            db.cache_rates(rates)
+            logging.info(f"✅ Курсы ЦБ обновлены: USD={usd_rate}, EUR={eur_rate}")
+            return rates
     except Exception as e:
-        logging.error(f"❌ Ошибка проверки платежей: {e}")
+        logging.error(f"❌ Ошибка получения курсов ЦБ: {e}")
+    return None
 
-async def notify_user_paid(context, user_id):
-    try:
-        await context.bot.send_message(
-            user_id,
-            "🎉 Оплата получена! Вам выдан премиум-доступ на 30 дней.\nСпасибо за поддержку! 💙"
-        )
-    except Exception as e:
-        logging.error(f"❌ Не удалось уведомить {user_id}: {e}")
+def get_cached_cbr_rates():
+    """Возвращает кэшированные курсы ЦБ РФ"""
+    rates = db.get_cached_rates()
+    if rates:
+        return rates
+    # Если кэша нет — возвращаем значения по умолчанию
+    return {
+        'USD_RUB': 92.50,
+        'EUR_RUB': 100.20,
+        'date': '01.01.2025'
+    }
