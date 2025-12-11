@@ -12,8 +12,15 @@ from telegram.ext import (
 )
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from bot.database import db
-from bot.weather import add_city, show_cities, show_weather
+# Импортируем функции напрямую
+from bot.database import (
+    get_user, add_user, set_premium, set_admin,
+    get_user_count, get_premium_count, get_today_joined_count,
+    log_action, get_user_cities, add_user_city, remove_city,
+    get_ai_requests, increment_ai_request, reset_ai_requests
+)
+
+from bot.weather import add_city as add_city_command
 from bot.ai import send_to_gigachat
 from bot.currency import get_usd_rate
 from bot.quotes import get_random_quote
