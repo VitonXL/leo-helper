@@ -1,209 +1,167 @@
 # bot/database.py
-import sqlite3
 import os
-import json
-from datetime import datetime, timedelta
+import sqlite3
+from contextlib import contextmanager
+import psycopg2
+from psycopg2.extras import DictCursor
 
-DB_PATH = "bot.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-class Database:
-    def __init__(self):
-        self.init_db()
+if DATABASE_URL:
+    print("✅ Используем PostgreSQL")
+else:
+    print("⚠️ Используем SQLite (локально)")
 
-    def init_db(self):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id INTEGER PRIMARY KEY,
-                    is_admin INTEGER DEFAULT 0,
-                    premium_until TEXT,
-                    daily_weather_count INTEGER DEFAULT 0,
-                    daily_movies_count INTEGER DEFAULT 0,
-                    daily_scan_count INTEGER DEFAULT 0,
-                    daily_currency_count INTEGER DEFAULT 0,
-                    last_reset TEXT,
-                    theme TEXT DEFAULT 'light'
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS referrals (
-                    user_id INTEGER PRIMARY KEY,
-                    referrer_id INTEGER,
-                    count INTEGER DEFAULT 0
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS reminders (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER,
-                    text TEXT,
-                    time TEXT
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS subscriptions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER,
-                    name TEXT,
-                    renewal_date TEXT
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    timestamp TEXT,
-                    user_id INTEGER,
-                    action TEXT
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS cache (
-                    key TEXT PRIMARY KEY,
-                    value TEXT,
-                    updated_at TEXT
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS payment_logs (
-                    tx_hash TEXT PRIMARY KEY,
-                    processed_at TEXT
-                )
-            ''')
-
-    def get_user(self, user_id):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute('SELECT * FROM users WHERE user_id = ?', (user_id,))
-            row = cursor.fetchone()
-            if not row:
-                is_admin = 1 if user_id == 1799560429 else 0
-                conn.execute('''
-                    INSERT INTO users (user_id, is_admin) VALUES (?, ?)
-                ''', (user_id, is_admin))
-                conn.commit()
-                return self.get_user(user_id)
-            return dict(row)
-
-    def is_premium(self, user_id):
-        user = self.get_user(user_id)
-        if user["is_admin"]:
-            return True
-        if user["premium_until"]:
-            return datetime.now() < datetime.fromisoformat(user["premium_until"])
-        return False
-
-    def grant_premium(self, user_id, days):
-        until = (datetime.now() + timedelta(days=days)).isoformat()
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                UPDATE users SET premium_until = ? WHERE user_id = ?
-            ''', (until, user_id))
+@contextmanager
+def get_db():
+    if DATABASE_URL:
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=DictCursor)
+        try:
+            yield conn
             conn.commit()
-
-    def reset_daily_counters(self, user_id):
-        user = self.get_user(user_id)
-        last = user["last_reset"]
-        today = datetime.now().strftime("%Y-%m-%d")
-
-        if last != today:
-            with sqlite3.connect(DB_PATH) as conn:
-                conn.execute('''
-                    UPDATE users SET
-                        daily_weather_count = 0,
-                        daily_movies_count = 0,
-                        daily_scan_count = 0,
-                        daily_currency_count = 0,
-                        last_reset = ?
-                    WHERE user_id = ?
-                ''', (today, user_id))
-                conn.commit()
-
-    def update_user(self, user_id, **kwargs):
-        with sqlite3.connect(DB_PATH) as conn:
-            set_clause = ", ".join([f"{k} = ?" for k in kwargs.keys()])
-            values = list(kwargs.values()) + [user_id]
-            conn.execute(f"UPDATE users SET {set_clause} WHERE user_id = ?", values)
+        except:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = sqlite3.connect("bot.db")
+        conn.row_factory = sqlite3.Row
+        try:
+            yield conn
             conn.commit()
+        except:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
 
-    def get_referral_count(self, user_id):
-        with sqlite3.connect(DB_PATH) as conn:
-            cursor = conn.execute("SELECT count FROM referrals WHERE user_id = ?", (user_id,))
-            row = cursor.fetchone()
-            return row[0] if row else 0
+def init_db():
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id BIGINT PRIMARY KEY,
+                username TEXT,
+                first_name TEXT,
+                last_name TEXT,
+                is_premium BOOLEAN DEFAULT FALSE,
+                is_admin BOOLEAN DEFAULT FALSE,
+                last_seen TIMESTAMP,
+                join_date TIMESTAMP,
+                notify_enabled BOOLEAN DEFAULT TRUE,
+                ai_requests_today INTEGER DEFAULT 0
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS logs (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT,
+                action TEXT,
+                timestamp TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_cities (
+                user_id BIGINT,
+                city TEXT,
+                PRIMARY KEY (user_id, city)
+            )
+        """)
+        conn.commit()
 
-    def get_all_users(self):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT * FROM users")
-            return [dict(row) for row in cursor.fetchall()]
+init_db()
 
-    def cache_rates(self, rates):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                INSERT OR REPLACE INTO cache (key, value, updated_at)
-                VALUES (?, ?, ?)
-            ''', ('exchange_rates', json.dumps(rates), datetime.now().isoformat()))
-            conn.commit()
+def get_user(user_id: int):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+        return cur.fetchone()
 
-    def get_cached_rates(self):
-        with sqlite3.connect(DB_PATH) as conn:
-            cursor = conn.execute("SELECT value FROM cache WHERE key = 'exchange_rates'")
-            row = cursor.fetchone()
-            return json.loads(row[0]) if row else None
+def add_user(user_data):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO users (user_id, username, first_name, last_name, join_date, last_seen)
+            VALUES (%s, %s, %s, %s, COALESCE((SELECT join_date FROM users WHERE user_id = %s), NOW()), NOW())
+            ON CONFLICT (user_id) DO UPDATE SET
+                username = EXCLUDED.username,
+                first_name = EXCLUDED.first_name,
+                last_name = EXCLUDED.last_name,
+                last_seen = NOW()
+        """, (
+            user_data["id"],
+            user_data.get("username"),
+            user_data.get("first_name"),
+            user_data.get("last_name"),
+            user_data["id"]
+        ))
 
-    def log_action(self, user_id, action):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                INSERT INTO logs (timestamp, user_id, action)
-                VALUES (?, ?, ?)
-            ''', (datetime.now().isoformat(), user_id, action))
-            conn.commit()
+def set_premium(user_id: int, is_premium: bool):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET is_premium = %s WHERE user_id = %s", (is_premium, user_id))
 
-    def mark_payment_as_processed(self, tx_hash):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                INSERT OR IGNORE INTO payment_logs (tx_hash, processed_at)
-                VALUES (?, ?)
-            ''', (tx_hash, datetime.now().isoformat()))
-            conn.commit()
+def set_admin(user_id: int, is_admin: bool):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET is_admin = %s WHERE user_id = %s", (is_admin, user_id))
 
-    def is_payment_processed(self, tx_hash):
-        with sqlite3.connect(DB_PATH) as conn:
-            cursor = conn.execute("SELECT 1 FROM payment_logs WHERE tx_hash = ?", (tx_hash,))
-            return cursor.fetchone() is not None
+def get_user_count():
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) as c FROM users")
+        return cur.fetchone()["c"]
 
-    def add_reminder(self, user_id, text, time):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                INSERT INTO reminders (user_id, text, time)
-                VALUES (?, ?, ?)
-            ''', (user_id, text, time))
-            conn.commit()
+def get_premium_count():
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) as c FROM users WHERE is_premium = TRUE")
+        return cur.fetchone()["c"]
 
-    def get_reminders(self, user_id):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT * FROM reminders WHERE user_id = ?", (user_id,))
-            return [dict(row) for row in cursor.fetchall()]
+def get_today_joined_count():
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) as c FROM users WHERE DATE(last_seen) = CURRENT_DATE")
+        return cur.fetchone()["c"]
 
-    def add_subscription(self, user_id, name, renewal_date):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute('''
-                INSERT INTO subscriptions (user_id, name, renewal_date)
-                VALUES (?, ?, ?)
-            ''', (user_id, name, renewal_date))
-            conn.commit()
+def log_action(user_id: int, action: str):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO logs (user_id, action, timestamp) VALUES (%s, %s, NOW())", (user_id, action))
 
-    def get_subscriptions(self, user_id):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT * FROM subscriptions WHERE user_id = ?", (user_id,))
-            return [dict(row) for row in cursor.fetchall()]
+def get_user_cities(user_id: int) -> list:
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT city FROM user_cities WHERE user_id = %s", (user_id,))
+        return [row["city"] for row in cur.fetchall()]
 
-db = Database()
+def add_user_city(user_id: int, city: str):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO user_cities (user_id, city) VALUES (%s, %s) ON CONFLICT DO NOTHING", (user_id, city))
+
+def remove_city(user_id: int, city: str):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM user_cities WHERE user_id = %s AND city = %s", (user_id, city))
+
+def get_ai_requests(user_id: int) -> int:
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT ai_requests_today FROM users WHERE user_id = %s", (user_id,))
+        row = cur.fetchone()
+        return row["ai_requests_today"] if row else 0
+
+def increment_ai_request(user_id: int):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE users SET ai_requests_today = ai_requests_today + 1, last_seen = NOW()
+            WHERE user_id = %s
+        """, (user_id,))
+
+def reset_ai_requests():
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET ai_requests_today = 0")
