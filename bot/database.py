@@ -70,8 +70,10 @@ def init_db():
         """)
         conn.commit()
 
+# === Инициализация при старте ===
 init_db()
 
+# === Пользователи ===
 def get_user(user_id: int):
     with get_db() as conn:
         cur = conn.cursor()
@@ -130,6 +132,7 @@ def log_action(user_id: int, action: str):
         cur = conn.cursor()
         cur.execute("INSERT INTO logs (user_id, action, timestamp) VALUES (%s, %s, NOW())", (user_id, action))
 
+# === Города ===
 def get_user_cities(user_id: int) -> list:
     with get_db() as conn:
         cur = conn.cursor()
@@ -139,13 +142,17 @@ def get_user_cities(user_id: int) -> list:
 def add_user_city(user_id: int, city: str):
     with get_db() as conn:
         cur = conn.cursor()
-        cur.execute("INSERT INTO user_cities (user_id, city) VALUES (%s, %s) ON CONFLICT DO NOTHING", (user_id, city))
+        cur.execute(
+            "INSERT INTO user_cities (user_id, city) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+            (user_id, city)
+        )
 
 def remove_city(user_id: int, city: str):
     with get_db() as conn:
         cur = conn.cursor()
         cur.execute("DELETE FROM user_cities WHERE user_id = %s AND city = %s", (user_id, city))
 
+# === AI-запросы ===
 def get_ai_requests(user_id: int) -> int:
     with get_db() as conn:
         cur = conn.cursor()
