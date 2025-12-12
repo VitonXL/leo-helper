@@ -74,6 +74,13 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+    
+    CREATE TABLE payments (
+    order_id INTEGER PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    status TEXT DEFAULT 'waiting',
+    created_at TIMESTAMP DEFAULT NOW()
+);
 
 # --- Пользователи ---
 def add_user(user_id, username, first_name, last_name, referred_by=None):
