@@ -10,7 +10,6 @@ db = None
 
 def init_db():
     global db
-    # Подключаемся к SQLite
     db = sqlite3.connect(DB_PATH, check_same_thread=False)
     cursor = db.cursor()
     cursor.execute('''
@@ -41,12 +40,25 @@ def set_premium(user_id, is_premium=True):
     cursor.execute("UPDATE users SET is_premium = ? WHERE user_id = ?", (int(is_premium), user_id))
     db.commit()
 
+# 🔽 ДОБАВЬ ЭТУ ФУНКЦИЮ ↓↓↓
+def set_admin(user_id, is_admin=True):
+    cursor = db.cursor()
+    # Добавим столбец is_admin, если его нет
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
+        db.commit()
+    except sqlite3.OperationalError:
+        # Столбец уже существует
+        pass
+    cursor.execute("UPDATE users SET is_admin = ? WHERE user_id = ?", (int(is_admin), user_id))
+    db.commit()
+
 def add_city(user_id, city):
     user = get_user(user_id)
     if user:
         cities = user[3].split(",") if user[3] else []
         if len(cities) >= (5 if user[2] else 1) and city not in cities:
-            return False  # Лимит городов
+            return False
         if city not in cities:
             cities.append(city)
             cursor = db.cursor()
