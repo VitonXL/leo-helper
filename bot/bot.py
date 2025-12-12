@@ -18,6 +18,8 @@ from bot.commands.games import games_menu
 from bot.commands.admin import admin_panel
 from bot.commands.support import support_chat
 from bot.commands.premium import premium_command, precheckout_callback, successful_payment
+from bot.commands.start import start
+from bot.commands.referral import referral_command, show_referrals
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -43,6 +45,9 @@ def bot_main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, giga_chat))
     app.add_handler(PreCheckoutQueryHandler(precheckout_callback))
     app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("referral", referral_command))
+    app.add_handler(CallbackQueryHandler(show_referrals, pattern="referrals_list"))
 
     print("🤖 Бот Лео запущен и слушает...")
     app.run_polling()
