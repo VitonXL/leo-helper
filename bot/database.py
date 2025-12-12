@@ -1,6 +1,7 @@
 ## bot/database.py
 import sqlite3
 import os
+from datetime import date
 
 # Путь к базе данных
 DB_PATH = os.getenv("DB_PATH", "users.db")
@@ -40,6 +41,12 @@ def get_premium_count():
     cursor.execute("SELECT COUNT(*) FROM users WHERE is_premium = 1")
     return cursor.fetchone()[0]
 
+def get_today_joined_count():
+    cursor = db.cursor()
+    today = date.today().isoformat()
+    cursor.execute("SELECT COUNT(*) FROM users WHERE DATE(joined_at) = ?", (today,))
+    return cursor.fetchone()[0]
+    
 def add_user(user_id):
     cursor = db.cursor()
     cursor.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
