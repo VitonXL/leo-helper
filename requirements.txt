@@ -1,6 +1,0 @@
-python-telegram-bot==20.7
-Flask
-psycopg2-binary==2.9.9
-requests
-gigachat==0.1.7
-APScheduler
