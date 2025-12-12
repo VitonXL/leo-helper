@@ -3,11 +3,13 @@ import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-# ✅ Заменяем db на прямые импорты
-from bot.database import get_user_cities, add_user_city, get_user
+# ✅ Убрали: from bot.database import db
+# ✅ Вместо этого:
+from bot.database import get_user_cities, add_user_city, get_user, get_db
 
-API_KEY = "ваш_openweathermap_ключ"  # Замените в Railway
+API_KEY = "ваш_ключ"  # Укажите в Service Variables
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+
 
 async def add_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -31,6 +33,7 @@ async def add_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     add_user_city(user_id, city)
     await update.message.reply_text(f"✅ Город {city} добавлен!")
 
+
 async def show_cities(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     cities = get_user_cities(user_id)
@@ -43,6 +46,7 @@ async def show_cities(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"• {city}\n"
     keyboard = [[InlineKeyboardButton("🌤 Погода", callback_data="weather")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+
 
 async def show_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -58,12 +62,14 @@ async def show_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text(f"❌ Нет погоды для {city}")
 
+
 async def is_valid_city(city: str) -> bool:
     url = f"{BASE_URL}?q={city}&appid={API_KEY}&units=metric"
     try:
         return requests.get(url).status_code == 200
     except:
         return False
+
 
 async def get_weather(city: str) -> str:
     url = f"{BASE_URL}?q={city}&appid={API_KEY}&lang=ru&units=metric"
@@ -73,5 +79,5 @@ async def get_weather(city: str) -> str:
         desc = r["weather"][0]["description"].capitalize()
         name = r["name"]
         return f"🌤 <b>{name}</b>\nТемпература: {temp}°C\nСостояние: {desc}"
-    except:
+    except Exception as e:
         return None
