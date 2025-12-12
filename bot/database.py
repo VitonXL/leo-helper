@@ -81,6 +81,12 @@ def init_db():
     status TEXT DEFAULT 'waiting',
     created_at TIMESTAMP DEFAULT NOW()
 );
+    CREATE TABLE giga_queries (
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    query TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT NOW()
+);
 
 # --- Пользователи ---
 def add_user(user_id, username, first_name, last_name, referred_by=None):
