@@ -11,8 +11,8 @@ from telegram.ext import (
     filters,
 )
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
 
-# Импортируем функции напрямую (НЕ через db)
 from bot.database import (
     get_user, add_user, set_premium, set_admin,
     get_user_count, get_premium_count, get_today_joined_count,
@@ -20,7 +20,6 @@ from bot.database import (
     get_ai_requests, increment_ai_request, reset_ai_requests
 )
 
-# Импортируем команды
 from bot.weather import add_city as add_city_command
 from bot.weather import show_cities as show_cities_command
 from bot.weather import show_weather as show_weather_command
@@ -29,7 +28,6 @@ from bot.currency import get_usd_rate
 from bot.quotes import get_random_quote
 from bot.broadcast import send_daily_broadcast
 
-# Настройка логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -43,7 +41,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = user.to_dict()
     add_user(user_data)
     log_action(user.id, "start")
-
     keyboard = [
         [InlineKeyboardButton("🌤 Погода", callback_data="weather_menu")],
         [InlineKeyboardButton("💰 Курс USD", callback_data="usd")],
@@ -52,11 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("📌 Мои города", callback_data="my_cities")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        f"Привет, {user.first_name}! 👋\nЯ — многофункциональный бот.\nВыберите действие:",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text(f"Привет, {user.first_name}! 👋\nЯ — многофункциональный бот.\nВыберите действие:", reply_markup=reply_markup)
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -82,7 +75,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     user = get_user(query.from_user.id)
     if not user:
         await query.message.reply_text("❌ Ошибка: пользователь не найден.")
@@ -152,7 +144,7 @@ async def message_handler_func(update: Update, context: ContextTypes.DEFAULT_TYP
             await update.message.reply_text("❌ Использование: /setpremium <id>")
 
     elif text.startswith('/setadmin'):
-        if user_id != 123456789:  # Замените на ваш ID
+        if user_id != 123456789:  # ← Замените на ваш ID
             await update.message.reply_text("❌ Только владелец может назначать админов.")
             return
         try:
@@ -169,7 +161,7 @@ async def message_handler_func(update: Update, context: ContextTypes.DEFAULT_TYP
         total = get_user_count()
         premium = get_premium_count()
         today = get_today_joined_count()
-        await update.message.reply_text(f"📊 Статистика бота:\n\nВсего пользователей: {total}\nPremium: {premium}\nСегодня: {today}")
+        await update.message.reply_text(f"📊 Статистика бота:\n\nВсего: {total}\nPremium: {premium}\nСегодня: {today}")
 
     elif text == '/resetai':
         if not get_user(user_id)["is_admin"]:
@@ -193,31 +185,25 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
 
 
 def bot_main():
-    """
-    Главная функция запуска бота
-    """
     application = Application.builder().token(TOKEN).build()
 
-    # Обработчики команд
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("city", add_city_command))
     application.add_handler(CommandHandler("weather", show_weather_command))
     application.add_handler(CommandHandler("usd", lambda u, c: c.bot.send_message(u.effective_chat.id, f"💵 {get_usd_rate()} ₽")))
-    application.add_handler(CommandHandler("quote", lambda u, c: c.bot.send_message(u.effective_chat.id, f"🧠 {get_random_quote()}")))
-
-    # Обработчики кнопок и сообщений
     application.add_handler(CallbackQueryHandler(button_handler))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler_func))
-
-    # Обработчик ошибок
     application.add_error_handler(error_handler)
 
-    # Планировщик
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(reset_ai_requests, 'cron', hour=0)  # Сброс запросов в 00:00
-    scheduler.add_job(send_daily_broadcast, 'cron', hour=8, minute=0)  # Рассылка в 8:00
-    scheduler.start()
+    # ✅ Запускаем планировщик ВНУТРИ асинхронного цикла
+    async def run():
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(reset_ai_requests, 'cron', hour=0)
+        scheduler.add_job(send_daily_broadcast, 'cron', hour=8, minute=0)
+        scheduler.start()
+        print("✅ Планировщик запущен")
+        await application.run_polling()
 
-    print("✅ Бот запущен")
-    application.run_polling()
+    # Запускаем асинхронно
+    asyncio.run(run())
