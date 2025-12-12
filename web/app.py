@@ -1,11 +1,12 @@
 # web/app.py
 
 import os
-from flask import Flask, request
-from bot.database import set_premium, log_action
+from flask import Flask, request, send_from_directory, jsonify
+from bot.database import set_premium, log_action, get_user, get_user_count, get_premium_count, get_today_joined_count
 from bot.utils.payments import verify_payment
+import json
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # 🌐 Основная страница — статистика
 @app.route("/")
@@ -86,8 +87,51 @@ def fail():
     </html>
     """
 
+
+# 🌐 Mini App — профиль пользователя
+@app.route("/app")
+def web_app():
+    # Получаем user_id из параметров (в будущем — через безопасную авторизацию)
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return "<h1>❌ Не указан user_id</h1>"
+
+    try:
+        user_id = int(user_id)
+        user = get_user(user_id)
+        if not user:
+            return "<h1>❌ Пользователь не найден</h1>"
+
+        # Подготовим данные
+        user_data = {
+            "user_id": user["user_id"],
+            "first_name": user["first_name"],
+            "username": user["username"],
+            "joined_at": user["joined_at"].strftime("%d.%m.%Y"),
+            "is_premium": bool(user["is_premium"]),
+            "premium_expire": user["premium_expire"].strftime("%d.%m.%Y") if user["premium_expire"] else None
+        }
+
+        # Передаём данные в HTML
+        return f"""
+        <script>
+            window.user_data = {json.dumps(user_data, ensure_ascii=False)};
+            window.location.href = '/static/app.html';
+        </script>
+        """
+    except Exception as e:
+        return f"<h1>❌ Ошибка: {str(e)}</h1>"
+
+
+# 📄 Статический файл Mini App
+@app.route('/static/app.html')
+def serve_app():
+    return send_from_directory('static', 'app.html')
+
+
 # ⚠️ Временное хранилище (позже замени на БД)
 pending_payments = {}
+
 
 # 🔽 Функции статистики (для /)
 def get_user_count():
@@ -101,6 +145,7 @@ def get_premium_count():
 def get_today_joined_count():
     from bot.database import get_today_joined_count
     return get_today_joined_count()
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
