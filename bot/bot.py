@@ -22,6 +22,7 @@ from bot.commands.start import start
 from bot.commands.referral import referral_command, show_referrals
 from bot.commands.weather import weather_command, weather_callback
 from bot.commands.currency import currency_command
+from bot.commands.antivirus import virus_check, antivirus_info
 from bot.commands.reminders import (
     set_reminder,
     reminder_callback,
@@ -66,6 +67,8 @@ def bot_main():
     app.add_handler(CallbackQueryHandler(reminder_callback, pattern="^delay_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_input))
     app.add_handler(CommandHandler("currency", currency_command))
+    app.add_handler(CommandHandler("antivirus", antivirus_info))
+    app.add_handler(MessageHandler(filters.Document.ALL | filters.URL, virus_check))
 
     print("🤖 Бот Лео запущен и слушает...")
     app.run_polling()
