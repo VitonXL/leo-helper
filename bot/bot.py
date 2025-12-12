@@ -20,6 +20,7 @@ from bot.commands.support import support_chat
 from bot.commands.premium import premium_command, precheckout_callback, successful_payment
 from bot.commands.start import start
 from bot.commands.referral import referral_command, show_referrals
+from bot.commands.weather import weather_command, weather_callback
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -48,6 +49,10 @@ def bot_main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("referral", referral_command))
     app.add_handler(CallbackQueryHandler(show_referrals, pattern="referrals_list"))
+    app.add_handler(CommandHandler("weather", weather_command))
+    app.add_handler(CallbackQueryHandler(weather_callback, pattern="^weather_"))
+    app.add_handler(CallbackQueryHandler(weather_callback, pattern="^delete_city_"))
+    app.add_handler(CallbackQueryHandler(weather_callback, pattern="^weather_back$"))
 
     print("🤖 Бот Лео запущен и слушает...")
     app.run_polling()
