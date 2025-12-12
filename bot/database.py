@@ -5,7 +5,6 @@ from contextlib import contextmanager
 import psycopg2
 from psycopg2.extras import DictCursor
 
-# Получаем URL базы из переменных окружения
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
@@ -16,10 +15,6 @@ else:
 
 @contextmanager
 def get_db():
-    """
-    Контекстный менеджер для подключения к базе
-    Поддерживает PostgreSQL и SQLite
-    """
     if DATABASE_URL:
         conn = psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=DictCursor)
     else:
@@ -30,16 +25,13 @@ def get_db():
         conn.commit()
     except Exception as e:
         conn.rollback()
-        print(f"❌ Ошибка базы данных: {e}")
+        print(f"❌ Ошибка базы: {e}")
         raise
     finally:
         conn.close()
 
 
 def init_db():
-    """
-    Создаёт таблицы при старте
-    """
     with get_db() as conn:
         cur = conn.cursor()
         cur.execute("""
@@ -74,11 +66,9 @@ def init_db():
         print("✅ Таблицы инициализированы")
 
 
-# === Инициализация базы при импорте
 init_db()
 
 
-# === Работа с пользователями ===
 def get_user(user_id: int):
     with get_db() as conn:
         cur = conn.cursor()
@@ -145,7 +135,6 @@ def log_action(user_id: int, action: str):
         cur.execute("INSERT INTO logs (user_id, action, timestamp) VALUES (%s, %s, NOW())", (user_id, action))
 
 
-# === Работа с городами ===
 def get_user_cities(user_id: int) -> list:
     with get_db() as conn:
         cur = conn.cursor()
@@ -156,19 +145,10 @@ def get_user_cities(user_id: int) -> list:
 def add_user_city(user_id: int, city: str):
     with get_db() as conn:
         cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO user_cities (user_id, city) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-            (user_id, city)
-        )
+        cur.execute("INSERT INTO user_cities (user_id, city) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                    (user_id, city))
 
 
-def remove_city(user_id: int, city: str):
-    with get_db() as conn:
-        cur = conn.cursor()
-        cur.execute("DELETE FROM user_cities WHERE user_id = %s AND city = %s", (user_id, city))
-
-
-# === AI-запросы ===
 def get_ai_requests(user_id: int) -> int:
     with get_db() as conn:
         cur = conn.cursor()
@@ -180,10 +160,7 @@ def get_ai_requests(user_id: int) -> int:
 def increment_ai_request(user_id: int):
     with get_db() as conn:
         cur = conn.cursor()
-        cur.execute("""
-            UPDATE users SET ai_requests_today = ai_requests_today + 1, last_seen = NOW()
-            WHERE user_id = %s
-        """, (user_id,))
+        cur.execute("UPDATE users SET ai_requests_today = ai_requests_today + 1 WHERE user_id = %s", (user_id,))
 
 
 def reset_ai_requests():
