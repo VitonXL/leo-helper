@@ -2,12 +2,12 @@
 
 import os
 from flask import Flask, request
-import hashlib
 from bot.database import set_premium, log_action
 from bot.utils.payments import verify_payment
 
 app = Flask(__name__)
 
+# 🌐 Основная страница — статистика
 @app.route("/")
 def home():
     try:
@@ -31,12 +31,11 @@ def home():
     </html>
     """
 
-# 🌐 Callback от Free-Kassa
+# 🌐 Callback — уведомление об оплате (POST)
 @app.route("/payment/callback", methods=["POST"])
 def payment_callback():
     data = request.form.to_dict()
 
-    # Проверяем подпись
     if not verify_payment(data):
         return "bad sign", 400
 
@@ -46,25 +45,51 @@ def payment_callback():
     if amount < 100.0:
         return "invalid amount", 400
 
-    # Проверяем заказ (в реальности — в БД)
     if order_id in pending_payments and pending_payments[order_id]['status'] == 'waiting':
         user_id = pending_payments[order_id]['user_id']
         set_premium(user_id, days=30)
         pending_payments[order_id]['status'] = 'paid'
         log_action(user_id, "premium_paid", f"order_id={order_id}")
 
-        # Можно отправить сообщение в бота
+        # Уведомляем пользователя
         from telegram import Bot
-        import os
         bot = Bot(token=os.getenv("TELEGRAM_BOT_TOKEN"))
-        bot.send_message(user_id, "🎉 Премиум активирован! Спасибо за оплату 💙")
+        bot.send_message(user_id, "🎉 Премиум-доступ активирован! Спасибо за доверие 💙")
 
     return "OK", 200
 
-# ⚠️ Глобальный словарь — временно (позже заменим на БД)
+# ✅ Успешная оплата
+@app.route("/success")
+def success():
+    return """
+    <html>
+    <head><title>Успешно</title></head>
+    <body style="text-align: center; margin-top: 100px; font-family: sans-serif;">
+        <h1>🎉 Оплата прошла успешно!</h1>
+        <p>Спасибо за покупку премиум-подписки!</p>
+        <p>Вернитесь в бота: <a href="https://t.me/LeoHelperBot">t.me/LeoHelperBot</a></p>
+    </body>
+    </html>
+    """
+
+# ❌ Оплата не удалась
+@app.route("/fail")
+def fail():
+    return """
+    <html>
+    <head><title>Ошибка</title></head>
+    <body style="text-align: center; margin-top: 100px; font-family: sans-serif;">
+        <h1>❌ Оплата не удалась</h1>
+        <p>Произошла ошибка. Попробуйте ещё раз.</p>
+        <p><a href="https://t.me/LeoHelperBot">Вернуться в бота</a></p>
+    </body>
+    </html>
+    """
+
+# ⚠️ Временное хранилище (позже замени на БД)
 pending_payments = {}
 
-# 🔽 Перенесём функции из database.py сюда, чтобы не было импорта
+# 🔽 Функции статистики (для /)
 def get_user_count():
     from bot.database import get_user_count
     return get_user_count()
