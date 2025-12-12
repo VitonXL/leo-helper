@@ -28,6 +28,7 @@ from bot.commands.admin import register_admin_handlers
 from bot.commands.broadcast import broadcast_menu, broadcast_callback, handle_broadcast_message, cancel_broadcast
 from bot.commands.menu import start_menu, handle_menu_buttons
 from bot.commands.webapp import profile_webapp
+from bot.commands.webapp import profile_command
 from bot.commands.reminders import (
     set_reminder,
     reminder_callback,
@@ -90,6 +91,7 @@ def bot_main():
     app.add_handler(CommandHandler("start", start_menu))  # теперь start открывает меню
     app.add_handler(CommandHandler("menu", start_menu))
     app.add_handler(CommandHandler("profile", profile_webapp))
+    app.add_handler(CommandHandler("profile", profile_command))
 
 # Обработчик кнопок меню (должен быть ПОСЛЕ всех команд)
   register_admin_handlers(app)
