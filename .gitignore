@@ -1,8 +1,0 @@
-__pycache__
-*.pyc
-.env
-.bot.db
-*.db
-.DS_Store
-.vscode/
-.idea/
