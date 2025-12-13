@@ -1,15 +1,27 @@
 # web/routes.py
-from fastapi import APIRouter, Request
+
+from fastapi import APIRouter, Request, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 router = APIRouter()
 templates = Jinja2Templates(directory="web/templates")
 
+
 @router.get("/", response_class=HTMLResponse)
 async def ui_home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    # Определяем тему: из куки или по умолчанию
+    theme = request.cookies.get("theme", "light")
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "theme": theme}
+    )
 
-@router.get("/api/status")
-async def api_status():
-    return {"status": "ok", "service": "Leo Assistant", "uptime": "online"}
+
+@router.get("/toggle-theme")
+async def toggle_theme(response: Response):
+    # Переключаем тему
+    theme = "dark" if response.cookies.get("theme") == "light" else "light"
+    resp = HTMLResponse(content=f'<script>document.location="/"</script>')
+    resp.set_cookie(key="theme", value=theme, max_age=3600*24*30)  # 30 дней
+    return resp
