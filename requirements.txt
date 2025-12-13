@@ -1,3 +1,0 @@
-python-telegram-bot[async]~=20.0
-asyncpg
-python-dotenv
