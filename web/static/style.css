@@ -5,6 +5,7 @@
   --card-bg: white;
   --text: #333;
   --border: #ddd;
+  --accent: #0088cc;
 }
 
 [data-theme="dark"] {
@@ -12,6 +13,7 @@
   --card-bg: #2d2d2d;
   --text: #e0e0e0;
   --border: #444;
+  --accent: #00a0ff;
 }
 
 body {
@@ -27,6 +29,7 @@ body {
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
+  text-align: center;
 }
 
 header {
@@ -40,7 +43,7 @@ header {
 
 h1 {
   margin: 0;
-  color: #0088cc;
+  color: var(--accent);
 }
 
 #theme-toggle {
@@ -59,7 +62,7 @@ main {
 
 .status-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
   margin: 30px 0;
 }
@@ -73,10 +76,14 @@ main {
   text-align: left;
 }
 
+.status {
+  font-weight: 500;
+}
+
 .btn {
   display: inline-block;
   padding: 14px 28px;
-  background: #0088cc;
+  background: var(--accent);
   color: white;
   text-decoration: none;
   border-radius: 8px;
