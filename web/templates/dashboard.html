@@ -1,44 +1,71 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="{{ theme }}">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Лео — Панель управления</title>
-  <link rel="stylesheet" href="/static/style.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лео — Панель</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Подключаем шрифт Telegram -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>
-    // Закрыть Mini App
+    // Готовим Telegram WebApp
+    window.Telegram = window.Telegram || {};
+    Telegram.WebApp = Telegram.WebApp || {};
+  </script>
+</head>
+<body class="tg-body" style="background: var(--tg-theme-bg-color, #f4f6f8); color: var(--tg-theme-text-color, #000);">
+  <div class="container">
+
+    <!-- Заголовок -->
+    <div class="header">
+      <h1>🤖 Лео Помощник</h1>
+      <button class="btn-close" onclick="closeApp()">✕</button>
+    </div>
+
+    <!-- Профиль -->
+    <div class="profile">
+      <div class="avatar" style="background-color: #{{ '%06x' % (user.id % 0xFFFFFF) }};">
+        {{ user.first_name[0].upper() }}
+      </div>
+      <div class="user-info">
+        <strong>{{ user.first_name }}</strong>
+        {% if user.get('is_premium') %}
+          <img src="/static/premium.svg" alt="Premium" class="premium-badge">
+        {% endif %}
+        <p>ID: <code>{{ user.id }}</code></p>
+      </div>
+    </div>
+
+    <!-- Статус -->
+    <div class="card">
+      <h3>📊 Ваш статус</h3>
+      <ul class="status-list">
+        <li><strong>Бот</strong> <span class="status online">🟢 Онлайн</span></li>
+        <li><strong>Подписка</strong> <span class="status">❌ Нет</span></li>
+        <li><strong>Рефералы</strong> <span class="value">0</span></li>
+        <li><strong>Язык</strong> <span class="value">{{ user.get('language_code', 'ru') }}</span></li>
+      </ul>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="actions">
+      <button class="btn" onclick="alert('Платёжная система в разработке')">💎 Оформить подписку</button>
+    </div>
+
+    <footer class="footer">
+      <p>Лео Помощник • 2025</p>
+    </footer>
+
+  </div>
+
+  <script>
     function closeApp() {
       if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.close();
+        Telegram.WebApp.close()
+      } else {
+        history.back()
       }
     }
   </script>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>🔐 Добро пожаловать, {{ user.first_name }}!</h1>
-      <button onclick="closeApp()">❌ Закрыть</button>
-    </header>
-
-    <main>
-      <div class="profile-card">
-        <img src="https://ui-avatars.com/api/?name={{ user.first_name }}&background=0088cc&color=fff" alt="Avatar" class="avatar">
-        <p><strong>ID:</strong> {{ user.id }}</p>
-        <p><strong>Имя:</strong> {{ user.first_name }}</p>
-        <p><strong>Язык:</strong> {{ user.get('language_code', 'не указан') }}</p>
-        <p><strong>Telegram Premium:</strong> {{ 'Да' if user.get('is_premium') else 'Нет' }}</p>
-      </div>
-
-      <div class="status-grid">
-        <div class="card"><strong>Бот</strong> <span class="status">🟢 В сети</span></div>
-        <div class="card"><strong>Подписка</strong> <span class="status">❌ Нет</span></div>
-        <div class="card"><strong>Рефералы</strong> 0</div>
-      </div>
-
-      <button class="btn" onclick="alert('Функция в разработке')">Обновить подписку</button>
-      <button class="btn" style="background: #6c757d;" onclick="closeApp()">Закрыть</button>
-    </main>
-  </div>
 </body>
 </html>
