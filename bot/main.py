@@ -1,7 +1,7 @@
 # bot/main.py
 
 import os
-from telegram import Update, WebAppInfo
+from telegram import Update, WebAppInfo, MenuButtonWebApp
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -19,25 +19,20 @@ async def post_init(application: Application):
     # Устанавливаем команды
     await application.bot.set_my_commands([
         ("start", "Запустить бота"),
-        ("help", "Помощь и поддержка")
     ])
 
-    # Устанавливаем кнопку в меню
+    # Устанавливаем кнопку Web App в меню
     await application.bot.set_chat_menu_button(
-        menu_button=WebAppInfo(
-            text="🌐 Панель",
-            web_app=WebAppInfo(url=WEB_APP_URL)
+        menu_button=MenuButtonWebApp(
+            text="🌐 Панель",           # ← текст кнопки
+            web_app=WebAppInfo(url=WEB_APP_URL)  # ← сам Mini App
         )
     )
 
 def main():
     app = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
 
-    # Добавляем только существующие обработчики
     app.add_handler(CommandHandler("start", start))
-
-    # Раскомментируй, если добавишь функцию help_command
-    # app.add_handler(CommandHandler("help", help_command))
 
     print("Бот запущен...")
     app.run_polling()
