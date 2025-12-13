@@ -1,9 +1,5 @@
 fastapi
 uvicorn[standard]
 python-telegram-bot[async]==20.7
-asyncpg
-aiosqlite
-python-dotenv
-psycopg2-binary
 jinja2
-python-multipart  # ← вот это добавь
+python-multipart
