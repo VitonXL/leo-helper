@@ -1,17 +1,42 @@
 <!-- web/templates/index.html -->
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="{{ theme }}">
 <head>
   <meta charset="UTF-8" />
   <title>Лео Помощник</title>
   <link rel="stylesheet" href="/static/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div class="container">
-    <h1>🤖 Лео Помощник</h1>
-    <p>Ваш персональный ассистент в Telegram.</p>
-    <div class="status">🟢 <strong>Статус:</strong> Работает</div>
-    <a href="https://t.me/Leo_aide_bot" class="btn" target="_blank">Открыть в Telegram</a>
+    <header>
+      <h1>🤖 Лео Помощник</h1>
+      <button id="theme-toggle" onclick="toggleTheme()">
+        {{ '🌙 Тёмная' if theme == 'light' else '☀️ Светлая' }} тема
+      </button>
+    </header>
+
+    <main>
+      <p>Ваш персональный ассистент в Telegram.</p>
+
+      <div class="status-grid">
+        <div class="card"><strong>Бот</strong> <span class="online">🟢 В сети</span></div>
+        <div class="card"><strong>Подписка</strong> <span class="offline">❌ Нет</span></div>
+        <div class="card"><strong>Рефералы</strong> 0</div>
+        <div class="card"><strong>Язык</strong> Русский</div>
+      </div>
+
+      <a href="https://t.me/Leo_aide_bot" class="btn" target="_blank">
+        Открыть в Telegram
+      </a>
+    </main>
   </div>
+
+  <script>
+    function toggleTheme() {
+      fetch('/toggle-theme', { method: 'GET' })
+        .then(() => location.reload());
+    }
+  </script>
 </body>
 </html>
