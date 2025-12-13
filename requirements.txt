@@ -5,3 +5,4 @@ fastapi
 uvicorn[standard]
 python-dotenv
 psycopg2-binary
+jinja2  # ← Эта строка нужна для шаблонов в FastAPI
