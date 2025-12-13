@@ -1,8 +1,9 @@
+fastapi
+uvicorn[standard]
 python-telegram-bot[async]==20.7
 asyncpg
 aiosqlite
-fastapi
-uvicorn[standard]
 python-dotenv
 psycopg2-binary
-jinja2  # ← Эта строка нужна для шаблонов в FastAPI
+jinja2
+python-multipart  # ← вот это добавь
