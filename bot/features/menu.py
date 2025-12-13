@@ -4,45 +4,30 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
 
 
-# --- Генерация клавиатур ---
+# --- Клавиатуры ---
 def get_main_menu():
     keyboard = [
-        [InlineKeyboardButton("ℹ️ Помощь", callback_data="menu_help")],
-        [InlineKeyboardButton("👤 Мой профиль", callback_data="menu_profile")],
-        [InlineKeyboardButton("🛠 Настройки", callback_data="nav_settings")],
-        [InlineKeyboardButton("🗑 Закрыть", callback_data="menu_close")],
+        [InlineKeyboardButton("👤 Личный кабинет", callback_data="menu_profile")],
+        [InlineKeyboardButton("💎 Премиум функционал", callback_data="menu_premium")],
+        [InlineKeyboardButton("🔧 Функционал", callback_data="menu_features")],
+        [InlineKeyboardButton("🎮 Игры", callback_data="menu_games")],
+        [InlineKeyboardButton("🛡 Антивирус", callback_data="menu_antivirus")],
+        [InlineKeyboardButton("🌐 Обход блокировок", callback_data="menu_unlock")],
+        [InlineKeyboardButton("⚙️ Настройки", callback_data="menu_settings")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
 def get_settings_menu():
     keyboard = [
-        [InlineKeyboardButton("🔔 Уведомления", callback_data="nav_notifications")],
-        [InlineKeyboardButton("🌐 Язык", callback_data="nav_language")],
+        [InlineKeyboardButton("🔔 Уведомления", callback_data="settings_notifications")],
+        [InlineKeyboardButton("🌐 Язык", callback_data="settings_language")],
         [InlineKeyboardButton("⬅️ Назад", callback_data="menu_main")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_notifications_menu():
-    keyboard = [
-        [InlineKeyboardButton("✅ Включить", callback_data="action_notify_on")],
-        [InlineKeyboardButton("❌ Выключить", callback_data="action_notify_off")],
-        [InlineKeyboardButton("⬅️ Назад", callback_data="nav_settings")],
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
-
-def get_language_menu():
-    keyboard = [
-        [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
-        [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
-        [InlineKeyboardButton("⬅️ Назад", callback_data="nav_settings")],
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
-
-# --- Основные обработчики ---
+# --- Обработчики ---
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📌 *Главное меню*\n\nВыбери раздел:",
@@ -55,77 +40,125 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
     query = update.callback_query
     await query.answer()
 
-    user = update.effective_user
     data = query.data
 
     # --- Главное меню ---
     if data == "menu_main":
         await query.edit_message_text("📌 *Главное меню*", reply_markup=get_main_menu(), parse_mode='Markdown')
 
-    elif data == "menu_help":
-        text = (
-            "🔧 *Помощь*\n\n"
-            "Я — *Лео*, твой личный помощник.\n\n"
-            "Используй меню для навигации.\n"
-            "Скоро появятся напоминания и задачи!"
-        )
-        await query.edit_message_text(text, reply_markup=get_main_menu(), parse_mode='Markdown')
-
+    # --- Личный кабинет ---
     elif data == "menu_profile":
-        text = (
-            "📋 *Ваш профиль:*\n"
-            f"• Имя: {user.full_name}\n"
-            f"• ID: {user.id}\n"
-            f"• Username: @{user.username or 'не задан'}"
+        await query.edit_message_text(
+            "👤 *Личный кабинет*\n\n"
+            "🔹 Статус: Бесплатный\n"
+            "🔹 Подписка: не активна\n"
+            "🔹 Регистрация: сегодня\n\n"
+            "🛠 В разработке...",
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
         )
-        await query.edit_message_text(text, reply_markup=get_main_menu(), parse_mode='Markdown')
+
+    # --- Премиум функционал ---
+    elif data == "menu_premium":
+        await query.edit_message_text(
+            "💎 *Премиум функционал*\n\n"
+            "Доступно только по подписке:\n"
+            "• Ускоренный отклик\n"
+            "• Неограниченные напоминания\n"
+            "• Экспорт данных\n"
+            "• Приоритетная поддержка\n\n"
+            "🛠 В разработке...",
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
+        )
+
+    # --- Функционал ---
+    elif data == "menu_features":
+        await query.edit_message_text(
+            "🔧 *Функционал*\n\n"
+            "Список доступных функций:\n"
+            "• Напоминания\n"
+            "• Список дел\n"
+            "• Календарь\n"
+            "• Голосовые команды\n\n"
+            "🛠 Все функции в разработке",
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
+        )
+
+    # --- Игры ---
+    elif data == "menu_games":
+        await query.edit_message_text(
+            "🎮 *Игры*\n\n"
+            "Доступные игры:\n"
+            "• Викторина\n"
+            "• Угадай число\n"
+            "• Крестики-нолики\n\n"
+            "🛠 Игры скоро появятся!",
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
+        )
+
+    # --- Антивирус ---
+    elif data == "menu_antivirus":
+        await query.edit_message_text(
+            "🛡 *Антивирус*\n\n"
+            "Проверка безопасности:\n"
+            "• Сканирование ссылок\n"
+            "• Проверка файлов\n"
+            "• Блокировка фишинга\n\n"
+            "🛠 Модуль в разработке",
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
+        )
+
+    # --- Обход блокировок ---
+    elif data == "menu_unlock":
+        await query.edit_message_text(
+            "🌐 *Обход блокировок*\n\n"
+            "Функции:\n"
+            "• Прокси-бот\n"
+            "• Шифрование трафика\n"
+            "• Доступ к заблокированным ресурсам\n\n"
+            "⚠️ В разработке. Следите за обновлениями.",
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
+        )
 
     # --- Настройки ---
-    elif data == "nav_settings":
-        text = "🛠 *Настройки*\n\nВыбери категорию:"
-        await query.edit_message_text(text, reply_markup=get_settings_menu(), parse_mode='Markdown')
-
-    # --- Уведомления ---
-    elif data == "nav_notifications":
-        text = "🔔 *Управление уведомлениями*"
-        await query.edit_message_text(text, reply_markup=get_notifications_menu(), parse_mode='Markdown')
-
-    elif data == "action_notify_on":
+    elif data == "menu_settings":
         await query.edit_message_text(
-            "✅ Уведомления включены",
-            reply_markup=get_notifications_menu(),
+            "⚙️ *Настройки*\n\nВыбери параметр:",
+            reply_markup=get_settings_menu(),
             parse_mode='Markdown'
         )
-        # Здесь можно сохранить в context.user_data или БД
-        context.user_data["notifications"] = True
 
-    elif data == "action_notify_off":
+    # --- Подменю: Уведомления ---
+    elif data == "settings_notifications":
         await query.edit_message_text(
-            "❌ Уведомления выключены",
-            reply_markup=get_notifications_menu(),
+            "🔔 *Уведомления*\n\n"
+            "Текущий статус: выключены\n\n"
+            "🛠 Настройка скоро будет доступна",
+            reply_markup=get_settings_menu(),
             parse_mode='Markdown'
         )
-        context.user_data["notifications"] = False
 
-    # --- Язык ---
-    elif data == "nav_language":
-        text = "🌐 Выбери язык интерфейса:"
-        await query.edit_message_text(text, reply_markup=get_language_menu(), parse_mode='Markdown')
-
-    elif data == "lang_ru":
-        await query.edit_message_text("🇷🇺 Язык установлен: Русский", reply_markup=get_language_menu(), parse_mode='Markdown')
-        context.user_data["language"] = "ru"
-
-    elif data == "lang_en":
-        await query.edit_message_text("🇬🇧 Language set to English", reply_markup=get_language_menu(), parse_mode='Markdown')
-        context.user_data["language"] = "en"
-
-    # --- Закрыть ---
-    elif data == "menu_close":
-        await query.delete_message()
+    # --- Подменю: Язык ---
+    elif data == "settings_language":
+        await query.edit_message_text(
+            "🌐 *Язык*\n\n"
+            "Доступные языки:\n"
+            "• Русский\n"
+            "• English\n\n"
+            "🛠 Переключение в разработке",
+            reply_markup=get_settings_menu(),
+            parse_mode='Markdown'
+        )
 
 
 # --- Регистрация ---
 def setup(application):
     application.add_handler(CommandHandler("menu", menu_command))
-    application.add_handler(CallbackQueryHandler(handle_menu_callbacks, pattern=r"^menu_|^nav_|^action_|^lang_"))
+    application.add_handler(
+        CallbackQueryHandler(handle_menu_callbacks, pattern=r"^menu_|^settings_")
+    )
