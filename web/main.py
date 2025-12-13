@@ -2,15 +2,15 @@
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from .routes import router
+from .routes import router  # ← импорт
 
 app = FastAPI(title="Лео Помощник — UI")
 
-# Подключаем статику: /static/style.css
+# Подключение статики
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
-# Подключаем маршруты
-app.include_router(router)
+# Подключение маршрутов
+app.include_router(router)  # ← вот это важно!
 
 @app.get("/health")
 async def health():
