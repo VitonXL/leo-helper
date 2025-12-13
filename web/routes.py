@@ -1,9 +1,6 @@
-# web/routes.py
-
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 
-router = APIRouter()  # ← важно: именно router, не app
+router = APIRouter()
 
 @router.get("/")
 async def home():
