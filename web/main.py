@@ -1,6 +1,7 @@
 # web/main.py
 import os
-print(f"🔧 PORT = {os.getenv('PORT')}")
+print(f"🚀 ENV PORT: {os.getenv('PORT')}")
+print(f"🚀 ARGS: {' '.join(os.sys.argv)}")
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
