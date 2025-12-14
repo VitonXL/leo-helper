@@ -12,10 +12,8 @@ WEB_APP_URL = "https://web-production-b74ea.up.railway.app"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [
-            InlineKeyboardButton("📱 Внутреннее меню", callback_data="menu_main"),
-            InlineKeyboardButton("🌐 Mini App", url="https://web-production-b74ea.up.railway.app")
-        ]
+        [InlineKeyboardButton("📌 Главное меню", callback_data="menu_main")],
+        [InlineKeyboardButton("🌐 Открыть Mini App", url="https://web-production-b74ea.up.railway.app")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
