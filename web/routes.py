@@ -16,6 +16,15 @@ async def home(request: Request):
     theme = request.cookies.get("theme", "light")
     return templates.TemplateResponse("index.html", {"request": request, "theme": theme})
 
+@router.get("/premium", response_class=HTMLResponse)
+async def premium_page(request: Request):
+    # Если user передан через query (например, из бота)
+    user_id = request.query_params.get("user_id", "123456")
+    return templates.TemplateResponse(
+        "premium.html",
+        {"request": request, "user": {"id": user_id}}
+    )
+
 @router.post("/webapp", response_class=HTMLResponse)
 async def handle_webapp(
     request: Request,
@@ -31,11 +40,14 @@ async def handle_webapp(
     user_data = eval(parsed_user["user"][0])
     theme = parsed_user.get("theme_params", ["{}"])[0]
 
+    # Передаём user.id в premium.html
     return templates.TemplateResponse(
         "dashboard.html",
         {
             "request": request,
             "user": user_data,
-            "theme": "dark" if theme.get("bg_color", "#ffffff").lower() in ["#000000", "#1a1a1a"] else "light"
+            "theme": "dark" if theme.get("bg_color", "#ffffff").lower() in ["#000000", "#1a1a1a"] else "light",
+            "is_premium": False,  # ← будет из API
+            "premium_expires": None
         }
     )
