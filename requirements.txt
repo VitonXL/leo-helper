@@ -4,3 +4,4 @@ python-telegram-bot[async,job-queue]==20.7
 jinja2
 python-multipart
 asyncpg
+loguru
