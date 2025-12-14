@@ -1,4 +1,6 @@
 # web/main.py
+import os
+print(f"🔧 PORT = {os.getenv('PORT')}")
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
