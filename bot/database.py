@@ -1,24 +1,28 @@
 # bot/database.py
 
 import asyncpg
-from .config import DATABASE_URL
+import os
+
+
+# Получаем URL базы из переменной окружения
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL не установлена в переменных окружения")
 
 
 async def create_db_pool():
     """
     Создаёт пул подключений к PostgreSQL.
-    Вызывается при старте бота.
     """
     return await asyncpg.create_pool(DATABASE_URL)
 
 
 async def init_db(pool):
     """
-    Инициализирует таблицы в базе данных.
-    Выполняется один раз при запуске.
+    Инициализирует таблицы.
     """
     async with pool.acquire() as conn:
-        # Таблица пользователей — обновлённая (с last_seen)
         await conn.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id BIGINT PRIMARY KEY,
@@ -32,7 +36,6 @@ async def init_db(pool):
             );
         ''')
 
-        # Таблица напоминаний
         await conn.execute('''
             CREATE TABLE IF NOT EXISTS reminders (
                 id SERIAL PRIMARY KEY,
@@ -45,11 +48,9 @@ async def init_db(pool):
         ''')
 
 
-# --- Работа с пользователями ---
-
 async def add_or_update_user(pool, user):
     """
-    Добавляет нового пользователя или обновляет last_seen, если уже существует.
+    Добавляет или обновляет пользователя.
     """
     async with pool.acquire() as conn:
         await conn.execute('''
@@ -65,8 +66,7 @@ async def add_or_update_user(pool, user):
 
 async def delete_inactive_users(pool, days=90):
     """
-    Удаляет пользователей, которые не заходили более `days` дней.
-    Возвращает количество удалённых.
+    Удаляет пользователей, не заходивших более `days` дней.
     """
     async with pool.acquire() as conn:
         deleted = await conn.fetchval('''
