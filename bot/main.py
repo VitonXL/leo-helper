@@ -15,6 +15,11 @@ from telegram.ext import (
 from database import create_db_pool, init_db, add_or_update_user, delete_inactive_users
 from features.menu import setup as setup_menu
 
+# Импортируем новые фичи
+from features.roles import setup_role_handlers
+from features.referrals import setup_referral_handlers
+from features.premium import setup_premium_handlers
+
 # Логи
 from loguru import logger
 
@@ -45,6 +50,10 @@ def get_start_keyboard():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
+    # Сохраняем/обновляем пользователя
+    await add_or_update_user(db_pool, user)
+
+    # Показываем приветствие
     await update.message.reply_html(
         text=f"👋 <b>Добро пожаловать, {user.first_name}!</b>\n\n"
              f"Выберите способ взаимодействия:",
@@ -65,6 +74,9 @@ async def on_post_init(application: Application):
     db_pool = await create_db_pool()
     await init_db(db_pool)
     logger.info("✅ База данных инициализирована")
+
+    # Передаём пул в bot, чтобы фичи могли к нему обращаться
+    application.bot.db_pool = db_pool
 
     # Устанавливаем кнопку (≡)
     await application.bot.set_chat_menu_button(
@@ -98,6 +110,11 @@ def main():
 
     # Подключаем меню
     setup_menu(app)
+
+    # Подключаем модули
+    setup_role_handlers(app)
+    setup_referral_handlers(app)
+    setup_premium_handlers(app)
 
     # Обработчики команд
     app.add_handler(CommandHandler("start", start))
