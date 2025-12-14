@@ -1,9 +1,8 @@
 # bot/main.py
 
 import os
-import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
-from telegram.ext import Application, ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import Application, ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
 
 # Импортируем БД
 from database import create_db_pool, init_db, add_or_update_user, delete_inactive_users
@@ -32,16 +31,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-async def cleanup_task(application: Application):
-    while True:
-        try:
-            await asyncio.sleep(24 * 3600)
-            await delete_inactive_users(db_pool, days=90)
-        except Exception as e:
-            print(f"❌ Ошибка в cleanup: {e}")
+# Фоновая задача: удаление неактивных пользователей
+async def cleanup_task(context: ContextTypes.DEFAULT_TYPE):
+    global db_pool
+    if db_pool:
+        await delete_inactive_users(db_pool, days=90)
 
 
-# Функция, которая вызывается при старте
 async def on_post_init(application: Application):
     global db_pool
     print("🔧 Инициализация БД...")
@@ -58,15 +54,20 @@ async def on_post_init(application: Application):
     )
     print("🚀 Меню (≡) установлено")
 
-    # Запускаем фоновую задачу
-    application.create_task(cleanup_task(application))
+    # Запускаем фоновую задачу каждые 24 часа
+    application.job_queue.run_repeating(
+        cleanup_task,
+        interval=24 * 3600,  # каждые 24 часа
+        first=10  # начать через 10 секунд после старта
+    )
+    print("⏰ Фоновая задача: очистка неактивных пользователей — запущена")
 
 
 def main():
     app = (
         Application.builder()
         .token(os.getenv("BOT_TOKEN"))
-        .post_init(on_post_init)  # ← здесь передаём
+        .post_init(on_post_init)
         .build()
     )
 
