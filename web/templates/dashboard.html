@@ -1,3 +1,4 @@
+<!-- web/templates/dashboard.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,10 +6,8 @@
   <title>Лео — Панель</title>
   <link rel="stylesheet" href="/static/app.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- Подключаем шрифт Telegram -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>
-    // Готовим Telegram WebApp
     window.Telegram = window.Telegram || {};
     Telegram.WebApp = Telegram.WebApp || {};
   </script>
@@ -16,40 +15,45 @@
 <body class="tg-body" style="background: var(--tg-theme-bg-color, #f4f6f8); color: var(--tg-theme-text-color, #000);">
   <div class="container">
 
-    <!-- Заголовок -->
     <div class="header">
       <h1>🤖 Лео Помощник</h1>
       <button class="btn-close" onclick="closeApp()">✕</button>
     </div>
 
-    <!-- Профиль -->
     <div class="profile">
       <div class="avatar" style="background-color: #{{ '%06x' % (user.id % 0xFFFFFF) }};">
         {{ user.first_name[0].upper() }}
       </div>
       <div class="user-info">
         <strong>{{ user.first_name }}</strong>
-        {% if user.get('is_premium') %}
+        {% if is_premium %}
           <img src="/static/premium.svg" alt="Premium" class="premium-badge">
         {% endif %}
         <p>ID: <code>{{ user.id }}</code></p>
       </div>
     </div>
 
-    <!-- Статус -->
     <div class="card">
       <h3>📊 Ваш статус</h3>
       <ul class="status-list">
         <li><strong>Бот</strong> <span class="status online">🟢 Онлайн</span></li>
-        <li><strong>Подписка</strong> <span class="status">❌ Нет</span></li>
+        <li>
+          <strong>Подписка</strong>
+          <span class="status">
+            {% if is_premium %}
+              <img src="/static/premium.svg" alt="Premium" style="width: 16px; height: 16px; margin-right: 4px;"> Активна до {{ premium_expires }}
+            {% else %}
+              ❌ Нет
+            {% endif %}
+          </span>
+        </li>
         <li><strong>Рефералы</strong> <span class="value">0</span></li>
         <li><strong>Язык</strong> <span class="value">{{ user.get('language_code', 'ru') }}</span></li>
       </ul>
     </div>
 
-    <!-- Кнопки -->
     <div class="actions">
-      <button class="btn" onclick="alert('Платёжная система в разработке')">💎 Оформить подписку</button>
+      <button class="btn" onclick="openPremium()">💎 Оформить подписку</button>
     </div>
 
     <footer class="footer">
@@ -59,13 +63,34 @@
   </div>
 
   <script>
+    const tg = window.Telegram?.WebApp;
+    tg.ready();
+
     function closeApp() {
-      if (window.Telegram?.WebApp) {
-        Telegram.WebApp.close()
+      if (tg) tg.close();
+      else history.back();
+    }
+
+    function openPremium() {
+      const user_id = {{ user.id }};
+      const url = `https://leo-aide.online/premium?user_id=${user_id}`;
+      if (tg) {
+        tg.openLink(url);
       } else {
-        history.back()
+        window.open(url, '_blank');
       }
     }
+
+    // Загружаем актуальный статус
+    fetch(`/api/user/{{ user.id }}`)
+      .then(res => res.json())
+      .then(data => {
+        document.querySelector('.status-list li:nth-child(2) .status').innerHTML = 
+          data.is_premium 
+            ? `<img src="/static/premium.svg" style="width:16px;height:16px;margin-right:4px"> Активна до ${data.premium_expires}`
+            : '❌ Нет';
+      })
+      .catch(console.error);
   </script>
 </body>
 </html>
