@@ -13,15 +13,16 @@ from telegram.ext import (
     filters,
 )
 
-# Импортируем БД
+# Импортируем БД с нужными функциями
 from database import (
     create_db_pool,
     init_db,
     add_or_update_user,
     delete_inactive_users,
     log_command_usage,
+    get_user_role,         # ← добавлено: для отображения роли
+    register_referral,     # ← добавлено: для рефералов
 )
-from loguru import logger
 
 # Импортируем фичи
 from features.menu import setup as setup_menu
@@ -30,7 +31,10 @@ from features.roles import setup_role_handlers
 from features.referrals import setup_referral_handlers
 from features.premium import setup_premium_handlers
 
-# Глобальный пул (для track_user_activity)
+# Логи
+from loguru import logger
+
+# Глобальный пул БД
 db_pool = None
 
 
@@ -63,12 +67,16 @@ def get_start_keyboard():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
+    # Сохраняем/обновляем пользователя
+    await add_or_update_user(db_pool, user)
+
     # Обработка реферальной ссылки
     if context.args and context.args[0].startswith("ref"):
-        referrer_id = int(context.args[0][3:])
+        referrer_id = int(context.args[0][3:])  # ref123 → 123
         if referrer_id != user.id:
             await register_referral(db_pool, referrer_id, user.id)
 
+    # Получаем роль
     role = await get_user_role(db_pool, user.id)
     role_text = {"user": "👤 Обычный", "premium": "💎 Премиум", "admin": "👮‍♂️ Админ"}.get(role, "👤 Обычный")
 
@@ -134,7 +142,7 @@ def main():
     setup_referral_handlers(app)
     setup_premium_handlers(app)
 
-    # Команды
+    # Обработчики команд
     app.add_handler(CommandHandler("start", start))
 
     logger.info("🚀 Бот запущен...")
