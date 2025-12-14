@@ -2,11 +2,10 @@
 
 import asyncpg
 import os
-from loguru import logger  # Опционально: для красивых логов
+from loguru import logger
 
 # Получаем URL базы из переменных окружения
 DATABASE_URL = os.getenv("DATABASE_URL")
-
 if not DATABASE_URL:
     raise ValueError("❌ Переменная DATABASE_URL не установлена в окружении")
 
@@ -20,10 +19,10 @@ async def create_db_pool():
 
 async def init_db(pool):
     """
-    Инициализирует таблицы. Автоматически добавляет last_seen, если нужно.
+    Инициализирует таблицы и применяет миграции для всех колонок.
     """
     async with pool.acquire() as conn:
-        # Основная таблица пользователей
+        # Создаём таблицу (если ещё не создана)
         await conn.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id BIGINT PRIMARY KEY,
@@ -49,15 +48,23 @@ async def init_db(pool):
             );
         ''')
 
-        # На случай, если таблица users уже была без last_seen
-        try:
-            await conn.execute('''
-                ALTER TABLE users 
-                ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ DEFAULT NOW();
-            ''')
-            logger.info("✅ Колонка last_seen добавлена (если отсутствовала)")
-        except Exception as e:
-            logger.warning(f"⚠️ Колонка last_seen уже существует или ошибка: {e}")
+        # Список миграций — безопасно добавляем колонки, если их нет
+        migrations = [
+            ('last_name', 'TEXT'),
+            ('language_code', 'TEXT'),
+            ('is_bot', 'BOOLEAN'),
+            ('last_seen', 'TIMESTAMPTZ DEFAULT NOW()'),
+        ]
+
+        for column, type_def in migrations:
+            try:
+                await conn.execute(f'''
+                    ALTER TABLE users 
+                    ADD COLUMN IF NOT EXISTS {column} {type_def};
+                ''')
+                logger.info(f"✅ Колонка {column} добавлена (если отсутствовала)")
+            except Exception as e:
+                logger.warning(f"⚠️ Колонка {column} уже существует или ошибка: {e}")
 
     logger.info("✅ База данных инициализирована")
 
@@ -74,9 +81,14 @@ async def add_or_update_user(pool, user):
             VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
             ON CONFLICT (id)
             DO UPDATE SET last_seen = NOW();
-        ''', user.id, user.username, user.first_name, user.last_name,
-                         user.language_code, user.is_bot)
-
+        ''', 
+        user.id,
+        user.username,
+        user.first_name,
+        user.last_name,
+        user.language_code,
+        user.is_bot
+    )
     logger.info(f"👤 Пользователь {user.id} добавлен/обновлён")
 
 
@@ -86,19 +98,16 @@ async def delete_inactive_users(pool, days=90):
     Возвращает количество удалённых.
     """
     async with pool.acquire() as conn:
-        # Сначала считаем, сколько будет удалено
         count = await conn.fetchval('''
             SELECT COUNT(*) FROM users
             WHERE last_seen < NOW() - $1 * INTERVAL '1 day';
         ''', days)
 
-        # Потом удаляем
         await conn.execute('''
             DELETE FROM users
             WHERE last_seen < NOW() - $1 * INTERVAL '1 day';
         ''', days)
 
-        # Логируем
         if count > 0:
             logger.info(f"🧹 Удалено неактивных пользователей: {count}")
         else:
