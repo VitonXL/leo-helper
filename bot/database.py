@@ -83,14 +83,25 @@ async def add_or_update_user(pool, user):
 async def delete_inactive_users(pool, days=90):
     """
     Удаляет пользователей, не заходивших более `days` дней.
+    Возвращает количество удалённых.
     """
     async with pool.acquire() as conn:
-        deleted = await conn.fetchval('''
-            DELETE FROM users
-            WHERE last_seen < NOW() - $1 * INTERVAL '1 day'
-            RETURNING COUNT(*);
+        # Сначала считаем, сколько будет удалено
+        count = await conn.fetchval('''
+            SELECT COUNT(*) FROM users
+            WHERE last_seen < NOW() - $1 * INTERVAL '1 day';
         ''', days)
-        deleted = deleted or 0
-        if deleted > 0:
-            logger.info(f"🧹 Удалено неактивных пользователей: {deleted}")
-        return deleted
+
+        # Потом удаляем
+        await conn.execute('''
+            DELETE FROM users
+            WHERE last_seen < NOW() - $1 * INTERVAL '1 day';
+        ''', days)
+
+        # Логируем
+        if count > 0:
+            logger.info(f"🧹 Удалено неактивных пользователей: {count}")
+        else:
+            logger.debug("✅ Нет неактивных пользователей для удаления")
+
+        return count
