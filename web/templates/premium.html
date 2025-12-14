@@ -1,0 +1,100 @@
+<!-- web/templates/premium.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>💎 Подписка</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="tg-body" style="background: var(--tg-theme-bg-color, #f4f6f8);">
+  <div class="container">
+
+    <div class="header">
+      <h1>💎 Подписка</h1>
+      <button class="btn-close" onclick="closeApp()">✕</button>
+    </div>
+
+    <div class="card">
+      <h2>Выберите тариф</h2>
+      <div class="plans">
+        <div class="plan" onclick="pay(30, 150)">
+          <h3>Стандарт</h3>
+          <p>30 дней</p>
+          <strong>150 ₽</strong>
+        </div>
+        <div class="plan" onclick="pay(90, 390)">
+          <h3>Продвинутый</h3>
+          <p>90 дней</p>
+          <strong>390 ₽</strong>
+        </div>
+        <div class="plan" onclick="pay(365, 1100)">
+          <h3>Максимум</h3>
+          <p>365 дней</p>
+          <strong>1100 ₽</strong>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Оплата через FreeKassa</p>
+    </footer>
+
+  </div>
+
+  <script>
+    function pay(days, amount) {
+      const user_id = {{ user.id }};
+      const plan = `premium_${days}`;
+      const merchant_id = "{{ merchant_id }}";
+      const url = `https://www.free-kassa.ru/merchant/cash.php?m=${merchant_id}&s=${amount}&i=${days}&us_user_id=${user_id}&us_plan=${plan}&shp_bot=leo_aide`;
+      window.open(url, '_blank');
+    }
+
+    function closeApp() {
+      if (window.Telegram?.WebApp) {
+        Telegram.WebApp.close();
+      } else {
+        history.back();
+      }
+    }
+  </script>
+
+  <style>
+    .plans {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .plan {
+      padding: 16px;
+      background: var(--tg-theme-secondary-bg-color, #fff);
+      border: 1px solid var(--tg-theme-separator-color, #ddd);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .plan:hover {
+      transform: scale(1.02);
+    }
+
+    .plan h3 {
+      margin: 0 0 8px 0;
+      color: var(--tg-theme-text-color, #333);
+    }
+
+    .plan p {
+      margin: 0 0 8px 0;
+      font-size: 0.9em;
+      color: var(--tg-theme-hint-color, #777);
+    }
+
+    .plan strong {
+      color: var(--tg-theme-link-color, #0088cc);
+    }
+  </style>
+</body>
+</html>
