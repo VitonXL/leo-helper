@@ -1,7 +1,13 @@
 # bot/features/admin.py
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import (
+    ContextTypes,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,  # ← добавлен
+    filters  # ← добавлен
+)
 from loguru import logger
 
 from database import (
@@ -60,17 +66,16 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
     data = query.data
 
     if data == "admin_stats":
-        # Пример статистики
         total_users = await pool.fetchval("SELECT COUNT(*) FROM users")
         active_24h = await pool.fetchval("SELECT COUNT(*) FROM users WHERE last_seen > NOW() - INTERVAL '24 hours'")
         premium_users = await pool.fetchval("SELECT COUNT(*) FROM users WHERE role = 'premium'")
 
-        cmd_count = await pool.fetchval('''
+        # Топ команд за неделю
+        cmd_count = await pool.fetch('''
             SELECT command, COUNT(*) FROM usage_stats
             WHERE timestamp > NOW() - INTERVAL '7 days'
             GROUP BY command ORDER BY COUNT(*) DESC LIMIT 5
         ''')
-
         cmd_text = "\n".join([f"  • <code>{c[0]}</code>: {c[1]}" for c in cmd_count]) if cmd_count else "Нет данных"
 
         text = f"""
@@ -104,28 +109,22 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
 # --- Поиск пользователя ---
 async def handle_message_from_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    if user_id not in user_search_state:
-        return
+    if user_id not in user_search_state or user_search_state[user_id] != 'awaiting_id':
+        return  # Игнорируем, если не ожидаем ввод
 
-    if user_search_state[user_id] == 'awaiting_id':
-        try:
-            target_id = int(update.message.text)
-            pool = context.application.bot_data['db_pool']
+    try:
+        target_id = int(update.message.text)
+        pool = context.application.bot_data['db_pool']
+        user = await pool.fetchrow("SELECT * FROM users WHERE id = $1", target_id)
 
-            user = await pool.fetchrow("SELECT * FROM users WHERE id = $1", target_id)
-            if not user:
-                await update.message.reply_text("❌ Пользователь не найден")
-                return
+        if not user:
+            await update.message.reply_text("❌ Пользователь не найден")
+            return
 
-            referred = await get_referral_stats(pool, target_id)
+        referred = await get_referral_stats(pool, target_id)
+        role_info = {'user': '👤 Обычный', 'premium': '💎 Премиум', 'admin': '👮‍♂️ Админ'}.get(user['role'], '👤')
 
-            role_info = {
-                'user': '👤 Обычный',
-                'premium': '💎 Премиум',
-                'admin': '👮‍♂️ Админ'
-            }.get(user['role'], '👤')
-
-            text = f"""
+        text = f"""
 🔍 <b>Пользователь: {target_id}</b>
 
 📝 Имя: {user['first_name']} {user['last_name'] or ''}
@@ -134,27 +133,21 @@ async def handle_message_from_admin(update: Update, context: ContextTypes.DEFAUL
 📅 Зарегистрирован: {user['created_at'].strftime('%d.%m.%Y')}
 🕓 Последний визит: {user['last_seen'].strftime('%d.%m.%Y %H:%M')}
 👥 Приглашено: {referred}
+        """
+        await update.message.reply_html(text)
 
-⚙️ /grant premium {target_id}
-⚙️ /grant user {target_id}
-            """
-            await update.message.reply_html(text)
+        # Кнопки действий
+        keyboard = [
+            [InlineKeyboardButton("💎 Выдать премиум", callback_data=f"grant_premium_{target_id}")],
+            [InlineKeyboardButton("👤 Сделать обычным", callback_data=f"grant_user_{target_id}")],
+            [InlineKeyboardButton("⬅️ Назад", callback_data="admin_users")]
+        ]
+        await update.message.reply_text("Выберите действие:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-            # Кнопки управления
-            keyboard = [
-                [InlineKeyboardButton("💎 Выдать премиум", callback_data=f"grant_premium_{target_id}")],
-                [InlineKeyboardButton("👤 Сделать обычным", callback_data=f"grant_user_{target_id}")],
-                [InlineKeyboardButton("⬅️ Назад", callback_data="admin_users")]
-            ]
-            await update.message.reply_text(
-                "Выберите действие:",
-                reply_markup=InlineKeyboardMarkup(keyboard)
-            )
-
-        except ValueError:
-            await update.message.reply_text("❌ Введите корректный ID")
-        finally:
-            del user_search_state[user_id]
+    except ValueError:
+        await update.message.reply_text("❌ Введите корректный ID (число)")
+    finally:
+        user_search_state.pop(user_id, None)
 
 
 # --- Выдача роли ---
@@ -172,8 +165,9 @@ async def grant_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
         await query.edit_message_text(f"✅ Пользователю `{target_id}` выдана роль `{role}`")
 
 
+# --- Регистрация обработчиков ---
 def setup_admin_handlers(app):
     app.add_handler(CommandHandler("admin", cmd_admin))
     app.add_handler(CallbackQueryHandler(admin_callback_handler, pattern="^admin_"))
     app.add_handler(CallbackQueryHandler(grant_callback_handler, pattern="^grant_"))
-    app.add_handler(MessageHandler(None, handle_message_from_admin))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message_from_admin))
