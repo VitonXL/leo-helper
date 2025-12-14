@@ -1,13 +1,15 @@
 # bot/main.py
 
 import os
+import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
 from telegram.ext import Application, ContextTypes, CommandHandler, CallbackQueryHandler
+
+# Импортируем функции из database.py
 from database import create_db_pool, init_db, add_or_update_user, delete_inactive_users
 from features.menu import setup as setup_menu
-import asyncio
 
-# Глобальный пул БД
+# Глобальный пул соединений
 db_pool = None
 
 # Клавиатура после /start
@@ -30,7 +32,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=get_start_keyboard()
     )
 
-
 # Фоновая задача: удаляем неактивных каждые 24 часа
 async def cleanup_task(application: Application):
     while True:
@@ -40,6 +41,16 @@ async def cleanup_task(application: Application):
         except Exception as e:
             print(f"❌ Ошибка в cleanup: {e}")
 
+# Функция, которая запускается при старте
+async def on_startup(application: Application):
+    global db_pool
+    print("🔧 Инициализация БД...")
+    db_pool = await create_db_pool()
+    await init_db(db_pool)
+    print("✅ База данных инициализирована")
+
+    # Запускаем фоновую задачу
+    application.create_task(cleanup_task(application))
 
 async def post_init(application: Application):
     await application.bot.set_chat_menu_button(
@@ -48,34 +59,23 @@ async def post_init(application: Application):
             web_app=WebAppInfo(url="https://web-production-b74ea.up.railway.app")
         )
     )
-
-
-async def on_startup(application: Application):
-    """Выполняется при старте бота"""
-    global db_pool
-    db_pool = await create_db_pool()
-    await init_db(db_pool)
-    print("✅ База данных инициализирована")
-
-    # Запускаем фоновую задачу
-    application.create_task(cleanup_task(application))
-
+    print("🚀 Меню (≡) установлено")
 
 def main():
+    # Создаём приложение
     app = Application.builder().token(os.getenv("BOT_TOKEN")).post_init(post_init).build()
 
     # Подключаем меню
     setup_menu(app)
 
-    # Обработчики
+    # Добавляем обработчики
     app.add_handler(CommandHandler("start", start))
 
-    # Запускаем инициализацию БД
-    app.add_startup_handler(on_startup)
+    # Запускаем инициализацию БД при старте
+    app.add_post_init(on_startup)
 
     print("🚀 Бот запущен...")
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
