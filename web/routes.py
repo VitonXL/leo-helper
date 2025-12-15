@@ -95,14 +95,3 @@ async def cabinet(request: Request):
         }
     )
 
-
-@router.get("/toggle-theme")
-async def toggle_theme(request: Request):
-    theme = request.cookies.get("theme", "light")
-    new_theme = "dark" if theme == "light" else "light"
-    redirect_url = request.headers.get("referer", "/")
-    
-    response = HTMLResponse(status_code=303)
-    response.headers["Location"] = redirect_url
-    response.set_cookie(key="theme", value=new_theme, max_age=3600*24*30)
-    return response
