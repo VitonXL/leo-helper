@@ -3,11 +3,14 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import urllib.parse
 import os
-
-from .utils import verify_webapp_data, verify_cabinet_link  # ✅ Добавили import
+import httpx
+from .utils import verify_webapp_data, verify_cabinet_link
 
 router = APIRouter()
 templates = Jinja2Templates(directory="web/templates")
+
+# Получаем URL бота из переменной окружения
+BOT_API_URL = os.getenv("BOT_API_URL", "https://mmuzs4kv.up.railway.app")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -52,12 +55,13 @@ async def handle_webapp(
     )
 
 
-# ✅ НОВОЕ: Роут для личного кабинета по ссылке
+# ✅ Роут: Личный кабинет по безопасной ссылке
 @router.get("/cabinet", response_class=HTMLResponse)
 async def cabinet(request: Request):
     user_id = request.query_params.get("user_id")
     hash_param = request.query_params.get("hash")
 
+    # Проверка параметров
     if not user_id or not hash_param:
         raise HTTPException(status_code=400, detail="Missing user_id or hash")
 
@@ -66,20 +70,31 @@ async def cabinet(request: Request):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user_id")
 
+    # Проверка подписи
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
-    # Пока заглушка — позже добавим данные из API
-    user_data = {
-        "id": user_id,
-        "first_name": "Алексей",
-        "username": "alex_dev",
-        "role": "premium",
-        "premium_expires": "2026-03-15T00:00:00",
-        "language": "ru",
-        "theme": "light",
-        "referrals": 7
-    }
+    # Запрос данных из бота
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
+            api_url = f"{BOT_API_URL.strip('/')}/api/user/{user_id}"
+            response = await client.get(api_url)
+            if response.status_code == 200:
+                user_data = response.json()
+            else:
+                user_data = {}
+        except Exception:
+            user_data = {}
+
+    # Дефолтные значения
+    user_data.setdefault("role", "user")
+    user_data.setdefault("premium_expires", None)
+    user_data.setdefault("language", "ru")
+    user_data.setdefault("theme", "light")
+    user_data.setdefault("first_name", "Пользователь")
+    user_data.setdefault("username", "unknown")
+    user_data.setdefault("referrals", 0)
+    user_data["id"] = user_id
 
     return templates.TemplateResponse(
         "cabinet.html",
