@@ -94,3 +94,11 @@ main {
 .btn:hover {
   background: #006699;
 }
+.badge.danger {
+    background: #7b1fa2; /* Фиолетовый — стиль Telegram Admin */
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
