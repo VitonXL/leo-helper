@@ -22,6 +22,13 @@ def generate_cabinet_link(user_id: int) -> str:
     secret = os.getenv("AUTH_SECRET")
     if not secret:
         raise ValueError("AUTH_SECRET не задан в переменных окружения")
+        
+def generate_cabinet_link(user_id: int) -> str:
+    secret = os.getenv("AUTH_SECRET")
+    if not secret:
+        raise ValueError("AUTH_SECRET not set")
+    hash = hashlib.md5(f"{user_id}{secret}".encode()).hexdigest()
+    return f"https://leo-aide.online/cabinet?user_id={user_id}&hash={hash}"
     
     hash = hashlib.md5(f"{user_id}{secret}".encode()).hexdigest()
     return f"https://leo-aide.online/cabinet?user_id={user_id}&hash={hash}"
