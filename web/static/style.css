@@ -94,11 +94,30 @@ main {
 .btn:hover {
   background: #006699;
 }
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+  background: #6c757d;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  background: #6c757d;
+  color: white;
+}
+
+.badge.success {
+  background: #28a745;
+}
+
 .badge.danger {
-    background: #7b1fa2; /* Фиолетовый — стиль Telegram Admin */
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.9em;
-    font-weight: bold;
+  background: #7b1fa2;
+  color: white;
 }
