@@ -19,17 +19,18 @@
           {{ user.first_name[0].upper() }}
         </div>
         <h2>{{ user.first_name }}</h2>
-        <p>@{{ user.username }}</p>
-        <div class="status">
-          {% if user.role == 'premium' %}
-            <span class="badge success">💎 Премиум</span>
-            <small>до {{ user.premium_expires[:10] }}</small>
-          {% elif user.role == 'admin' %}
-            <span class="badge danger">👮‍♂️ Админ</span>
-          {% else %}
-            <span class="badge">👤 Обычный</span>
-          {% endif %}
-        </div>
+       <div class="status">
+  {% if user.role == 'premium' %}
+    <span class="badge success">💎 Премиум</span>
+    {% if user.premium_expires %}
+      <small>до {{ user.premium_expires[:10] }}</small>
+    {% endif %}
+  {% elif user.role == 'admin' %}
+    <span class="badge danger">👮‍♂️ Админ</span>
+  {% else %}
+    <span class="badge">👤 Обычный</span>
+  {% endif %}
+</div>
       </div>
 
       <div class="info-grid">
