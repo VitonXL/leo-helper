@@ -41,8 +41,8 @@ async def init_db(pool):
                 created_at TIMESTAMPTZ DEFAULT NOW(),
                 last_seen TIMESTAMPTZ DEFAULT NOW(),
                 premium_expires TIMESTAMPTZ,
-                theme TEXT DEFAULT 'light',           -- НОВОЕ: тема
-                language TEXT DEFAULT 'ru'            -- НОВОЕ: интерфейсный язык
+                theme TEXT DEFAULT 'light',
+                language TEXT DEFAULT 'ru'
             );
         ''')
 
@@ -273,3 +273,17 @@ async def delete_inactive_users(pool, days=90):
             logger.debug("✅ Нет неактивных для удаления")
 
         return count
+
+
+# === Глобальный пул подключений ===
+_db_pool = None
+
+
+async def get_db_pool():
+    """
+    Возвращает пул подключений к БД. Создаёт, если ещё не создан.
+    """
+    global _db_pool
+    if _db_pool is None:
+        _db_pool = await create_db_pool()
+    return _db_pool
