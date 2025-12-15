@@ -4,14 +4,10 @@ from fastapi.templating import Jinja2Templates
 import urllib.parse
 import os
 from .utils import verify_webapp_data, verify_cabinet_link
-
-# ✅ Импортируем функцию получения данных пользователя
 from .api import get_user_data
 
 router = APIRouter()
 templates = Jinja2Templates(directory="web/templates")
-
-# Убрали BOT_API_URL — больше не нужен для /cabinet
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -56,13 +52,11 @@ async def handle_webapp(
     )
 
 
-# ✅ Обновлённый роут: Личный кабинет — использует локальные данные
 @router.get("/cabinet", response_class=HTMLResponse)
 async def cabinet(request: Request):
     user_id = request.query_params.get("user_id")
     hash_param = request.query_params.get("hash")
 
-    # Проверка параметров
     if not user_id or not hash_param:
         raise HTTPException(status_code=400, detail="Missing user_id or hash")
 
@@ -71,15 +65,11 @@ async def cabinet(request: Request):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user_id")
 
-    # Проверка подписи
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
-    # ✅ Запрашиваем данные напрямую из БД через api.py
     user_data = await get_user_data(user_id)
-
     if not user_data:
-        # Дефолтные данные, если не найден
         user_data = {
             "id": user_id,
             "first_name": "Пользователь",
@@ -100,3 +90,15 @@ async def cabinet(request: Request):
             "title": "Личный кабинет"
         }
     )
+
+
+@router.get("/toggle-theme")
+async def toggle_theme(request: Request):
+    theme = request.cookies.get("theme", "light")
+    new_theme = "dark" if theme == "light" else "light"
+    redirect_url = request.headers.get("referer", "/")
+    
+    response = HTMLResponse(status_code=303)
+    response.headers["Location"] = redirect_url
+    response.set_cookie(key="theme", value=new_theme, max_age=3600*24*30)
+    return response
