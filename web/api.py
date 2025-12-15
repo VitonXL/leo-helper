@@ -63,6 +63,40 @@ async def get_user_data(user_id: int) -> Dict[str, Any]:
         }
 
 
+async def get_user_data(user_id: int) -> Dict[str, Any]:
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            SELECT 
+                id, first_name, username, language_code, 
+                role, premium_expires
+            FROM users 
+            WHERE id = $1
+        """, user_id)
+
+        print(f"🔍 Поиск пользователя: {user_id}")
+        print(f"📄 Результат из БД: {row}")  # ← вот это покажет, нашёлся ли ты
+
+        if not row:
+            return None
+
+        referrals = await conn.fetchval("""
+            SELECT COUNT(*) FROM referrals WHERE referrer_id = $1
+        """, user_id)
+
+        return {
+            "id": row["id"],
+            "first_name": row["first_name"] or "Пользователь",
+            "username": row["username"] or "unknown",
+            "language": row["language_code"] or "ru",
+            "role": row["role"] or "user",
+            "premium_expires": row["premium_expires"].isoformat() if row["premium_expires"] else None,
+            "is_premium": row["role"] == "premium",
+            "referrals": referrals or 0,
+            "theme": "light"
+        }
+
+
 @router.get("/user/{user_id}")
 async def get_user_status(user_id: int):
     """
