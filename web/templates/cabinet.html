@@ -48,8 +48,9 @@
         <a href="https://t.me/Leo_aide_bot" target="_blank" class="btn btn-outline">
           💬 Написать в поддержку
         </a>
-        <a href="/toggle-theme?return=/cabinet?user_id={{ user.id }}&hash={{ request.query_params.hash }}" class="btn btn-sm">
-          🌙 Сменить тему
+        <button id="theme-toggle" class="btn btn-sm">
+  {{ '☀️ Светлая' if theme == 'dark' else '🌙 Тёмная' }}
+</button>
         </a>
       </div>
     </main>
