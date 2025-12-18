@@ -101,3 +101,28 @@ async def get_user_status(user_id: int):
             "theme": "light",
             "referrals": 0
         }
+        # web/api.py — ДОБАВЬ В КОНЕЦ
+
+@router.post("/set-theme")
+async def set_user_theme(user_id: int, theme: str, hash: str):
+    """
+    API: сохраняет тему пользователя в БД.
+    Вызывается с фронтенда при смене темы.
+    """
+    if theme not in ["light", "dark"]:
+        raise HTTPException(status_code=400, detail="Theme must be 'light' or 'dark'")
+    
+    if not verify_cabinet_link(user_id, hash):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    try:
+        pool = await get_db_pool()
+        async with pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE users SET theme = $1 WHERE id = $2",
+                theme, user_id
+            )
+        return {"status": "success", "theme": theme}
+    except Exception as e:
+        print(f"❌ Ошибка обновления темы: {e}")
+        raise HTTPException(status_code=500, detail="Internal error")
