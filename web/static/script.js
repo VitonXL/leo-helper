@@ -1,7 +1,7 @@
-// web/static/script.js — РАБОЧАЯ UTF-8 ВЕРСИЯ
+// web/static/script.js — ЧИСТЫЙ UTF-8, БЕЗ КИРИЛЛИЦЫ
 
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('✅ DOM загружен, script.js работает');
+  console.log('✅ DOM загружен');
 
   // === Навигация ===
   window.navigateTo = function (screen) {
@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     navigateTo('dashboard');
   };
 
+  // === Боковое меню ===
   window.toggleSidebar = function () {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.querySelector('.overlay');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
+  // === QR-модалка ===
   window.openQRModal = function () {
     const modal = document.getElementById('qr-modal');
     if (modal) modal.style.display = 'flex';
@@ -39,18 +41,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (modal) modal.style.display = 'none';
   };
 
+  // === Язык (временно без кириллицы) ===
   window.setLang = function (lang) {
-    alert('Язык изменён на: ' + lang);
+    alert('Language: ' + lang);
   };
 
-  // === Тема ===
+  // === Смена темы ===
   const themeToggle = document.createElement('button');
   themeToggle.className = 'btn primary';
   themeToggle.style.marginTop = '20px';
 
   function updateThemeButton() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
-    themeToggle.textContent = currentTheme === 'light' ? '🌙 Включить тёмную' : '☀️ Включить светлую';
+    themeToggle.textContent = currentTheme === 'light' ? '🌙 Dark mode' : '☀️ Light mode';
   }
 
   window.toggleTheme = function () {
@@ -76,11 +79,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   themeToggle.addEventListener('click', toggleTheme);
 
+  // Добавляем кнопку в профиль
   const profileMain = document.querySelector('.profile-main');
   if (profileMain) {
     profileMain.appendChild(themeToggle);
   }
 
+  // Восстанавливаем тему
   const savedTheme = getCookie('theme') || document.documentElement.getAttribute('data-theme');
   document.documentElement.setAttribute('data-theme', savedTheme);
   updateThemeButton();
@@ -91,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
-  // === Оффлайн ===
+  // === Оффлайн-бар ===
   const offlineBar = document.getElementById('offline-bar');
   if (offlineBar) {
     window.addEventListener('offline', () => offlineBar.style.display = 'block');
@@ -101,30 +106,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // === Авторизация ===
   window.startAuth = function () {
+    console.log('🔥 startAuth: started');
     const urlParams = new URLSearchParams(window.location.search);
     const user_id = urlParams.get('user_id');
     const hash = urlParams.get('hash');
 
     if (!user_id || !hash) {
-      alert('❌ Неверная ссылка. Откройте из бота.');
+      alert('❌ Invalid link. Open from bot.');
       return;
     }
 
+    console.log('🔍 Fetching user:', user_id);
     fetch(`/api/user/${user_id}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
       .then(data => {
-        console.log('✅ Данные:', data);
+        console.log('✅ Data received:', data);
 
         const update = (id, value) => {
           const el = document.getElementById(id);
           if (el) el.textContent = value;
         };
 
-        update('user-name', data.first_name || 'Пользователь');
-        update('user-username', data.username ? '@' + data.username : 'не указан');
+        update('user-name', data.first_name || 'User');
+        update('user-username', data.username ? '@' + data.username : 'no username');
         update('user-id', data.id);
         update('referrals', data.referrals || 0);
-        update('premium-status', data.is_premium ? 'Премиум' : 'Базовая');
+        update('premium-status', data.is_premium ? 'Premium' : 'Free');
 
         const photo = document.getElementById('profile-photo');
         if (photo) {
@@ -138,14 +148,15 @@ document.addEventListener('DOMContentLoaded', function () {
         navigateTo('dashboard');
       })
       .catch(err => {
-        console.error('❌ Ошибка:', err);
-        alert('❌ Не удалось загрузить данные');
+        console.error('❌ Error:', err);
+        alert('❌ Failed to load data');
       });
   };
 
+  // === Премиум ===
   window.buyPremium = function () {
-    alert("💳 Премиум скоро! Ожидайте интеграцию.");
+    alert('💳 Premium coming soon!');
   };
 
-  console.log('✅ Все функции готовы');
+  console.log('✅ script.js: fully loaded');
 });
