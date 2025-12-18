@@ -1,9 +1,7 @@
 // web/static/script.js
 
-// === Глобальные переменные ===
 let USER_DATA = null;
 
-// === Навигация между экранами ===
 function navigateTo(screen) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   setTimeout(() => {
@@ -15,6 +13,24 @@ function navigateTo(screen) {
 
 function navigateBack() { navigateTo('dashboard'); }
 
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.querySelector('.overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+
+function openQRModal() { document.getElementById('qr-modal').style.display = 'flex'; }
+function closeQRModal() { document.getElementById('qr-modal').style.display = 'none'; }
+
+function setLang(lang) {
+  alert('Язык изменён на: ' + lang);
+}
+
+function buyPremium() {
+  alert("💳 Премиум скоро! Ожидайте интеграцию.");
+}
+
 // === Старт авторизации ===
 function startAuth() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -22,31 +38,30 @@ function startAuth() {
   const hash = urlParams.get('hash');
 
   if (!user_id || !hash) {
-    alert('❌ Неверная ссылка. Пожалуйста, перейдите из бота.');
+    alert('❌ Неверная ссылка. Откройте из бота.');
     return;
   }
 
-  // Проверяем подпись
   fetch(`/api/user/${user_id}`)
     .then(res => res.json())
     .then(data => {
       USER_DATA = data;
+
       document.getElementById('user-name').textContent = data.first_name;
       document.getElementById('user-username').textContent = data.username ? '@' + data.username : 'не указан';
       document.getElementById('user-id').textContent = data.id;
       document.getElementById('referrals').textContent = data.referrals;
       document.getElementById('profile-photo').textContent = data.first_name[0]?.toUpperCase() || '?';
 
-      // Тема
       const theme = data.theme || 'light';
       document.documentElement.setAttribute('data-theme', theme);
       document.getElementById('current-theme').textContent = theme === 'light' ? 'Светлая' : 'Тёмкая';
 
-      // Подписка
       document.getElementById('premium-status').textContent = data.is_premium ? 'Премиум' : 'Базовая';
-      document.getElementById('premium-status').style.color = data.is_premium ? '#DAA520' : '#333';
+      if (data.is_premium) {
+        document.getElementById('premium-status').style.color = '#DAA520';
+      }
 
-      // Переход
       navigateTo('dashboard');
     })
     .catch(err => {
@@ -62,10 +77,8 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', newTheme);
   document.getElementById('current-theme').textContent = newTheme === 'light' ? 'Светлая' : 'Тёмкая';
 
-  // В куку
   document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
 
-  // В БД
   const urlParams = new URLSearchParams(window.location.search);
   const user_id = urlParams.get('user_id');
   const hash = urlParams.get('hash');
@@ -79,7 +92,7 @@ function toggleTheme() {
   }
 }
 
-// === Добавляем кнопку "Сменить тему" ===
+// === Инициализация ===
 document.addEventListener('DOMContentLoaded', () => {
   const profileMain = document.querySelector('.profile-main');
   const themeBtn = document.createElement('button');
@@ -88,32 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   themeBtn.textContent = '🌙 Сменить тему';
   themeBtn.onclick = toggleTheme;
   profileMain.appendChild(themeBtn);
-
-  // Если уже есть user_id — можно сразу стартовать (для тестов)
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('auto') === '1') {
-    startAuth();
-  }
 });
-
-// === Прочие функции ===
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.querySelector('.overlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('active');
-}
-
-function openQRModal() { document.getElementById('qr-modal').style.display = 'flex'; }
-function closeQRModal() { document.getElementById('qr-modal').style.display = 'none'; }
-
-function setLang(lang) {
-  alert(`Язык: ${lang}. Функция в разработке.`);
-}
-
-function buyPremium() {
-  alert("💳 Премиум скоро! Ожидайте интеграцию.");
-}
 
 // === Оффлайн ===
 const offlineBar = document.getElementById('offline-bar');
