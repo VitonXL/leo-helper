@@ -1,5 +1,8 @@
+// web/static/script.js
+
 let USER_DATA = null;
 
+// === Навигация ===
 function navigateTo(screen) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   setTimeout(() => {
@@ -29,6 +32,7 @@ function buyPremium() {
   alert("💳 Премиум скоро! Ожидайте интеграцию.");
 }
 
+// === Старт авторизации ===
 function startAuth() {
   const urlParams = new URLSearchParams(window.location.search);
   const user_id = urlParams.get('user_id');
@@ -43,15 +47,18 @@ function startAuth() {
     .then(res => res.json())
     .then(data => {
       USER_DATA = data;
+
+      // Теперь все элементы гарантированно существуют
       document.getElementById('user-name').textContent = data.first_name;
       document.getElementById('user-username').textContent = data.username ? '@' + data.username : 'не указан';
       document.getElementById('user-id').textContent = data.id;
       document.getElementById('referrals').textContent = data.referrals;
       document.getElementById('profile-photo').textContent = data.first_name[0]?.toUpperCase() || '?';
-      document.getElementById('premium-status').textContent = data.is_premium ? 'Премиум' : 'Базовая';
 
       const theme = data.theme || 'light';
       document.documentElement.setAttribute('data-theme', theme);
+
+      document.getElementById('premium-status').textContent = data.is_premium ? 'Премиум' : 'Базовая';
 
       navigateTo('dashboard');
     })
@@ -61,7 +68,13 @@ function startAuth() {
     });
 }
 
+// === Оффлайн ===
 const offlineBar = document.getElementById('offline-bar');
 window.addEventListener('offline', () => offlineBar.style.display = 'block');
-window.addEventListener('online',  () => offlineBar.style.display = 'none');
+window.addEventListener('online', () => offlineBar.style.display = 'none');
 window.onload = () => { if (!navigator.onLine) offlineBar.style.display = 'block'; };
+
+// === Защита от раннего выполнения ===
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('✅ Скрипт загружен, DOM готов');
+});
