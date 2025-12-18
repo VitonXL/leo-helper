@@ -3,8 +3,8 @@ import os
 print(f"🚀 ENV PORT: {os.getenv('PORT')}")
 print(f"🚀 ARGS: {' '.join(os.sys.argv)}")
 
-from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
 from .routes import router
 from .api import router as api_router
 
