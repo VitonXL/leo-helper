@@ -11,7 +11,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("❌ DATABASE_URL не задана")
 
-print(f"✅ DATABASE_URL: {DATABASE_URL[:30]}...")  # Не показываем пароль
+print(f"✅ DATABASE_URL: {DATABASE_URL[:30]}...")
 
 db_pool = None
 
@@ -38,7 +38,7 @@ async def get_user_data(user_id: int) -> Dict[str, Any]:
             row = await conn.fetchrow("""
                 SELECT 
                     id, first_name, username, language_code, 
-                    role, premium_expires
+                    role, premium_expires, theme
                 FROM users 
                 WHERE id = $1
             """, user_id)
@@ -63,7 +63,7 @@ async def get_user_data(user_id: int) -> Dict[str, Any]:
                 "premium_expires": row["premium_expires"].isoformat() if row["premium_expires"] else None,
                 "is_premium": row["role"] == "premium",
                 "referrals": referrals or 0,
-                "theme": "light"
+                "theme": row["theme"] or "light"
             }
     except Exception as e:
         print(f"❌ Ошибка в get_user_data: {e}")
@@ -101,27 +101,25 @@ async def get_user_status(user_id: int):
             "theme": "light",
             "referrals": 0
         }
-        # web/api.py — ДОБАВЬ В КОНЕЦ
 
+
+# === 🌙 НОВЫЙ ЭНДПОИНТ: обновление темы ===
 @router.post("/set-theme")
 async def set_user_theme(user_id: int, theme: str, hash: str):
     """
-    API: сохраняет тему пользователя в БД.
-    Вызывается с фронтенда при смене темы.
+    API для смены темы пользователя. Вызывается с фронтенда.
     """
     if theme not in ["light", "dark"]:
         raise HTTPException(status_code=400, detail="Theme must be 'light' or 'dark'")
     
+    from .utils import verify_cabinet_link
     if not verify_cabinet_link(user_id, hash):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
     try:
         pool = await get_db_pool()
         async with pool.acquire() as conn:
-            await conn.execute(
-                "UPDATE users SET theme = $1 WHERE id = $2",
-                theme, user_id
-            )
+            await conn.execute("UPDATE users SET theme = $1 WHERE id = $2", theme, user_id)
         return {"status": "success", "theme": theme}
     except Exception as e:
         print(f"❌ Ошибка обновления темы: {e}")
