@@ -10,9 +10,12 @@ from .api import router as api_router
 
 app = FastAPI(title="Лео Помощник — UI")
 
+# 🔼 Сначала — статика (чтобы /static/script.js отдавался напрямую)
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
-app.include_router(router)
+
+# 🔽 Потом — API и роуты
 app.include_router(api_router, prefix="/api")
+app.include_router(router)  # твои страницы (например, /cabinet)
 
 @app.get("/health")
 async def health():
