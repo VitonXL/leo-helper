@@ -1,4 +1,4 @@
-// web/static/script.js — Исправленная версия (UTF-8)
+// web/static/script.js — РАБОЧАЯ UTF-8 ВЕРСИЯ
 
 function navigateTo(screen) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -12,9 +12,7 @@ function navigateTo(screen) {
   }, 300);
 }
 
-function navigateBack() {
-  navigateTo('dashboard');
-}
+function navigateBack() { navigateTo('dashboard'); }
 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -55,10 +53,8 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', newTheme);
   updateThemeButton();
 
-  // Сохраняем в куки
   document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
 
-  // Обновляем в БД
   const urlParams = new URLSearchParams(window.location.search);
   const user_id = urlParams.get('user_id');
   const hash = urlParams.get('hash');
@@ -117,7 +113,6 @@ function startAuth() {
     .then(data => {
       console.log('✅ Данные:', data);
 
-      // Обновляем профиль
       const update = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -134,7 +129,6 @@ function startAuth() {
         photo.textContent = (data.first_name || '?')[0].toUpperCase();
       }
 
-      // Тема
       const theme = data.theme || 'light';
       document.documentElement.setAttribute('data-theme', theme);
       updateThemeButton();
@@ -150,4 +144,3 @@ function startAuth() {
 function buyPremium() {
   alert("💳 Премиум скоро! Ожидайте интеграцию.");
 }
-
