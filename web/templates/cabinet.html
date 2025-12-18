@@ -1,94 +1,109 @@
+<!-- web/templates/cabinet.html -->
+
 <!DOCTYPE html>
-<html lang="ru" data-theme="{{ 'dark' if theme == 'dark' else 'light' }}">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Личный кабинет</title>
   <link rel="stylesheet" href="/static/style.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <div class="container cabinet">
+  <div class="container">
     <header>
       <h1>🔐 Личный кабинет</h1>
-      <a href="/" class="btn btn-secondary">← Назад</a>
+      <button id="theme-toggle">🌙 Тёмная</button>
     </header>
 
     <main>
-      <div class="profile-card">
-        <div class="avatar">
-          {{ user.first_name[0].upper() }}
+      <div class="status-grid">
+        <div class="card">
+          <h3>👤 Пользователь</h3>
+          <p class="status"><strong>Имя:</strong> {{ user.first_name }}</p>
+          <p class="status"><strong>Юзернейм:</strong> @{{ user.username }}</p>
+          <p class="status"><strong>ID:</strong> <code>{{ user.id }}</code></p>
         </div>
-        <h2>{{ user.first_name }}</h2>
-        <p>@{{ user.username }}</p>
-        <div class="status">
-          {% if user.role == 'premium' %}
-            <span class="badge success">💎 Премиум</span>
-            {% if user.premium_expires %}
-              <small>до {{ user.premium_expires[:10] }}</small>
+
+        <div class="card">
+          <h3>💎 Подписка</h3>
+          <p class="status"><strong>Статус:</strong> 
+            {% if user.is_premium %}
+              <span class="badge success">Премиум</span>
+            {% else %}
+              <span class="badge">Обычный</span>
             {% endif %}
-          {% elif user.role == 'admin' %}
-            <span class="badge danger">👮‍♂️ Админ</span>
-          {% else %}
-            <span class="badge">👤 Обычный</span>
+          </p>
+          {% if user.premium_expires %}
+            <p class="status"><strong>До:</strong> {{ user.premium_expires[:10] }}</p>
           {% endif %}
         </div>
+
+        <div class="card">
+          <h3>👥 Рефералы</h3>
+          <p class="status"><strong>Приглашено:</strong> {{ user.referrals }}</p>
+          <p class="status"><strong>Реф. ссылка:</strong> <code>t.me/Leo_aide_bot?start=ref{{ user.id }}</code></p>
+        </div>
       </div>
 
-      <div class="info-grid">
-        <div class="info-item"><strong>Язык</strong> <span>{{ 'Русский' if user.language == 'ru' else 'English' }}</span></div>
-        <div class="info-item"><strong>Тема</strong> <span>{{ 'Тёмная' if theme == 'dark' else 'Светлая' }}</span></div>
-        <div class="info-item"><strong>Рефералы</strong> <span>{{ user.referrals }}</span></div>
-        <div class="info-item"><strong>ID</strong> <span>{{ user.id }}</span></div>
-      </div>
-
-      <div class="actions">
-        {% if user.role != 'premium' %}
-          <a href="/premium?user_id={{ user.id }}" class="btn">💳 Купить премиум</a>
-        {% endif %}
-        <a href="https://t.me/Leo_aide_bot" target="_blank" class="btn btn-outline">
-          💬 Написать в поддержку
-        </a>
-        <button id="theme-toggle" class="btn btn-sm">
-          {{ '☀️ Светлая' if theme == 'dark' else '🌙 Тёмная' }}
-        </button>
-      </div>
+      <a href="https://t.me/Leo_aide_bot" class="btn">Вернуться в бота</a>
     </main>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const themeBtn = document.getElementById("theme-toggle");
-      if (!themeBtn) return;
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
 
-      themeBtn.addEventListener("click", (e) => {
-        e.preventDefault();
+    // Загружаем тему: кука > сервер
+    const savedTheme = getCookie('theme') || "{{ user.theme }}";
+    html.setAttribute('data-theme', savedTheme);
+    updateToggleText(savedTheme);
 
-        const html = document.documentElement;
-        const currentTheme = html.getAttribute("data-theme");
-        const newTheme = currentTheme === "light" ? "dark" : "light";
+    themeToggle.addEventListener('click', async () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
-        // Меняем тему
-        html.setAttribute("data-theme", newTheme);
+      // Обновляем UI
+      html.setAttribute('data-theme', newTheme);
+      updateToggleText(newTheme);
+      setCookie('theme', newTheme, 365);
 
-        // Обновляем текст кнопки
-        themeBtn.textContent = newTheme === "light" ? "☀️ Светлая" : "🌙 Тёмная";
+      // Отправляем в БД
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const user_id = urlParams.get('user_id');
+        const hash = urlParams.get('hash');
 
-        // Сохраняем в куки (30 дней)
-        const d = new Date();
-        d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000);
-        document.cookie = `theme=${newTheme}; path=/; expires=${d.toUTCString()}; SameSite=Strict`;
-        // Отправляем тему в бота
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://t.me/Leo_aide_bot?start=settheme_${newTheme}`;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-      if (iframe && iframe.parentNode) {
-    iframe.parentNode.removeChild(iframe);
-  }
-}, 1000);
-      });
+        if (user_id && hash) {
+          const response = await fetch('/api/set-theme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: parseInt(user_id), theme: newTheme, hash })
+          });
+
+          if (!response.ok) {
+            console.warn("❌ Ошибка сохранения темы");
+          }
+        }
+      } catch (e) {
+        console.warn("⚠️ Ошибка API:", e);
+      }
     });
+
+    function updateToggleText(theme) {
+      themeToggle.textContent = theme === 'light' ? '🌙 Тёмная' : '☀️ Светлая';
+    }
+
+    function setCookie(name, value, days) {
+      const d = new Date();
+      d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+      document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+    }
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
   </script>
 </body>
 </html>
