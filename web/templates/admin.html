@@ -405,24 +405,25 @@
     }
 
     async function loadSupportTickets() {
-      try {
+    try {
         const res = await fetch('/api/admin/support-tickets');
         const tickets = await res.json();
         const container = document.getElementById('support-list');
         container.innerHTML = tickets.map(t => `
           <div style="padding: 10px; border-bottom: 1px solid #eee;">
-            <strong>@${t.username}</strong> — <span style="color: #FF9800;">${t.subject}</span>
-            <p style="margin: 8px 0; font-size: 14px;">${t.message}</p>
+            <strong>@${t.username}</strong> (${t.first_name})
+            <p style="margin: 8px 0; font-size: 14px; white-space: pre-wrap;">${t.message}</p>
             <small>${new Date(t.created_at).toLocaleString()}</small>
             <div style="margin-top: 8px;">
-              <button class="btn" style="background: #2196F3; padding: 5px 10px;" onclick="resolveTicket(${t.id})">✅ Решено</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (e) {
-        document.getElementById('support-list').innerHTML = '<p class="text-danger">Ошибка загрузки обращений</p>';
-        console.error(e);
-      }
+              <button class="btn" style="background: #2196F3; padding: 5px 10px;"
+                  onclick="replyToTicket(${t.id}, ${t.user_id})">💬 Ответить</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('support-list').innerHTML = '<p class="text-danger">Ошибка загрузки</p>';
+    console.error('❌ Ошибка загрузки тикетов:', e);
+  }
     }
 
     function approveReview(id) { alert(`Отзыв ${id} принят`); }
@@ -433,6 +434,24 @@
       window.Telegram?.WebApp?.close();
       window.location.href = "https://t.me/leo_aide_bot";
     }
+
+    async function replyToTicket(ticketId, userId) {
+  const reply = prompt("Введите ответ пользователю:");
+  if (!reply || !reply.trim()) return;
+
+  try {
+    await fetch('/api/admin/reply-support', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticket_id: ticketId, reply_text: reply.trim() })
+    });
+    alert('✅ Ответ отправлен пользователю');
+    await loadSupportTickets(); // Обновим список
+  } catch (e) {
+    alert('❌ Ошибка отправки');
+    console.error(e);
+  }
+}
   </script>
 </body>
 </html>
