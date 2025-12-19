@@ -316,39 +316,46 @@ async def reply_support(
     ticket_id: int = Body(..., embed=True),
     reply_text: str = Body(..., embed=True)
 ):
-    """
-    Отправляет ответ пользователю и закрывает тикет.
-    """
+    from database import get_db_pool
     pool = await get_db_pool()
+    
     async with pool.acquire() as conn:
-        # Получаем данные
         ticket = await conn.fetchrow(
             "SELECT user_id, message FROM support_tickets WHERE id = $1", ticket_id
         )
         if not ticket:
             raise HTTPException(status_code=404, detail="Тикет не найден")
 
-        # Получаем бота
+    # ✅ Импортируем бота правильно
+    try:
         from bot.main import bot
+        if bot is None:
+            raise RuntimeError("Бот не инициализирован")
+    except Exception as e:
+        logger.error(f"❌ Не удалось получить доступ к боту: {e}")
+        raise HTTPException(status_code=500, detail="Сервис бота недоступен")
 
-        try:
-            await bot.send_message(
-                ticket["user_id"],
-                f"📬 Ответ от поддержки:\n\n{reply_text}\n\nСпасибо за обращение! ✅"
-            )
-            # Закрываем тикет
+    try:
+        await bot.send_message(
+            ticket["user_id"],
+            f"📬 Ответ от поддержки:\n\n{reply_text}\n\nСпасибо за обращение! ✅"
+        )
+        # ✅ Обновляем статус
+        async with pool.acquire() as conn:
             await conn.execute(
                 "UPDATE support_tickets SET status = 'resolved', updated_at = NOW() WHERE id = $1",
                 ticket_id
             )
-        except Exception as e:
+        return {"status": "ok", "message": "Ответ отправлен"}
+    except Exception as e:
+        # 🔁 Обновляем статус, даже если ошибка
+        async with pool.acquire() as conn:
             await conn.execute(
-                "UPDATE support_tickets SET status = 'in_progress' WHERE id = $1",
+                "UPDATE support_tickets SET status = 'in_progress', updated_at = NOW() WHERE id = $1",
                 ticket_id
             )
-            raise HTTPException(status_code=500, detail=f"Не удалось отправить: {str(e)}")
-
-        return {"status": "ok"}
+        logger.error(f"❌ Ошибка отправки тикета {ticket_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Не удалось отправить: {str(e)}")
     
 @router.get("/admin/support-tickets")
 async def get_support_tickets():
