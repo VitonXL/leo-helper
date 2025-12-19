@@ -25,13 +25,13 @@ from database import (
     register_referral,
 )
 
-# Импортируем фичи
+# Импорты фичей — БЕЗ "bot."
 from features.menu import setup as setup_menu
 from features.admin import setup_admin_handlers
 from features.roles import setup_role_handlers
 from features.referrals import setup_referral_handlers
 from features.premium import setup_premium_handlers
-from bot.features.help import setup as help_setup  # ✅ Убедился, что путь правильный
+from features.help import setup as help_setup  # ✅ Без "bot."
 
 from loguru import logger
 
