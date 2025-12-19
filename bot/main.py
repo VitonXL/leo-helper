@@ -3,6 +3,7 @@
 import os
 import asyncio
 from database import cleanup_support_tickets
+from database import ensure_support_table_exists
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
 from telegram.ext import (
     Application,
@@ -99,7 +100,12 @@ async def on_post_init(application: Application):
     await init_db(db_pool)
     logger.info("✅ База данных инициализирована")
 
+    # Гарантируем существование таблицы support_tickets
+    await ensure_support_table_exists(db_pool)
+
     application.bot_data['db_pool'] = db_pool
+
+    # ... остальное (меню, команды, задачи)
 
     # Устанавливаем кнопку (≡)
     await application.bot.set_chat_menu_button(
