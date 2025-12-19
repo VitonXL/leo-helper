@@ -134,3 +134,39 @@ async def finance_page(request: Request):
             "theme": theme
         }
     )
+
+@router.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    user_id = request.query_params.get("user_id")
+    hash_param = request.query_params.get("hash")
+
+    if not user_id or not hash_param:
+        raise HTTPException(status_code=400, detail="Missing user_id or hash")
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user_id")
+
+    if not verify_cabinet_link(user_id, hash_param):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    user_data = await get_user_data(user_id)
+    if not user_data:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 🔐 Только администраторы
+    if user_data.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Access denied. Admins only.")
+
+    theme = request.cookies.get("theme", user_data.get("theme", "light"))
+
+    return templates.TemplateResponse(
+        "admin.html",
+        {
+            "request": request,
+            "user": user_data,
+            "title": "Админ-панель",
+            "theme": theme
+        }
+    )
