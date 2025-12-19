@@ -1,12 +1,33 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="{{ theme }}">
+<html lang="ru" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Админ-панель — Лео</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/main.css" />
-  <link rel="stylesheet" href="/static/css/admin.css" />
+  <style>
+    body { font-family: Roboto, sans-serif; margin: 0; background: #f5f5f5; }
+    header {
+      display: flex; align-items: center; padding: 15px; background: white; border-bottom: 1px solid #ddd;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .back-btn {
+      background: none; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px;
+      color: #4CAF50; cursor: pointer; font-size: 14px; font-family: inherit;
+    }
+    .back-btn:hover { background: #4CAF50; color: white; border-color: #4CAF50; }
+    .title { font-size: 18px; font-weight: 500; margin: 0 15px; }
+    .admin-badge { margin-left: auto; background: #8E24AA; color: white; padding: 6px 12px; border-radius: 12px; }
+    main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;
+    }
+    .btn.primary { background: #4CAF50; color: white; }
+    .text-danger { color: #D32F2F; }
+    #stats-container canvas { max-width: 80%; height: 300px !important; margin: 20px auto; display: block; }
+  </style>
 </head>
 <body>
 
@@ -14,11 +35,10 @@
     <header>
       <button class="back-btn" type="button" onclick="history.back()">← Назад</button>
       <div class="title">Админ-панель</div>
-      <span class="admin-badge" title="Администратор">👑</span>
+      <span class="admin-badge">👑 Админ</span>
     </header>
 
-    <main style="padding: 20px; max-width: 1200px; margin: 0 auto;">
-      <!-- Переключатель режима -->
+    <main>
       <div style="margin-bottom: 20px; text-align: right;">
         <label><strong>Режим:</strong></label>
         <select id="view-mode" onchange="changeViewMode(this.value)">
@@ -29,56 +49,160 @@
         </select>
       </div>
 
-      <!-- Статистика -->
       <div id="stats-container">
         <div class="card">
-          <h3>📊 Общая статистика</h3>
-          <p><strong>Пользователей:</strong> <span id="total-users">-</span></p>
-          <p><strong>Премиум:</strong> <span id="premium-users">-</span></p>
-          <p><strong>Сегодня активно:</strong> <span id="active-today">-</span></p>
-          <p><strong>Рефералов:</strong> <span id="referrals-count">-</span></p>
+          <h3>📊 Статистика</h3>
+          <p><strong>Всего:</strong> <span id="total-users">–</span></p>
+          <p><strong>Премиум:</strong> <span id="premium-users">–</span></p>
+          <p><strong>Сегодня:</strong> <span id="active-today">–</span></p>
+          <p><strong>Рефералов:</strong> <span id="referrals-count">–</span></p>
         </div>
       </div>
 
-      <!-- Управление пользователями -->
       <div class="card" style="margin-top: 20px;">
-        <h3>👥 Управление пользователями</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-          <input type="text" id="search-user" placeholder="Поиск по ID или @username" style="flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
-          <button class="btn primary" onclick="searchUser()">🔍 Найти</button>
-        </div>
-        <div id="user-actions" style="display: none;">
+        <h3>🔍 Поиск пользователя</h3>
+        <input type="text" id="search-user" placeholder="ID или @username" style="width: 70%; padding: 10px; margin-right: 10px;">
+        <button class="btn primary" onclick="searchUser()">Поиск</button>
+        <div id="user-actions" style="display: none; margin-top: 15px;">
           <p><strong>Найден:</strong> <span id="found-user"></span></p>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn" onclick="grantPremium()">✅ Выдать премиум</button>
-            <button class="btn" style="background: #FF9800;" onclick="revokePremium()">🚫 Снять премиум</button>
-            <button class="btn" style="background: #F44336;" onclick="blockUser()">⛔ Заблокировать</button>
-            <button class="btn" style="background: #42A5F5;" onclick="resetUser()">🔄 Сбросить</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Модерация отзывов -->
-      <div class="card" style="margin-top: 20px;">
-        <h3>📝 Модерация отзывов</h3>
-        <div id="reviews-list" style="max-height: 300px; overflow-y: auto;">
-          <p>Загрузка...</p>
-        </div>
-      </div>
-
-      <!-- Реклама (заглушка) -->
-      <div class="card" style="margin-top: 20px;">
-        <h3>📢 Реклама</h3>
-        <div id="ads-list" style="margin-top: 15px;">
-          <p>🛠 Функция в разработке</p>
+          <button class="btn" style="background: #4CAF50;" onclick="grantPremium()">✅ Выдать премиум</button>
+          <button class="btn" style="background: #FF9800;" onclick="revokePremium()">🚫 Снять</button>
+          <button class="btn" style="background: #F44336;" onclick="blockUser()">⛔ Заблокировать</button>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Скрипты -->
-  <script src="/static/js/main.js"></script>
+  <script>
+    let statsData = {};
+    let currentChart = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadStats();
+      changeViewMode('cards');
+    });
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/admin/stats');
+        statsData = await res.json();
+        renderStatsCards();
+      } catch (e) {
+        document.getElementById('stats-container').innerHTML = '<p class="text-danger">Ошибка загрузки</p>';
+        console.error(e);
+      }
+    }
+
+    function changeViewMode(mode) {
+      if (currentChart) { currentChart.destroy(); currentChart = null; }
+      const container = document.getElementById('stats-container');
+
+      if (mode === 'cards') renderStatsCards();
+      else if (mode === 'table') renderStatsTable();
+      else if (mode === 'chart') renderActivityChart();
+      else if (mode === 'bars') renderCommandsChart();
+    }
+
+    function renderStatsCards() {
+      document.getElementById('stats-container').innerHTML = `
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px; background: #1976D2; color: white; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4>${statsData.total_users || 0}</h4>
+            <p>Пользователей</p>
+          </div>
+          <div style="flex: 1; min-width: 200px; background: #388E3C; color: white; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4>${statsData.premium_users || 0}</h4>
+            <p>Премиум</p>
+          </div>
+          <div style="flex: 1; min-width: 200px; background: #1976D2; color: white; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4>${statsData.active_today || 0}</h4>
+            <p>Активно сегодня</p>
+          </div>
+          <div style="flex: 1; min-width: 200px; background: #FF8F00; color: white; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4>${statsData.referrals_count || 0}</h4>
+            <p>Рефералов</p>
+          </div>
+        </div>`;
+    }
+
+    function renderStatsTable() {
+      document.getElementById('stats-container').innerHTML = `
+        <table class="card" style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 10px; border: 1px solid #ddd;">Пользователи</td><td style="padding: 10px; border: 1px solid #ddd;">${statsData.total_users || 0}</td></tr>
+          <tr><td style="padding: 10px; border: 1px solid #ddd;">Премиум</td><td style="padding: 10px; border: 1px solid #ddd;">${statsData.premium_users || 0}</td></tr>
+          <tr><td style="padding: 10px; border: 1px solid #ddd;">Активно сегодня</td><td style="padding: 10px; border: 1px solid #ddd;">${statsData.active_today || 0}</td></tr>
+          <tr><td style="padding: 10px; border: 1px solid #ddd;">Рефералов</td><td style="padding: 10px; border: 1px solid #ddd;">${statsData.referrals_count || 0}</td></tr>
+        </table>`;
+    }
+
+    function renderActivityChart() {
+      document.getElementById('stats-container').innerHTML = '<canvas id="chart"></canvas>';
+      fetch('/api/admin/activity-by-day').then(r => r.json()).then(data => {
+        const ctx = document.getElementById('chart').getContext('2d');
+        currentChart = new Chart(ctx, {
+          type: 'line',
+          data: { labels: data.dates, datasets: [{ label: 'Активность', data: data.counts, borderColor: '#4CAF50', tension: 0.3 }] },
+          options: { responsive: true }
+        });
+      });
+    }
+
+    function renderCommandsChart() {
+      document.getElementById('stats-container').innerHTML = '<canvas id="chart"></canvas>';
+      fetch('/api/admin/top-commands').then(r => r.json()).then(data => {
+        const ctx = document.getElementById('chart').getContext('2d');
+        currentChart = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: data.commands, datasets: [{ label: 'Использовано', data: data.counts, backgroundColor: '#66BB6A' }] },
+          options: { responsive: true, indexAxis: 'y' }
+        });
+      });
+    }
+
+    async function searchUser() {
+      const q = document.getElementById('search-user').value.trim();
+      if (!q) return;
+      const res = await fetch(`/api/admin/user?query=${encodeURIComponent(q)}`);
+      const user = await res.json();
+      if (user) {
+        document.getElementById('found-user').textContent = `@${user.username} (ID: ${user.id})`;
+        document.getElementById('user-actions').style.display = 'block';
+        window.user = user;
+      } else {
+        alert('Не найден');
+      }
+    }
+
+    async function grantPremium() {
+      if (!window.user) return;
+      await fetch('/api/admin/grant-premium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: window.user.id })
+      });
+      alert('✅ Выдано');
+    }
+
+    async function revokePremium() {
+      if (!window.user) return;
+      await fetch('/api/admin/revoke-premium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: window.user.id })
+      });
+      alert('✅ Снято');
+    }
+
+    async function blockUser() {
+      if (!window.user) return;
+      await fetch('/api/admin/block-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: window.user.id })
+      });
+      alert('✅ Заблокирован');
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/static/js/admin.js"></script>
 </body>
 </html>
