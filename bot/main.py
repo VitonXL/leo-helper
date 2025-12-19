@@ -2,6 +2,7 @@
 
 import os
 import asyncio
+from database import cleanup_support_tickets
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
 from telegram.ext import (
     Application,
@@ -88,10 +89,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# --- Фоновая задача: удаление неактивных ---
 async def cleanup_task(context: ContextTypes.DEFAULT_TYPE):
-    if db_pool:
-        await delete_inactive_users(db_pool, days=90)
+    """
+    Фоновая задача: очистка раз в 24 часа.
+    """
+    if not db_pool:
+        return
+
+    # Удаляем неактивных пользователей (90+ дней)
+    await delete_inactive_users(db_pool, days=90)
+
+    # Удаляем старые тикеты (закрытые >7 дней назад)
+    await cleanup_support_tickets(db_pool, days=7)
 
 
 # --- Инициализация при старте ---
