@@ -105,7 +105,7 @@
     </main>
   </div>
 
-  <!-- 🔥 Chart.js — подключаем ДО основного скрипта -->
+  <!-- 🔥 Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
@@ -166,48 +166,48 @@
     }
 
     function renderStatsTable() {
-  document.getElementById('stats-container').innerHTML = `
-    <table style="
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      font-size: 14px;
-    ">
-      <thead>
-        <tr style="
-          background: #f8f9fa;
-          color: #333;
-          font-weight: 500;
-          text-align: left;
+      document.getElementById('stats-container').innerHTML = `
+        <table style="
+          width: 100%;
+          border-collapse: collapse;
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          font-size: 14px;
         ">
-          <th style="padding: 14px 20px; border-bottom: 2px solid #ddd;">Метрика</th>
-          <th style="padding: 14px 20px; border-bottom: 2px solid #ddd;">Значение</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="background: #f9f9f9;">
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Пользователи</td>
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #1976D2;">${statsData.total_users || 0}</td>
-        </tr>
-        <tr style="background: white;">
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Премиум</td>
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #388E3C;">${statsData.premium_users || 0}</td>
-        </tr>
-        <tr style="background: #f9f9f9;">
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Активно сегодня</td>
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #1976D2;">${statsData.active_today || 0}</td>
-        </tr>
-        <tr style="background: white;">
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Рефералов</td>
-          <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #FF8F00;">${statsData.referrals_count || 0}</td>
-        </tr>
-      </tbody>
-    </table>
-  `;
-}
+          <thead>
+            <tr style="
+              background: #f8f9fa;
+              color: #333;
+              font-weight: 500;
+              text-align: left;
+            ">
+              <th style="padding: 14px 20px; border-bottom: 2px solid #ddd;">Метрика</th>
+              <th style="padding: 14px 20px; border-bottom: 2px solid #ddd;">Значение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: #f9f9f9;">
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Пользователи</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #1976D2;">${statsData.total_users || 0}</td>
+            </tr>
+            <tr style="background: white;">
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Премиум</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #388E3C;">${statsData.premium_users || 0}</td>
+            </tr>
+            <tr style="background: #f9f9f9;">
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Активно сегодня</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #1976D2;">${statsData.active_today || 0}</td>
+            </tr>
+            <tr style="background: white;">
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; color: #555;">Рефералов</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #eee; font-weight: 500; color: #FF8F00;">${statsData.referrals_count || 0}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
 
     function renderActivityChart() {
       if (currentChart) {
@@ -231,7 +231,6 @@
       container.innerHTML = '';
       container.appendChild(wrapper);
 
-      // Ждём следующего кадра, когда DOM обновился
       requestAnimationFrame(() => {
         fetch('/api/admin/activity-by-day')
           .then(res => res.json())
@@ -405,7 +404,7 @@
     }
 
     async function loadSupportTickets() {
-    try {
+      try {
         const res = await fetch('/api/admin/support-tickets');
         const tickets = await res.json();
         const container = document.getElementById('support-list');
@@ -413,60 +412,89 @@
           <div style="padding: 10px; border-bottom: 1px solid #eee;">
             <strong>@${t.username}</strong> (${t.first_name})
             <p style="margin: 8px 0; font-size: 14px; white-space: pre-wrap;">${t.message}</p>
-<span style="
-    font-size: 12px;
-    padding: 3px 8px;
-    border-radius: 10px;
-    background: ${t.status === 'open' ? '#ffebee' : t.status === 'in_progress' ? '#fff8e1' : '#e8f5e8'};
-    color: ${t.status === 'open' ? '#c62828' : t.status === 'in_progress' ? '#f57f17' : '#2e7d32'};
-">
-    ${t.status === 'open' ? '🔴 Открыт' : t.status === 'in_progress' ? '🟡 В работе' : '🟢 Закрыт'}
-</span>
+            <span style="
+              font-size: 12px;
+              padding: 3px 8px;
+              border-radius: 10px;
+              background: ${t.status === 'open' ? '#ffebee' : t.status === 'in_progress' ? '#fff8e1' : '#e8f5e8'};
+              color: ${t.status === 'open' ? '#c62828' : t.status === 'in_progress' ? '#f57f17' : '#2e7d32'};
+            ">
+              ${t.status === 'open' ? '🔴 Открыт' : t.status === 'in_progress' ? '🟡 В работе' : '🟢 Закрыт'}
+            </span>
             <small>${new Date(t.created_at).toLocaleString()}</small>
             <div style="margin-top: 8px;">
               <button class="btn" style="background: #2196F3; padding: 5px 10px;"
                   onclick="replyToTicket(${t.id}, ${t.user_id})">💬 Ответить</button>
-        </div>
-      </div>
-    `).join('');
-  } catch (e) {
-    document.getElementById('support-list').innerHTML = '<p class="text-danger">Ошибка загрузки</p>';
-    console.error('❌ Ошибка загрузки тикетов:', e);
-  }
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('support-list').innerHTML = '<p class="text-danger">Ошибка загрузки</p>';
+        console.error('❌ Ошибка загрузки тикетов:', e);
+      }
     }
 
-    function approveReview(id) { alert(`Отзыв ${id} принят`); }
-    function deleteReview(id) { alert(`Отзыв ${id} удалён`); }
-    function resolveTicket(id) { alert(`Обращение ${id} отмечено как решённое`); }
+    async function replyToTicket(ticketId, userId) {
+      const reply = prompt("Введите ответ пользователю:");
+      if (!reply || !reply.trim()) return;
+
+      try {
+        const res = await fetch('/api/admin/reply-support', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticket_id: ticketId, reply_text: reply.trim() })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          alert(data.message || '✅ Ответ отправлен');
+          await loadSupportTickets(); // Обновляем список
+        } else {
+          // Если сервер прислал текст (не JSON)
+          const text = await res.text();
+          console.error('Ошибка сервера:', text);
+          alert(`❌ Ошибка: ${text.substring(0, 200)}`);
+        }
+      } catch (e) {
+        alert('❌ Ошибка сети. Проверьте подключение.');
+        console.error(e);
+      }
+    }
+
+    async function approveReview(reviewId) {
+      if (!confirm("Принять этот отзыв?")) return;
+      try {
+        await fetch('/api/admin/approve-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ review_id: reviewId })
+        });
+        alert('✅ Отзыв принят');
+        await loadReviews();
+      } catch (e) {
+        alert('❌ Ошибка');
+      }
+    }
+
+    async function deleteReview(reviewId) {
+      if (!confirm("Удалить отзыв?")) return;
+      try {
+        await fetch('/api/admin/delete-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ review_id: reviewId })
+        });
+        alert('🗑 Отзыв удалён');
+        await loadReviews();
+      } catch (e) {
+        alert('❌ Ошибка');
+      }
+    }
 
     function goBack() {
       window.Telegram?.WebApp?.close();
       window.location.href = "https://t.me/leo_aide_bot";
     }
-
-    async function replyToTicket(ticketId, userId) {
-  const reply = prompt("Введите ответ пользователю:");
-  if (!reply || !reply.trim()) return;
-
-  try {
-    const res = await fetch('/api/admin/reply-support', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ticket_id: ticketId, reply_text: reply.trim() })
-    });
-
-    if (res.ok) {
-      alert('✅ Ответ отправлен пользователю');
-      await loadSupportTickets(); // Обязательно обновляем
-    } else {
-      const err = await res.json();
-      alert(`❌ Ошибка: ${err.detail || 'Неизвестная ошибка'}`);
-    }
-  } catch (e) {
-    alert('❌ Ошибка сети. Проверьте подключение.');
-    console.error(e);
-  }
-}
   </script>
 </body>
 </html>
