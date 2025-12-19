@@ -1,16 +1,10 @@
 # bot/features/help.py
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import (
-    ContextTypes,
-    CommandHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    filters
-)
+from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from database import get_db_pool
 
-# Состояние ожидания сообщения от пользователя
+# Состояние ожидания
 SUPPORT_WAITING = set()
 
 
@@ -29,10 +23,8 @@ async def start_support_chat(update: Update, context: ContextTypes.DEFAULT_TYPE)
     query = update.callback_query
     await query.answer()
     user = update.effective_user
-
     SUPPORT_WAITING.add(user.id)
-
-    await query.edit_message_text("📬 Опишите вашу проблему — мы ответим в ближайшее время.")
+    await query.edit_message_text("📬 Опишите вашу проблему — мы ответим в течение 24 часов.")
 
 
 async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -52,7 +44,7 @@ async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_T
             VALUES ($1, $2, $3, $4)
         """, user.id, user.username, user.first_name, text)
 
-    await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в течение 24 часов.")
+    await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в ближайшее время.")
     SUPPORT_WAITING.discard(user.id)
 
 
