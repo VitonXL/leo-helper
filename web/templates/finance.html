@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="{{ theme }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ title }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/finance.css" />
+</head>
+<body>
+
+  <div class="screen active">
+    <header>
+      <div class="back-btn" onclick="history.back()">← Назад</div>
+      <div class="title">Финансы</div>
+    </header>
+
+    <main style="padding: 20px;">
+      <h2>💰 Калькулятор прибыли и убытков</h2>
+
+      <!-- Профиль -->
+      <div style="margin: 20px 0;">
+        <label><strong>Активный профиль:</strong></label>
+        <select id="profile-select">
+          <option value="personal">Личный</option>
+          <option value="family">Семейный</option>
+          <option value="business">Бизнес</option>
+        </select>
+      </div>
+
+      <!-- Форма -->
+      <div class="finance-form">
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <label>Сумма</label>
+            <input type="number" id="amount-input" placeholder="0.00">
+          </div>
+          <div style="flex: 1;">
+            <label>Категория</label>
+            <select id="category-select">
+              <option value="income">Доход</option>
+              <option value="expense">Расход</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label>Цель</label>
+          <input type="text" id="comment-input" placeholder="Зарплата, Кафе">
+        </div>
+        <div>
+          <label>Время</label>
+          <input type="datetime-local" id="time-input">
+        </div>
+        <button class="btn primary" onclick="addFinanceOperation()">➕ Добавить</button>
+      </div>
+
+      <!-- История -->
+      <div class="finance-card">
+        <h3>📜 История операций</h3>
+        <div id="operations-list">
+          <p style="color: #888;">Пока нет операций</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/finance.js"></script>
+</body>
+</html>
