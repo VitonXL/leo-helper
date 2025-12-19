@@ -49,9 +49,10 @@
         </div>
         <div id="user-actions" style="display: none;">
           <p><strong>Найден:</strong> <span id="found-user"></span></p>
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn" onclick="grantPremium()">✅ Выдать премиум</button>
-            <button class="btn" style="background: #DD3935;" onclick="blockUser()">⛔ Заблокировать</button>
+            <button class="btn" style="background: #FF9800;" onclick="revokePremium()">🚫 Снять премиум</button>
+            <button class="btn" style="background: #F44336;" onclick="blockUser()">⛔ Заблокировать</button>
             <button class="btn" style="background: #42A5F5;" onclick="resetUser()">🔄 Сбросить</button>
           </div>
         </div>
@@ -65,10 +66,9 @@
         </div>
       </div>
 
-      <!-- Управление рекламой (временно) -->
+      <!-- Реклама (заглушка) -->
       <div class="card" style="margin-top: 20px;">
         <h3>📢 Реклама</h3>
-        <!-- <button class="btn" onclick="createAd()">➕ Создать объявление</button> -->
         <div id="ads-list" style="margin-top: 15px;">
           <p>🛠 Функция в разработке</p>
         </div>
