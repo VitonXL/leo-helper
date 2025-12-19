@@ -247,3 +247,22 @@ async def get_top_commands():
         "commands": [r["command"] for r in rows],
         "counts": [r["count"] for r in rows]
     }
+
+@router.get("/admin/reviews")
+async def get_reviews():
+    """
+    Возвращает неподтверждённые или все отзывы для модерации.
+    """
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT 
+                r.id, r.text, r.rating, r.created_at,
+                u.id as user_id, u.first_name, u.username
+            FROM reviews r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.is_approved = false
+            ORDER BY r.created_at DESC
+            LIMIT 50
+        """)
+    return [dict(r) for r in rows]
