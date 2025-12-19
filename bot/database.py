@@ -90,6 +90,24 @@ async def init_db(pool):
             );
         ''')
 
+        # --- Таблица: обращения в техподдержку ---
+        await conn.execute('''
+            CREATE TABLE IF NOT EXISTS support_tickets (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+             username TEXT,
+                first_name TEXT,
+                message TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'open', -- open, in_progress, resolved
+                created_at TIMESTAMPTZ DEFAULT NOW(),
+                updated_at TIMESTAMPTZ DEFAULT NOW()
+            );
+        ''')
+
+# Индексы
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets(user_id);')
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_status ON support_tickets(status);')
+
         # --- Миграции — расширения ---
         migrations = [
             ('theme', "TEXT DEFAULT 'light'"),
