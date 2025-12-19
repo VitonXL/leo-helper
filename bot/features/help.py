@@ -1,96 +1,181 @@
-# bot/features/help.py
+# bot/main.py
 
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
-from database import get_db_pool
+import os
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
+from telegram.ext import (
+    Application,
+    ContextTypes,
+    CommandHandler,
+    CallbackQueryHandler,
+    TypeHandler,
+    MessageHandler,
+    filters,
+)
 
-# Состояние ожидания
-SUPPORT_WAITING = set()
+# Импортируем БД
+from database import (
+    create_db_pool,
+    init_db,
+    add_or_update_user,
+    delete_inactive_users,
+    log_command_usage,
+    get_user_role,
+    register_referral,
+    cleanup_support_tickets,
+)
+
+# Импортируем фичи
+from features.menu import setup as setup_menu
+from features.admin import setup_admin_handlers
+from features.roles import setup_role_handlers
+from features.referrals import setup_referral_handlers
+from features.premium import setup_premium_handlers
+from bot.features.help import setup as help_setup  # Убедись, что путь правильный
+
+from loguru import logger
+
+# Глобальный пул БД
+db_pool = None
 
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton("📬 Написать в поддержку", callback_data="help_support")]]
-    await update.message.reply_text(
-        "🔧 Доступные команды:\n"
-        "/start — начать\n"
-        "/menu — главное меню\n\n"
-        "Если нужна помощь — напиши в поддержку!",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+# --- Дебаг: логируем ВСЕ входящие сообщения ---
+async def debug_all_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message and update.message.text:
+        logger.debug(f"📨 DEBUG: Входящее сообщение: '{update.message.text}' от user_id={update.effective_user.id}")
+
+
+# --- Отслеживание активности ---
+async def track_user_activity(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user:
+        await add_or_update_user(db_pool, user)
+
+    # Логируем команды
+    if update.message and update.message.text and update.message.text.startswith('/'):
+        command = update.message.text.split()[0]
+        await log_command_usage(db_pool, user.id, command)
+
+
+# --- Клавиатура после /start ---
+def get_start_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("📌 Главное меню", callback_data="menu_main")],
+        [InlineKeyboardButton("🌐 Mini App", url="https://leo-aide.online/")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# --- Обработчик /start ---
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+
+    await add_or_update_user(db_pool, user)
+
+    # Обработка реферала
+    if context.args and context.args[0].startswith("ref"):
+        referrer_id = int(context.args[0][3:])
+        if referrer_id != user.id:
+            await register_referral(db_pool, referrer_id, user.id)
+
+    # Роль
+    role = await get_user_role(db_pool, user.id)
+    role_text = {"user": "👤 Обычный", "premium": "💎 Премиум", "admin": "👮‍♂️ Админ"}.get(role, "👤 Обычный")
+
+    await update.message.reply_html(
+        text=f"👋 <b>Добро пожаловать, {user.first_name}!</b>\n\n"
+             f"🔹 Ваш статус: <b>{role_text}</b>\n\n"
+             f"Выберите способ взаимодействия:",
+        reply_markup=get_start_keyboard()
     )
 
 
-async def start_support_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    user = update.effective_user
-    SUPPORT_WAITING.add(user.id)
-    await query.edit_message_text("📬 Опишите вашу проблему — мы ответим в течение 24 часов.")
-
-
-async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    if user.id not in SUPPORT_WAITING:
+# --- Фоновая задача: очистка ---
+async def cleanup_task(context: ContextTypes.DEFAULT_TYPE):
+    if not db_pool:
         return
-
-    text = update.message.text.strip()
-    if len(text) < 5:
-        await update.message.reply_text("Пожалуйста, опишите проблему подробнее.")
-        return
-
-    pool = await get_db_pool()
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            INSERT INTO support_tickets (user_id, username, first_name, message)
-            VALUES ($1, $2, $3, $4)
-        """, user.id, user.username, user.first_name, text)
-
-    await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в ближайшее время.")
-    SUPPORT_WAITING.discard(user.id)
+    await delete_inactive_users(db_pool, days=90)
+    await cleanup_support_tickets(db_pool, days=7)
 
 
-def setup(application):
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CallbackQueryHandler(start_support_chat, pattern="^help_support$"))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support_message))
+# --- Инициализация ---
+async def on_post_init(application: Application):
+    global db_pool
+    logger.info("🔧 Инициализация БД...")
+    db_pool = await create_db_pool()
+    await init_db(db_pool)
+    logger.info("✅ База данных инициализирована")
 
-    # bot/features/help.py
+    # Гарантируем существование таблицы support_tickets
+    from database import ensure_support_table_exists
+    await ensure_support_table_exists(db_pool)
 
-async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    logger.info(f"📩 handle_support_message вызван пользователем {user.id}")
+    # Сохраняем пул
+    application.bot_data['db_pool'] = db_pool
 
-    if user.id not in SUPPORT_WAITING:
-        logger.warning(f"❌ Пользователь {user.id} не в режиме поддержки. Текущие: {SUPPORT_WAITING}")
-        return
-
-    text = update.message.text.strip()
-    if len(text) < 5:
-        logger.debug(f"❌ Сообщение слишком короткое: {text}")
-        await update.message.reply_text("Пожалуйста, опишите проблему подробнее.")
-        return
-
-    logger.info(f"📝 Пытаемся сохранить тикет: user_id={user.id}, message='{text[:50]}...'")
-
+    # Устанавливаем кнопку (≡)
     try:
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
-            await conn.execute("""
-                INSERT INTO support_tickets (user_id, username, first_name, message)
-                VALUES ($1, $2, $3, $4)
-            """, user.id, user.username, user.first_name, text)
-
-        logger.info(f"✅ УСПЕШНО: Тикет от {user.id} вставлен в БД")
-        await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в ближайшее время.")
-
+        await application.bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="🌐 Панель",
+                web_app=WebAppInfo(url="https://leo-aide.online/")
+            )
+        )
+        logger.info("🚀 Меню (≡) установлено")
     except Exception as e:
-        logger.error(f"❌ ОШИБКА при вставке тикета: {type(e).__name__}: {e}", exc_info=True)
+        logger.error(f"❌ Не удалось установить menu button: {e}")
 
-        # Отправим пользователю уведомление
-        try:
-            await update.message.reply_text("❌ Произошла ошибка при отправке. Админ уже знает.")
-        except:
-            pass
+    # Устанавливаем команды
+    await application.bot.set_my_commands([
+        ("start", "🚀 Начать"),
+        ("menu", "🏠 Открыть меню"),
+        ("help", "🔧 Помощь и поддержка"),
+    ])
+    logger.info("✅ Команды бота установлены")
 
-    finally:
-        SUPPORT_WAITING.discard(user.id)
-        logger.info(f"🧹 Пользователь {user.id} удалён из SUPPORT_WAITING")
+    # Фоновая задача
+    application.job_queue.run_repeating(
+        cleanup_task,
+        interval=24 * 3600,
+        first=10
+    )
+    logger.info("⏰ Фоновая задача: очистка — запущена")
+
+
+# --- Главная ---
+def main():
+    # ⚠️ ВАЖНО: ЗАПУСКАЙ ТОЛЬКО ОДИН ЭКЗЕМПЛЯР БОТА!
+    # Ошибка Conflict: terminated by other getUpdates — значит, запущено несколько
+
+    app = (
+        Application.builder()
+        .token(os.getenv("BOT_TOKEN"))
+        .post_init(on_post_init)
+        .build()
+    )
+
+    # Группа -2: дебаг — логируем ВСЁ
+    app.add_handler(MessageHandler(filters.ALL, debug_all_messages), group=-2)
+
+    # Группа -1: отслеживание активности
+    app.add_handler(TypeHandler(Update, track_user_activity), group=-1)
+
+    # === КЛЮЧЕВОЕ: help_setup — ПЕРВЫМ ===
+    # Чтобы MessageHandler из help перехватывал сообщения до других
+    help_setup(app)  # ✅ Должен быть ДО всех остальных
+
+    # Подключаем остальные фичи
+    setup_menu(app)
+    setup_admin_handlers(app)
+    setup_role_handlers(app)
+    setup_referral_handlers(app)
+    setup_premium_handlers(app)
+
+    # Обработчик /start
+    app.add_handler(CommandHandler("start", start))
+
+    logger.info("🚀 Бот запущен...")
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
