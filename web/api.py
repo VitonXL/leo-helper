@@ -124,3 +124,17 @@ async def set_user_theme(user_id: int, theme: str, hash: str):
     except Exception as e:
         print(f"❌ Ошибка обновления темы: {e}")
         raise HTTPException(status_code=500, detail="Internal error")
+
+@router.get("/admin/stats")
+async def get_admin_stats():
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        total = await conn.fetchval("SELECT COUNT(*) FROM users")
+        premium = await conn.fetchval("SELECT COUNT(*) FROM users WHERE role = 'premium'")
+        active = await conn.fetchval("SELECT COUNT(*) FROM user_activity WHERE activity_date = CURRENT_DATE")
+
+    return {
+        "total_users": total,
+        "premium_users": premium,
+        "active_today": active
+    }
