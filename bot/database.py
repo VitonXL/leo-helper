@@ -331,6 +331,30 @@ async def cleanup_support_tickets(pool, days=7):
 
         return count or 0
 
+async def ensure_support_table_exists(pool):
+    """
+    Принудительно создаёт таблицу support_tickets, если её нет.
+    Запускается при старте бота.
+    """
+    async with pool.acquire() as conn:
+        try:
+            await conn.execute('''
+                CREATE TABLE IF NOT EXISTS support_tickets (
+                    id SERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    username TEXT,
+                    first_name TEXT,
+                    message TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'open',
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            ''')
+            await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets(user_id);')
+            await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_status ON support_tickets(status);')
+            logger.info("✅ Таблица support_tickets проверена и готова")
+        except Exception as e:
+            logger.error(f"❌ Ошибка при создании таблицы support_tickets: {e}")
 
 # === Глобальный пул подключений ===
 _db_pool = None
