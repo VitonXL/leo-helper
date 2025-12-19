@@ -280,21 +280,6 @@ async def api_revoke_premium(user_id: int = Body(..., embed=True)):
         """, user_id)
     return {"status": "success", "message": f"Премиум снят с {user_id}"}
 
-# === ЭНДПОИНТ: модерация отзывов (заглушка) ===
-@router.get("/admin/reviews")
-async def get_reviews():
-    return [
-        {"id": 1, "text": "Отличный бот!", "rating": 5, "created_at": "2025-04-05T12:30:00", "user_id": 123, "first_name": "Анна", "username": "anna"},
-        {"id": 2, "text": "Работает, но медленно", "rating": 3, "created_at": "2025-04-04T09:15:00", "user_id": 456, "first_name": "Дима", "username": "dimon"}
-    ]
-
-# === ЭНДПОИНТ: техподдержка (заглушка) ===
-@router.get("/admin/support-tickets")
-async def get_support_tickets():
-    return [
-        {"id": 1, "user_id": 123, "username": "anna", "subject": "Ошибка", "message": "Не работает кнопка", "status": "open", "created_at": "2025-04-05T10:00:00"},
-        {"id": 2, "user_id": 789, "username": "max", "subject": "Предложение", "message": "Добавьте календарь", "status": "open", "created_at": "2025-04-04T16:20:00"}
-    ]
 
 # === 🛠 ТЕХПОДДЕРЖКА ===
 
