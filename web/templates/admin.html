@@ -27,6 +27,11 @@
     .btn.primary { background: #4CAF50; color: white; }
     .text-danger { color: #D32F2F; }
     .section { margin-top: 20px; }
+    .chart-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
   </style>
 </head>
 <body>
@@ -177,53 +182,53 @@
       }
 
       const container = document.getElementById('stats-container');
-      container.innerHTML = `
-        <div style="display: flex; justify-content: center; margin: 20px 0;">
-          <canvas id="activityChart" width="600" height="300"></canvas>
-        </div>
-      `;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chart-wrapper';
+      wrapper.style.display = 'flex';
+      wrapper.style.justifyContent = 'center';
+      wrapper.style.margin = '20px 0';
 
-      setTimeout(() => {
-        try {
-          const ctx = document.getElementById('activityChart').getContext('2d');
-          fetch('/api/admin/activity-by-day')
-            .then(res => res.json())
-            .then(data => {
-              currentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                  labels: data.dates,
-                  datasets: [{
-                    label: 'Активность по дням',
-                    data: data.counts,
-                    borderColor: '#4CAF50',
-                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                  }]
-                },
-                options: {
-                  responsive: false,
-                  maintainAspectRatio: true,
-                  animation: {
-                    duration: 500,
-                    easing: 'easeOutCubic'
-                  },
-                  plugins: {
-                    legend: { display: true }
-                  }
-                }
-              });
-            })
-            .catch(err => {
-              container.innerHTML = '<p class="text-danger">Ошибка загрузки данных</p>';
-              console.error(err);
+      const canvas = document.createElement('canvas');
+      canvas.id = 'activityChart';
+      canvas.width = 600;
+      canvas.height = 300;
+
+      wrapper.appendChild(canvas);
+      container.innerHTML = '';
+      container.appendChild(wrapper);
+
+      // Ждём следующего кадра, когда DOM обновился
+      requestAnimationFrame(() => {
+        fetch('/api/admin/activity-by-day')
+          .then(res => res.json())
+          .then(data => {
+            const ctx = canvas.getContext('2d');
+            currentChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: data.dates,
+                datasets: [{
+                  label: 'Активность по дням',
+                  data: data.counts,
+                  borderColor: '#4CAF50',
+                  backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                  fill: true,
+                  tension: 0.3
+                }]
+              },
+              options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                animation: { duration: 400 },
+                plugins: { legend: { display: true } }
+              }
             });
-        } catch (err) {
-          container.innerHTML = '<p class="text-danger">Ошибка рендеринга графика</p>';
-          console.error(err);
-        }
-      }, 100);
+          })
+          .catch(err => {
+            container.innerHTML = '<p class="text-danger">Не удалось загрузить график</p>';
+            console.error('❌ Ошибка графика:', err);
+          });
+      });
     }
 
     function renderCommandsChart() {
@@ -233,51 +238,50 @@
       }
 
       const container = document.getElementById('stats-container');
-      container.innerHTML = `
-        <div style="display: flex; justify-content: center; margin: 20px 0;">
-          <canvas id="commandsChart" width="600" height="300"></canvas>
-        </div>
-      `;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chart-wrapper';
+      wrapper.style.display = 'flex';
+      wrapper.style.justifyContent = 'center';
+      wrapper.style.margin = '20px 0';
 
-      setTimeout(() => {
-        try {
-          const ctx = document.getElementById('commandsChart').getContext('2d');
-          fetch('/api/admin/top-commands')
-            .then(res => res.json())
-            .then(data => {
-              currentChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                  labels: data.commands,
-                  datasets: [{
-                    label: 'Использовано',
-                    data: data.counts,
-                    backgroundColor: '#66BB6A'
-                  }]
-                },
-                options: {
-                  responsive: false,
-                  maintainAspectRatio: true,
-                  animation: {
-                    duration: 500,
-                    easing: 'easeOutCubic'
-                  },
-                  indexAxis: 'y',
-                  plugins: {
-                    legend: { display: true }
-                  }
-                }
-              });
-            })
-            .catch(err => {
-              container.innerHTML = '<p class="text-danger">Ошибка загрузки данных</p>';
-              console.error(err);
+      const canvas = document.createElement('canvas');
+      canvas.id = 'commandsChart';
+      canvas.width = 600;
+      canvas.height = 300;
+
+      wrapper.appendChild(canvas);
+      container.innerHTML = '';
+      container.appendChild(wrapper);
+
+      requestAnimationFrame(() => {
+        fetch('/api/admin/top-commands')
+          .then(res => res.json())
+          .then(data => {
+            const ctx = canvas.getContext('2d');
+            currentChart = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                labels: data.commands,
+                datasets: [{
+                  label: 'Использовано',
+                  data: data.counts,
+                  backgroundColor: '#66BB6A'
+                }]
+              },
+              options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                animation: { duration: 400 },
+                indexAxis: 'y',
+                plugins: { legend: { display: true } }
+              }
             });
-        } catch (err) {
-          container.innerHTML = '<p class="text-danger">Ошибка рендеринга диаграммы</p>';
-          console.error(err);
-        }
-      }, 100);
+          })
+          .catch(err => {
+            container.innerHTML = '<p class="text-danger">Не удалось загрузить диаграмму</p>';
+            console.error('❌ Ошибка диаграммы:', err);
+          });
+      });
     }
 
     async function searchUser() {
