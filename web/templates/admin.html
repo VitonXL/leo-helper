@@ -449,15 +449,21 @@
   if (!reply || !reply.trim()) return;
 
   try {
-    await fetch('/api/admin/reply-support', {
+    const res = await fetch('/api/admin/reply-support', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ticket_id: ticketId, reply_text: reply.trim() })
     });
-    alert('✅ Ответ отправлен пользователю');
-    await loadSupportTickets(); // Обновим список
+
+    if (res.ok) {
+      alert('✅ Ответ отправлен пользователю');
+      await loadSupportTickets(); // Обязательно обновляем
+    } else {
+      const err = await res.json();
+      alert(`❌ Ошибка: ${err.detail || 'Неизвестная ошибка'}`);
+    }
   } catch (e) {
-    alert('❌ Ошибка отправки');
+    alert('❌ Ошибка сети. Проверьте подключение.');
     console.error(e);
   }
 }
