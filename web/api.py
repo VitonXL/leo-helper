@@ -103,14 +103,14 @@ async def get_user_status(user_id: int):
         }
 
 
-# === 🌙 НОВЫЙ ЭНДПОИНТ: обновление темы ===
+# === 🌙 ЭНДПОИНТ: обновление темы ===
 @router.post("/set-theme")
 async def set_user_theme(user_id: int, theme: str, hash: str):
     """
     API для смены темы пользователя. Вызывается с фронтенда.
     """
     if theme not in ["light", "dark"]:
-        raise HTTPException(status_code=400, detail="Theme must be 'light' or 'dark'")
+        raise HTTPException(status_code: 400, detail="Theme must be 'light' or 'dark'")
     
     from .utils import verify_cabinet_link
     if not verify_cabinet_link(user_id, hash):
@@ -125,16 +125,127 @@ async def set_user_theme(user_id: int, theme: str, hash: str):
         print(f"❌ Ошибка обновления темы: {e}")
         raise HTTPException(status_code=500, detail="Internal error")
 
+
+# === 🔐 АДМИН-ПАНЕЛЬ ===
+
 @router.get("/admin/stats")
 async def get_admin_stats():
+    """
+    Общая статистика: пользователи, премиум, активность.
+    """
     pool = await get_db_pool()
     async with pool.acquire() as conn:
         total = await conn.fetchval("SELECT COUNT(*) FROM users")
         premium = await conn.fetchval("SELECT COUNT(*) FROM users WHERE role = 'premium'")
-        active = await conn.fetchval("SELECT COUNT(*) FROM user_activity WHERE activity_date = CURRENT_DATE")
+        # Исправлено: таблица usage_stats → активность за сегодня
+        active_today = await conn.fetchval("""
+            SELECT COUNT(*) FROM usage_stats 
+            WHERE timestamp >= CURRENT_DATE
+        """)
+        referrals_count = await conn.fetchval("SELECT COUNT(*) FROM referrals")
 
     return {
-        "total_users": total,
-        "premium_users": premium,
-        "active_today": active
+        "total_users": total or 0,
+        "premium_users": premium or 0,
+        "active_today": active_today or 0,
+        "referrals_count": referrals_count or 0
+    }
+
+
+@router.get("/admin/users")
+async def get_all_users():
+    """
+    Возвращает список всех пользователей (ограничение: 100 последних).
+    """
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT 
+                id, first_name, username, role, language_code as language, 
+                premium_expires, last_seen
+            FROM users
+            ORDER BY last_seen DESC
+            LIMIT 100
+        """)
+    return [dict(row) for row in rows]
+
+
+@router.get("/admin/user")
+async def get_single_user(query: str):
+    """
+    Поиск пользователя по ID или username.
+    """
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        if query.startswith('@'):
+            user = await conn.fetchrow("SELECT * FROM users WHERE username = $1", query[1:])
+        else:
+            try:
+                user_id = int(query)
+                user = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
+            except ValueError:
+                return None
+    return dict(user) if user else None
+
+
+@router.post("/admin/grant-premium")
+async def api_grant_premium(user_id: int):
+    """
+    Выдаёт пользователю премиум-доступ на 30 дней.
+    """
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("""
+            UPDATE users 
+            SET role = 'premium', 
+                premium_expires = NOW() + INTERVAL '30 days'
+            WHERE id = $1
+        """, user_id)
+        
+        # Проверяем, был ли обновлён пользователь
+        if result == "UPDATE 0":
+            raise HTTPException(status_code=404, detail="User not found")
+
+    return {"status": "success", "message": f"Премиум выдан пользователю {user_id}"}
+
+
+@router.get("/admin/activity-by-day")
+async def get_activity_by_day():
+    """
+    Активность по дням за последние 30 дней.
+    """
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT 
+                DATE(timestamp) as day,
+                COUNT(*) as count
+            FROM usage_stats
+            WHERE timestamp > NOW() - INTERVAL '30 days'
+            GROUP BY day
+            ORDER BY day
+        """)
+    return {
+        "dates": [r["day"].isoformat() for r in rows],
+        "counts": [r["count"] for r in rows]
+    }
+
+
+@router.get("/admin/top-commands")
+async def get_top_commands():
+    """
+    Топ-10 команд по использованию.
+    """
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT command, COUNT(*) as count
+            FROM usage_stats
+            GROUP BY command
+            ORDER BY count DESC
+            LIMIT 10
+        """)
+    return {
+        "commands": [r["command"] for r in rows],
+        "counts": [r["count"] for r in rows]
     }
