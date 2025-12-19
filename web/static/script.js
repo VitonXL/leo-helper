@@ -5,22 +5,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // === Навигация ===
   window.navigateTo = function (screen) {
-  // Сначала скрываем ВСЕ экраны и убираем active
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('active');
-    s.style.display = 'none';
-  });
+    // Сначала скрываем ВСЕ экраны и убираем active
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active');
+      s.style.display = 'none';
+    });
 
-  // Потом показываем нужный
-  const nextScreen = document.getElementById(screen + '-screen');
-  if (nextScreen) {
-    nextScreen.style.display = 'flex';
-    // Ждём, пока отобразится, потом добавим анимацию
-    setTimeout(() => {
-      nextScreen.classList.add('active');
-    }, 10);
-  }
-};
+    // Потом показываем нужный
+    const nextScreen = document.getElementById(screen + '-screen');
+    if (nextScreen) {
+      nextScreen.style.display = 'flex';
+      // Ждём, пока отобразится, потом добавим анимацию
+      setTimeout(() => {
+        nextScreen.classList.add('active');
+      }, 10);
+    }
+  };
 
   window.navigateBack = function () {
     navigateTo('dashboard');
