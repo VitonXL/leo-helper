@@ -26,7 +26,12 @@
     }
     .btn.primary { background: #4CAF50; color: white; }
     .text-danger { color: #D32F2F; }
-    #stats-container canvas { max-width: 80%; height: 300px !important; margin: 20px auto; display: block; }
+    #stats-container canvas {
+      max-width: 80%;
+      height: 300px !important;
+      margin: 20px auto;
+      display: block;
+    }
     .section { margin-top: 20px; }
   </style>
 </head>
@@ -172,68 +177,103 @@
     }
 
     function renderActivityChart() {
-      document.getElementById('stats-container').innerHTML = '<canvas id="chart"></canvas>';
-      setTimeout(() => {
-        const chartEl = document.getElementById('chart');
-        if (!chartEl) return;
-        const ctx = chartEl.getContext('2d');
+      // Уничтожаем предыдущий график
+      if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+      }
 
-        fetch('/api/admin/activity-by-day')
-          .then(r => r.json())
-          .then(data => {
-            if (currentChart) currentChart.destroy();
-            currentChart = new Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: data.dates,
-                datasets: [{
-                  label: 'Активность',
-                  data: data.counts,
-                  borderColor: '#4CAF50',
-                  backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                  fill: true,
-                  tension: 0.3
-                }]
-              },
-              options: { responsive: true }
+      // Очищаем контейнер и вставляем canvas с уникальным id
+      const container = document.getElementById('stats-container');
+      container.innerHTML = '<div style="text-align: center;"><canvas id="activityChart" height="300"></canvas></div>';
+
+      // Даём время на обновление DOM
+      setTimeout(() => {
+        try {
+          const ctx = document.getElementById('activityChart').getContext('2d');
+          fetch('/api/admin/activity-by-day')
+            .then(res => res.json())
+            .then(data => {
+              currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: data.dates,
+                  datasets: [{
+                    label: 'Активность по дням',
+                    data: data.counts,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: true }
+                  }
+                }
+              });
+            })
+            .catch(err => {
+              container.innerHTML = '<p class="text-danger">Не удалось загрузить график</p>';
+              console.error('❌ Ошибка данных графика:', err);
             });
-          })
-          .catch(e => {
-            document.getElementById('stats-container').innerHTML = '<p class="text-danger">Ошибка графика</p>';
-            console.error(e);
-          });
-      }, 50);
+        } catch (err) {
+          container.innerHTML = '<p class="text-danger">Ошибка рендеринга</p>';
+          console.error('❌ Ошибка рисования графика:', err);
+        }
+      }, 100); // Даем время на рендер
     }
 
     function renderCommandsChart() {
-      document.getElementById('stats-container').innerHTML = '<canvas id="chart"></canvas>';
-      setTimeout(() => {
-        const chartEl = document.getElementById('chart');
-        if (!chartEl) return;
-        const ctx = chartEl.getContext('2d');
+      // Уничтожаем предыдущий график
+      if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+      }
 
-        fetch('/api/admin/top-commands')
-          .then(r => r.json())
-          .then(data => {
-            if (currentChart) currentChart.destroy();
-            currentChart = new Chart(ctx, {
-              type: 'bar',
-              data: {
-                labels: data.commands,
-                datasets: [{
-                  label: 'Использовано',
-                  data: data.counts,
-                  backgroundColor: '#66BB6A'
-                }]
-              },
-              options: { responsive: true, indexAxis: 'y' }
+      // Очищаем и вставляем новый canvas
+      const container = document.getElementById('stats-container');
+      container.innerHTML = '<div style="text-align: center;"><canvas id="commandsChart" height="300"></canvas></div>';
+
+      // Даём время
+      setTimeout(() => {
+        try {
+          const ctx = document.getElementById('commandsChart').getContext('2d');
+          fetch('/api/admin/top-commands')
+            .then(res => res.json())
+            .then(data => {
+              currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                  labels: data.commands,
+                  datasets: [{
+                    label: 'Использовано',
+                    data: data.counts,
+                    backgroundColor: '#66BB6A'
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  indexAxis: 'y',
+                  plugins: {
+                    legend: { display: true }
+                  }
+                }
+              });
+            })
+            .catch(err => {
+              container.innerHTML = '<p class="text-danger">Не удалось загрузить диаграмму</p>';
+              console.error('❌ Ошибка данных столбцов:', err);
             });
-          })
-          .catch(e => {
-            document.getElementById('stats-container').innerHTML = '<p class="text-danger">Ошибка столбцов</p>';
-            console.error(e);
-          });
-      }, 50);
+        } catch (err) {
+          container.innerHTML = '<p class="text-danger">Ошибка рендеринга</p>';
+          console.error('❌ Ошибка рисования диаграммы:', err);
+        }
+      }, 100);
     }
 
     async function searchUser() {
@@ -258,7 +298,6 @@
     async function grantPremium() {
       if (!window.user) return;
       if (!confirm(`Выдать премиум @${window.user.username}?`)) return;
-
       try {
         await fetch('/api/admin/grant-premium', {
           method: 'POST',
@@ -274,7 +313,6 @@
     async function revokePremium() {
       if (!window.user) return;
       if (!confirm(`Снять премиум у @${window.user.username}?`)) return;
-
       try {
         await fetch('/api/admin/revoke-premium', {
           method: 'POST',
@@ -290,7 +328,6 @@
     async function blockUser() {
       if (!window.user) return;
       if (!confirm(`Заблокировать @${window.user.username}?`)) return;
-
       try {
         await fetch('/api/admin/block-user', {
           method: 'POST',
