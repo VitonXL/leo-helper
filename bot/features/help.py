@@ -1,19 +1,26 @@
+# bot/features/help.py
+
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+from telegram.ext import (
+    ContextTypes,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    filters
+)
 from database import get_db_pool
 
-# Состояние для сбора сообщения
-SUPPORT_WAITING = {}
+# Состояние ожидания сообщения от пользователя
+SUPPORT_WAITING = set()
+
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("📬 Написать в поддержку", callback_data="help_support")]
-    ]
+    keyboard = [[InlineKeyboardButton("📬 Написать в поддержку", callback_data="help_support")]]
     await update.message.reply_text(
         "🔧 Доступные команды:\n"
         "/start — начать\n"
-        "/menu — открыть меню\n\n"
-        "Если есть вопрос — пиши в поддержку!",
+        "/menu — главное меню\n\n"
+        "Если нужна помощь — напиши в поддержку!",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -23,12 +30,9 @@ async def start_support_chat(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.answer()
     user = update.effective_user
 
-    SUPPORT_WAITING[user.id] = True
+    SUPPORT_WAITING.add(user.id)
 
-    await query.edit_message_text(
-        "📬 Напишите ваше сообщение в техподдержку.\n"
-        "Опишите проблему — и мы ответим в ближайшее время."
-    )
+    await query.edit_message_text("📬 Опишите вашу проблему — мы ответим в ближайшее время.")
 
 
 async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -41,7 +45,6 @@ async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_T
         await update.message.reply_text("Пожалуйста, опишите проблему подробнее.")
         return
 
-    # Сохраняем в БД
     pool = await get_db_pool()
     async with pool.acquire() as conn:
         await conn.execute("""
@@ -49,8 +52,8 @@ async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_T
             VALUES ($1, $2, $3, $4)
         """, user.id, user.username, user.first_name, text)
 
-    await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в ближайшее время.")
-    del SUPPORT_WAITING[user.id]
+    await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в течение 24 часов.")
+    SUPPORT_WAITING.discard(user.id)
 
 
 def setup(application):
