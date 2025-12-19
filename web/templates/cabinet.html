@@ -5,24 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Лео Помощник</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=7" />
+  <link rel="stylesheet" href="/static/style.css?v=8" />
 </head>
 <body>
 
   <!-- ОФФЛАЙН-БАР -->
   <div class="offline-bar" id="offline-bar">🔴 Нет подключения</div>
 
-  <!-- ЭКРАН 1: Авторизация -->
+  <!-- ЭКРАН 1: Авторизация с спиннером и резервной кнопкой -->
   <div class="screen active" id="welcome-screen">
     <div class="lang-switch">
       <a href="#" onclick="setLang('RU')">RU</a> | 
       <a href="#" onclick="setLang('EN')">ENG</a>
     </div>
     <div class="logo">Лео Помощник</div>
-    <button class="btn primary" onclick="startAuth()">Авторизоваться</button>
+
+    <!-- Контейнер загрузки -->
+    <div id="auth-container">
+      <div class="spinner"></div>
+      <p style="margin-top: 20px; font-size: 16px;">Загрузка профиля...</p>
+    </div>
+
     <div class="qr-container" onclick="openQRModal()">
       <div class="tooltip">📲<span class="tooltiptext">Через Telegram</span></div>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const user_id = urlParams.get('user_id');
+        const hash = urlParams.get('hash');
+
+        if (user_id && hash) {
+          startAuth(); // стартуем авторизацию
+        } else {
+          document.getElementById('auth-container').innerHTML = `
+            <button class="btn primary" onclick="startAuth()">Авторизоваться</button>
+          `;
+        }
+
+        // Резерв: если через 5 секунд ничего не загрузилось
+        setTimeout(() => {
+          const isDashboardActive = document.getElementById('dashboard-screen')?.classList.contains('active');
+          const isProfileActive = document.getElementById('profile-screen')?.classList.contains('active');
+
+          if (!isDashboardActive && !isProfileActive) {
+            document.getElementById('auth-container').innerHTML = `
+              <button class="btn primary" onclick="startAuth()">🔄 Повторить авторизацию</button>
+            `;
+          }
+        }, 5000);
+      });
+    </script>
   </div>
 
   <!-- ЭКРАН 2: Главный экран -->
@@ -84,6 +118,6 @@
     </div>
   </div>
 
-  <script src="/static/script.js?v=7"></script>
+  <script src="/static/script.js?v=8"></script>
 </body>
 </html>
