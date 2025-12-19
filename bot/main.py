@@ -1,9 +1,6 @@
 # bot/main.py
 
 import os
-import asyncio
-from database import cleanup_support_tickets
-from database import ensure_support_table_exists
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
 from telegram.ext import (
     Application,
@@ -24,20 +21,27 @@ from database import (
     log_command_usage,
     get_user_role,
     register_referral,
+    cleanup_support_tickets,
 )
 
-# Импорты фичей — БЕЗ "bot."
+# Импортируем фичи
 from features.menu import setup as setup_menu
 from features.admin import setup_admin_handlers
 from features.roles import setup_role_handlers
 from features.referrals import setup_referral_handlers
 from features.premium import setup_premium_handlers
-from features.help import setup as help_setup  # ✅ Без "bot."
+from bot.features.help import setup as help_setup  # Убедись, что путь правильный
 
 from loguru import logger
 
 # Глобальный пул БД
 db_pool = None
+
+
+# --- Дебаг: логируем ВСЕ входящие сообщения ---
+async def debug_all_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message and update.message.text:
+        logger.debug(f"📨 DEBUG: Входящее сообщение: '{update.message.text}' от user_id={update.effective_user.id}")
 
 
 # --- Отслеживание активности ---
@@ -46,6 +50,7 @@ async def track_user_activity(update: Update, context: ContextTypes.DEFAULT_TYPE
     if user:
         await add_or_update_user(db_pool, user)
 
+    # Логируем команды
     if update.message and update.message.text and update.message.text.startswith('/'):
         command = update.message.text.split()[0]
         await log_command_usage(db_pool, user.id, command)
@@ -84,7 +89,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# --- Фоновая очистка ---
+# --- Фоновая задача: очистка ---
 async def cleanup_task(context: ContextTypes.DEFAULT_TYPE):
     if not db_pool:
         return
@@ -101,20 +106,23 @@ async def on_post_init(application: Application):
     logger.info("✅ База данных инициализирована")
 
     # Гарантируем существование таблицы support_tickets
+    from database import ensure_support_table_exists
     await ensure_support_table_exists(db_pool)
 
+    # Сохраняем пул
     application.bot_data['db_pool'] = db_pool
 
-    # ... остальное (меню, команды, задачи)
-
     # Устанавливаем кнопку (≡)
-    await application.bot.set_chat_menu_button(
-        menu_button=MenuButtonWebApp(
-            text="🌐 Панель",
-            web_app=WebAppInfo(url="https://leo-aide.online/")
+    try:
+        await application.bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="🌐 Панель",
+                web_app=WebAppInfo(url="https://leo-aide.online/")
+            )
         )
-    )
-    logger.info("🚀 Меню (≡) установлено")
+        logger.info("🚀 Меню (≡) установлено")
+    except Exception as e:
+        logger.error(f"❌ Не удалось установить menu button: {e}")
 
     # Устанавливаем команды
     await application.bot.set_my_commands([
@@ -135,6 +143,9 @@ async def on_post_init(application: Application):
 
 # --- Главная ---
 def main():
+    # ⚠️ ВАЖНО: ЗАПУСКАЙ ТОЛЬКО ОДИН ЭКЗЕМПЛЯР БОТА!
+    # Ошибка Conflict: terminated by other getUpdates — значит, запущено несколько
+
     app = (
         Application.builder()
         .token(os.getenv("BOT_TOKEN"))
@@ -142,18 +153,24 @@ def main():
         .build()
     )
 
-    # Самый первый — отслеживаем активность
+    # Группа -2: дебаг — логируем ВСЁ
+    app.add_handler(MessageHandler(filters.ALL, debug_all_messages), group=-2)
+
+    # Группа -1: отслеживание активности
     app.add_handler(TypeHandler(Update, track_user_activity), group=-1)
 
-    # Подключаем фичи
+    # === КЛЮЧЕВОЕ: help_setup — ПЕРВЫМ ===
+    # Чтобы MessageHandler из help перехватывал сообщения до других
+    help_setup(app)  # ✅ Должен быть ДО всех остальных
+
+    # Подключаем остальные фичи
     setup_menu(app)
     setup_admin_handlers(app)
     setup_role_handlers(app)
     setup_referral_handlers(app)
     setup_premium_handlers(app)
-    help_setup(app)  # ✅ Подключаем систему поддержки
 
-    # Команда /start
+    # Обработчик /start
     app.add_handler(CommandHandler("start", start))
 
     logger.info("🚀 Бот запущен...")
