@@ -1,31 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru" data-theme="{{ theme }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Лео Помощник</title>
+  <title>{{ title }}</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=8" />
+  <link rel="stylesheet" href="/static/css/main.css?v=2" />
+  <link rel="stylesheet" href="/static/css/finance.css?v=1" />
 </head>
 <body>
 
   <!-- ОФФЛАЙН-БАР -->
   <div class="offline-bar" id="offline-bar">🔴 Нет подключения</div>
 
-  <!-- ЭКРАН 1: Авторизация с спиннером и резервной кнопкой -->
+  <!-- ЭКРАН 1: Авторизация -->
   <div class="screen active" id="welcome-screen">
     <div class="lang-switch">
       <a href="#" onclick="setLang('RU')">RU</a> | 
       <a href="#" onclick="setLang('EN')">ENG</a>
     </div>
     <div class="logo">Лео Помощник</div>
-
-    <!-- Контейнер загрузки -->
-    <div id="auth-container">
-      <div class="spinner"></div>
-      <p style="margin-top: 20px; font-size: 16px;">Загрузка профиля...</p>
-    </div>
-
+    <button class="btn primary" onclick="startAuth()">Авторизоваться</button>
     <div class="qr-container" onclick="openQRModal()">
       <div class="tooltip">📲<span class="tooltiptext">Через Telegram</span></div>
     </div>
@@ -39,13 +34,11 @@
       <a href="https://t.me/Leo_aide_bot" class="back-link">В Telegram</a>
     </header>
     <main class="full-height">
-      <!-- Карточка сверху -->
       <div class="card">
         <h2>📊 Статистика</h2>
-        <p><strong>Рефералов:</strong> <span id="referrals">0</span></p>
-        <p><strong>Подписка:</strong> <span id="premium-status">Базовая</span></p>
+        <p><strong>Рефералов:</strong> <span id="referrals">{{ user.referrals }}</span></p>
+        <p><strong>Подписка:</strong> <span id="premium-status">{{ "Premium" if user.is_premium else "Базовая" }}</span></p>
       </div>
-      <!-- Кнопка внизу -->
       <button class="btn primary" onclick="navigateTo('profile')">👤 Профиль</button>
     </main>
   </div>
@@ -57,10 +50,10 @@
       <div class="title">Профиль</div>
     </header>
     <main class="profile-main full-height">
-      <div class="avatar" id="profile-photo">?</div>
-      <h2 id="user-name">Загрузка...</h2>
-      <p><strong>ID:</strong> <code id="user-id">-</code></p>
-      <p><strong>Юзернейм:</strong> <span id="user-username">@</span></p>
+      <div class="avatar" id="profile-photo">{{ user.first_name[0] if user.first_name else "?" }}</div>
+      <h2 id="user-name">{{ user.first_name }}</h2>
+      <p><strong>ID:</strong> <code id="user-id">{{ user.id }}</code></p>
+      <p><strong>Юзернейм:</strong> <span id="user-username">@{{ user.username if user.username else "не задан" }}</span></p>
       <button class="btn primary" onclick="buyPremium()">💳 Купить премиум</button>
     </main>
   </div>
@@ -74,6 +67,11 @@
     <a href="#" onclick="alert('🌐 Обход')">🌐 Обход</a>
     <a href="#" onclick="alert('🛡️ Антивирус')">🛡️ Антивирус</a>
     <a href="#" onclick="navigateTo('settings'); toggleSidebar()">⚙️ Настройки</a>
+    <!-- ССЫЛКА НА ФИНАНСЫ -->
+    <a href="/finance?user_id={{ user.id }}&hash={{ request.query_params.hash }}"
+       onclick="navigateTo('finance'); return false;">
+       💰 Финансы
+    </a>
   </div>
   <div class="overlay" onclick="toggleSidebar()"></div>
 
@@ -90,10 +88,11 @@
     </div>
   </div>
 
-  <!-- СНАЧАЛА подключаем скрипт -->
-  <script src="/static/script.js?v=9"></script>
+  <!-- Скрипты -->
+  <script src="/static/js/main.js?v=2"></script>
+  <script src="/static/js/finance.js?v=1"></script>
 
-  <!-- ПОТОМ — вызываем startAuth -->
+  <!-- Скрипт авторизации -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const urlParams = new URLSearchParams(window.location.search);
@@ -101,22 +100,18 @@
       const hash = urlParams.get('hash');
 
       if (user_id && hash) {
-        startAuth(); // теперь startAuth уже определена
+        startAuth();
       } else {
-        document.getElementById('auth-container').innerHTML = `
-          <button class="btn primary" onclick="startAuth()">Авторизоваться</button>
-        `;
+        document.getElementById('auth-container')?.remove();
       }
 
-      // Резерв: если не загрузилось
       setTimeout(() => {
         const isDashboardActive = document.getElementById('dashboard-screen')?.classList.contains('active');
-        const isProfileActive = document.getElementById('profile-screen')?.classList.contains('active');
-
-        if (!isDashboardActive && !isProfileActive) {
-          document.getElementById('auth-container').innerHTML = `
-            <button class="btn primary" onclick="startAuth()">🔄 Повторить авторизацию</button>
-          `;
+        if (!isDashboardActive) {
+          const authContainer = document.getElementById('auth-container');
+          if (authContainer) {
+            authContainer.innerHTML = `<button class="btn primary" onclick="startAuth()">🔄 Повторить</button>`;
+          }
         }
       }, 5000);
     });
