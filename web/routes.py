@@ -82,7 +82,6 @@ async def cabinet(request: Request):
             "referrals": 0
         }
 
-      # Приоритет: кука > данные из БД
     theme = request.cookies.get("theme", user_data.get("theme", "light"))
 
     return templates.TemplateResponse(
@@ -91,7 +90,47 @@ async def cabinet(request: Request):
             "request": request,
             "user": user_data,
             "title": "Личный кабинет",
-            "theme": theme  # ← передаём в шаблон
+            "theme": theme
         }
     )
 
+
+# ✅ НОВЫЙ РОУТ: /finance
+@router.get("/finance", response_class=HTMLResponse)
+async def finance_page(request: Request):
+    user_id = request.query_params.get("user_id")
+    hash_param = request.query_params.get("hash")
+
+    if not user_id or not hash_param:
+        raise HTTPException(status_code=400, detail="Missing user_id or hash")
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user_id")
+
+    if not verify_cabinet_link(user_id, hash_param):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    user_data = await get_user_data(user_id)
+    if not user_data:
+        user_data = {
+            "id": user_id,
+            "first_name": "Пользователь",
+            "username": "unknown",
+            "referrals": 0,
+            "is_premium": False,
+            "theme": "light"
+        }
+
+    theme = request.cookies.get("theme", user_data.get("theme", "light"))
+
+    return templates.TemplateResponse(
+        "finance.html",
+        {
+            "request": request,
+            "user": user_data,
+            "title": "Финансы",
+            "theme": theme
+        }
+    )
