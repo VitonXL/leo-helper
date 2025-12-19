@@ -29,34 +29,6 @@
     <div class="qr-container" onclick="openQRModal()">
       <div class="tooltip">📲<span class="tooltiptext">Через Telegram</span></div>
     </div>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const user_id = urlParams.get('user_id');
-        const hash = urlParams.get('hash');
-
-        if (user_id && hash) {
-          startAuth(); // стартуем авторизацию
-        } else {
-          document.getElementById('auth-container').innerHTML = `
-            <button class="btn primary" onclick="startAuth()">Авторизоваться</button>
-          `;
-        }
-
-        // Резерв: если через 5 секунд ничего не загрузилось
-        setTimeout(() => {
-          const isDashboardActive = document.getElementById('dashboard-screen')?.classList.contains('active');
-          const isProfileActive = document.getElementById('profile-screen')?.classList.contains('active');
-
-          if (!isDashboardActive && !isProfileActive) {
-            document.getElementById('auth-container').innerHTML = `
-              <button class="btn primary" onclick="startAuth()">🔄 Повторить авторизацию</button>
-            `;
-          }
-        }, 5000);
-      });
-    </script>
   </div>
 
   <!-- ЭКРАН 2: Главный экран -->
@@ -118,6 +90,36 @@
     </div>
   </div>
 
-  <script src="/static/script.js?v=8"></script>
+  <!-- СНАЧАЛА подключаем скрипт -->
+  <script src="/static/script.js?v=9"></script>
+
+  <!-- ПОТОМ — вызываем startAuth -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const user_id = urlParams.get('user_id');
+      const hash = urlParams.get('hash');
+
+      if (user_id && hash) {
+        startAuth(); // теперь startAuth уже определена
+      } else {
+        document.getElementById('auth-container').innerHTML = `
+          <button class="btn primary" onclick="startAuth()">Авторизоваться</button>
+        `;
+      }
+
+      // Резерв: если не загрузилось
+      setTimeout(() => {
+        const isDashboardActive = document.getElementById('dashboard-screen')?.classList.contains('active');
+        const isProfileActive = document.getElementById('profile-screen')?.classList.contains('active');
+
+        if (!isDashboardActive && !isProfileActive) {
+          document.getElementById('auth-container').innerHTML = `
+            <button class="btn primary" onclick="startAuth()">🔄 Повторить авторизацию</button>
+          `;
+        }
+      }, 5000);
+    });
+  </script>
 </body>
 </html>
