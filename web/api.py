@@ -1,6 +1,6 @@
 # web/api.py
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 import asyncpg
 import os
 from typing import Dict, Any
