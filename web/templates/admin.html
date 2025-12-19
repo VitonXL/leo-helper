@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Админ-панель — Лео</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/main.css" />
   <link rel="stylesheet" href="/static/css/admin.css" />
 </head>
@@ -12,68 +13,73 @@
 
   <div class="screen active">
     <header>
-      <div class="back-btn" onclick="history.back()">← Назад</div>
+      <button class="back-btn" onclick="history.back()">← Назад</button>
       <div class="title">Админ-панель</div>
-      <div class="admin-badge">👑</div>
+      <span class="admin-badge" title="Администратор">👑</span>
     </header>
 
-    <main style="padding: 20px; max-width: 1200px; margin: 0 auto;">
-      <!-- Переключатель режима отображения -->
-      <div style="margin-bottom: 20px; text-align: right;">
-        <label><strong>Режим:</strong></label>
-        <select id="view-mode" onchange="changeViewMode(this.value)">
+    <main class="admin-main">
+      <!-- Управление режимом -->
+      <div class="view-controls mb-4">
+        <label><strong>Режим отображения:</strong></label>
+        <select class="form-select w-auto" onchange="changeViewMode(this.value)">
           <option value="cards">Карточки</option>
           <option value="table">Таблица</option>
-          <option value="chart">График</option>
-          <option value="bars">Столбцы</option>
+          <option value="chart">График активности</option>
+          <option value="bars">Столбцы (топ команд)</option>
         </select>
       </div>
 
-      <!-- Статистика: динамически меняется -->
+      <!-- Статистика -->
       <div id="stats-container">
-        <div class="card">
-          <h3>📊 Общая статистика</h3>
-          <p><strong>Пользователей:</strong> <span id="total-users">-</span></p>
-          <p><strong>Премиум:</strong> <span id="premium-users">-</span></p>
-          <p><strong>Сегодня активно:</strong> <span id="active-today">-</span></p>
-        </div>
+        <!-- Загрузится динамически -->
       </div>
 
-      <!-- Управление пользователями -->
-      <div class="card" style="margin-top: 20px;">
+      <!-- Блок поиска пользователя -->
+      <div class="card mt-4">
         <h3>👥 Управление пользователями</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-          <input type="text" id="search-user" placeholder="Поиск по ID или username" style="flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
-          <button class="btn primary" onclick="searchUser()">🔍 Найти</button>
+        <div class="d-flex gap-2 mb-3">
+          <input type="text" id="search-user" class="form-control" placeholder="ID или @username">
+          <button class="btn btn-primary" onclick="searchUser()">🔍 Найти</button>
         </div>
-        <div id="user-actions" style="display: none;">
+        <div id="user-actions" class="d-none">
           <p><strong>Найден:</strong> <span id="found-user"></span></p>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn" onclick="grantPremium()">✅ Выдать премиум</button>
-            <button class="btn" style="background: #DD3935;" onclick="blockUser()">⛔ Заблокировать</button>
-            <button class="btn" style="background: #42A5F5;" onclick="resetUser()">🔄 Сбросить</button>
+          <div class="btn-group">
+            <button class="btn btn-success" onclick="grantPremium()">✅ Выдать премиум</button>
+            <button class="btn btn-danger" onclick="blockUser()">⛔ Заблокировать</button>
+            <button class="btn btn-warning" onclick="resetUser()">🔄 Сбросить</button>
           </div>
         </div>
       </div>
 
-      <!-- Модерация отзывов -->
-      <div class="card" style="margin-top: 20px;">
-        <h3>📝 Модерация отзывов</h3>
-        <div id="reviews-list" style="max-height: 300px; overflow-y: auto;">
-          <p>Загрузка...</p>
-        </div>
-      </div>
-
-      <!-- Управление рекламой -->
-      <div class="card" style="margin-top: 20px;">
-        <h3>📢 Реклама</h3>
-        <button class="btn" onclick="createAd()">➕ Создать объявление</button>
-        <div id="ads-list" style="margin-top: 15px;">
-          <p>Загрузка...</p>
+      <!-- Таблица пользователей -->
+      <div id="users-table-container" class="card mt-4 d-none">
+        <h3>📋 Все пользователи</h3>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Юзернейм</th>
+                <th>Роль</th>
+                <th>Язык</th>
+                <th>Премиум до</th>
+                <th>Последний визит</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <tr><td colspan="8">Загрузка...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
   </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Скрипты -->
   <script src="/static/js/main.js"></script>
