@@ -2,7 +2,6 @@
 
 import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
-from bot.instance import application as bot_app, bot as bot_instance
 from telegram.ext import (
     Application,
     ContextTypes,
@@ -12,6 +11,9 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+
+# Импортируем глобальные переменные
+from bot.instance import application as global_app, bot as global_bot
 
 # Импортируем БД
 from database import (
@@ -33,13 +35,12 @@ from features.admin import setup_admin_handlers
 from features.roles import setup_role_handlers
 from features.referrals import setup_referral_handlers
 from features.premium import setup_premium_handlers
-from features.help import setup as help_setup  # ✅ Без "bot."
+from features.help import setup as help_setup
 
 from loguru import logger
 
-# Глобальные переменные
+# Глобальная переменная пула
 db_pool = None
-application = None  # ✅ Добавлено: для доступа из web-админки
 
 
 # --- Дебаг: логируем ВСЕ входящие сообщения ---
@@ -100,32 +101,32 @@ async def cleanup_task(context: ContextTypes.DEFAULT_TYPE):
     await delete_inactive_users(db_pool, days=90)
     await cleanup_support_tickets(db_pool, days=7)
 
-async def on_post_init(app: Application):
-    global db_pool
-    # Сохраняем глобально
-    bot_app = app  # ← сохраняем в instance
-    bot_instance = app.bot
-    # ... остальное
 
 # --- Инициализация ---
 async def on_post_init(app: Application):
-    global db_pool, application
-    application = app  # ✅ Сохраняем глобально!
+    global db_pool
+
     logger.info("🔧 Инициализация БД...")
     db_pool = await create_db_pool()
     await init_db(db_pool)
     logger.info("✅ База данных инициализирована")
 
-    # Гарантируем существование таблицы support_tickets
-    from database import ensure_support_table_exists
-    await ensure_support_table_exists(db_pool)
+    # Создаём таблицу support_tickets при необходимости
+    await ensure_support_table_exists()
 
-    # Сохраняем пул
-    application.bot_data['db_pool'] = db_pool
+    # Сохраняем пул в bot_data
+    app.bot_data['db_pool'] = db_pool
 
-    # Устанавливаем кнопку (≡)
+    # Сохраняем в bot.instance
+    global_app.__class__ = Application  # чтобы PyCharm не ругался
+    global_app = app
+    global_bot.__class__ = app.bot.__class__
+    global_bot = app.bot
+    logger.info("✅ Бот и application сохранены в bot.instance")
+
+    # Устанавливаем кнопку меню (≡)
     try:
-        await application.bot.set_chat_menu_button(
+        await app.bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(
                 text="🌐 Панель",
                 web_app=WebAppInfo(url="https://leo-aide.online/")
@@ -136,7 +137,7 @@ async def on_post_init(app: Application):
         logger.error(f"❌ Не удалось установить menu button: {e}")
 
     # Устанавливаем команды
-    await application.bot.set_my_commands([
+    await app.bot.set_my_commands([
         ("start", "🚀 Начать"),
         ("menu", "🏠 Открыть меню"),
         ("help", "🔧 Помощь и поддержка"),
@@ -144,17 +145,12 @@ async def on_post_init(app: Application):
     logger.info("✅ Команды бота установлены")
 
     # Фоновая задача
-    application.job_queue.run_repeating(
-        cleanup_task,
-        interval=24 * 3600,
-        first=10
-    )
+    app.job_queue.run_repeating(cleanup_task, interval=24 * 3600, first=10)
     logger.info("⏰ Фоновая задача: очистка — запущена")
 
 
 # --- Главная ---
 def main():
-    # ⚠️ ЗАПУСКАЙ ТОЛЬКО ОДИН ЭКЗЕМПЛЯР БОТА!
     app = (
         Application.builder()
         .token(os.getenv("BOT_TOKEN"))
@@ -168,7 +164,7 @@ def main():
     # Группа -1: активность
     app.add_handler(TypeHandler(Update, track_user_activity), group=-1)
 
-    # === Важно: help_setup — ПЕРВЫМ ===
+    # help_setup — должен быть первым
     help_setup(app)
 
     # Остальные фичи
