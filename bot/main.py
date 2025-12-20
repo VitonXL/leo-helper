@@ -22,6 +22,8 @@ from database import (
     get_user_role,
     register_referral,
     cleanup_support_tickets,
+    ensure_support_table_exists,
+    get_db_pool,
 )
 
 # Импортируем фичи
