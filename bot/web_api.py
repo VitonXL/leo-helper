@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 import uvicorn
-from database import get_user_role, get_user_info, get_referral_stats
+from bot.database import get_user_role, get_user_info, get_referral_stats
 
 app = FastAPI()
 
