@@ -2,7 +2,7 @@
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
-from database import get_db_pool, get_referral_stats, get_user_settings, update_user_theme
+from bot.database import get_db_pool, get_referral_stats, get_user_settings, update_user_theme
 
 # --- Локализация ---
 TEXTS = {
