@@ -103,15 +103,14 @@ async def init_db(pool):
                 message TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'open',
                 created_at TIMESTAMPTZ DEFAULT NOW(),
-                updated_at TIMESTAMPTZ DEFAULT NOW(),
-                ticket_id TEXT UNIQUE  -- ✅ Уникальный ID тикета
+                updated_at TIMESTAMPTZ DEFAULT NOW()
+                -- ticket_id добавим позже через миграцию
             );
         ''')
 
-        # Индексы
+        # Индексы (без индекса по ticket_id — он будет позже)
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets(user_id);')
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_status ON support_tickets(status);')
-        await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_ticket_id ON support_tickets(ticket_id);')  
 
         # --- Миграции — расширения ---
         migrations = [
@@ -143,7 +142,7 @@ async def init_db(pool):
         except Exception as e:
             logger.warning(f"⚠️ Ошибка при добавлении ticket_id: {e}")
 
-        # ✅ Теперь создаём индекс
+        # ✅ Теперь можно создать индекс
         try:
             await conn.execute('''
                 CREATE INDEX IF NOT EXISTS idx_support_ticket_id ON support_tickets(ticket_id);
