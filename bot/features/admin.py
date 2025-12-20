@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 from loguru import logger
 
-from database import (
+from bot.database import (
     get_user_role,
     set_user_role,
     is_admin,
