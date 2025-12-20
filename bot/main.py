@@ -110,7 +110,7 @@ async def on_post_init(app: Application):
     logger.info("✅ База данных инициализирована")
 
     # Гарантируем существование таблицы support_tickets
-    from database import ensure_support_table_exists
+    from bot.database import ensure_support_table_exists
     await ensure_support_table_exists(db_pool)
 
     # Сохраняем пул
