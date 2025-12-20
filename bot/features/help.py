@@ -3,8 +3,6 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from database import get_db_pool
-
-# ✅ Добавь эту строку!
 from loguru import logger
 
 # Состояние ожидания
@@ -17,7 +15,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔧 Доступные команды:\n"
         "/start — начать\n"
         "/menu — главное меню\n\n"
-        "Если нужна помощь — напиши в поддержку!",
+        "Если нужна помощь — напишите в поддержку!",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -32,18 +30,16 @@ async def start_support_chat(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    # ✅ Разрешаем обработку, только если пользователь в режиме поддержки
     if user.id not in SUPPORT_WAITING:
-        logger.warning(f"❌ Сообщение от {user.id}, но не в режиме поддержки")
-        return
+        return  # ← Просто выходим, не блокируем, чтобы FAQ мог сработать
 
     text = update.message.text.strip()
     if len(text) < 5:
         await update.message.reply_text("Пожалуйста, опишите проблему подробнее.")
         return
 
-    logger.info(f"📩 handle_support_message вызван пользователем {user.id}")
-    logger.info(f"📝 Пытаемся сохранить тикет: user_id={user.id}, message='{text[:50]}...'")
-
+    logger.info(f"📩 Пользователь {user.id} отправляет в поддержку: {text[:50]}...")
     try:
         pool = await get_db_pool()
         async with pool.acquire() as conn:
@@ -52,19 +48,20 @@ async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_T
                 VALUES ($1, $2, $3, $4)
             """, user.id, user.username, user.first_name, text)
 
-        logger.info(f"✅ УСПЕШНО: Тикет от {user.id} вставлен в БД")
+        logger.info(f"✅ Тикет от {user.id} сохранён в БД")
         await update.message.reply_text("✅ Ваше сообщение отправлено! Мы ответим в ближайшее время.")
 
     except Exception as e:
-        logger.error(f"❌ ОШИБКА при вставке тикета: {e}", exc_info=True)
-        await update.message.reply_text("❌ Произошла ошибка при отправке. Админ уже знает.")
+        logger.error(f"❌ Ошибка при сохранении тикета: {e}", exc_info=True)
+        await update.message.reply_text("❌ Ошибка отправки. Сообщим админу.")
 
     finally:
         SUPPORT_WAITING.discard(user.id)
-        logger.info(f"🧹 Пользователь {user.id} удалён из SUPPORT_WAITING")
+        logger.info(f"🧹 {user.id} удалён из режима поддержки")
 
 
 def setup(application):
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(start_support_chat, pattern="^help_support$"))
+    # 🟡 Важно: handle_support_message остаётся, но НЕ блокирует других
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support_message))
