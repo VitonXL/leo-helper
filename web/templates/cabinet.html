@@ -7,7 +7,7 @@
   <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/main.css?v=8" />
+  <link rel="stylesheet" href="/static/css/main.css?v=9" />
 </head>
 <body>
 
@@ -92,7 +92,7 @@
         </a>
       </div>
 
-      <!-- Виджеты внизу (как в твоём макете) -->
+      <!-- Виджеты: погода, курсы, чат, напоминания -->
       <div class="widget-grid">
         
         <!-- Погода -->
@@ -128,6 +128,17 @@
         </div>
       </div>
 
+      <!-- Лента новостей -->
+      <div class="section-title">📰 Новости дня</div>
+      <div class="news-feed" id="news-feed">
+        <!-- Новости загрузятся через JS -->
+      </div>
+
+      <!-- Кнопка "Ещё" -->
+      <div class="news-footer">
+        <button class="btn-sm" onclick="loadMoreNews()">Ещё новости</button>
+      </div>
+
     </div>
   </div>
 
@@ -138,9 +149,9 @@
   <div class="overlay" onclick="toggleSidebar()"></div>
 
   <!-- Скрипты -->
-  <script src="/static/js/main.js?v=8"></script>
+  <script src="/static/js/main.js?v=9"></script>
   <script>
-    // Передаём данные
+    // Данные пользователя
     const userData = {
       id: {{ user.id if user.id else 'null' }},
       firstName: "{{ user.first_name|default('Пользователь', true) }}",
@@ -178,8 +189,47 @@
       document.getElementById('admin-link').style.display = 'flex';
     }
 
-    // Вызываем
-    updateGreeting();
+    // === НОВОСТИ ===
+    const mockNews = [
+      { icon: "🌍", title: "Курс доллара превысил 99 рублей", time: "10 минут назад" },
+      { icon: "🤖", title: "Sber запустил новую версию GigaChat", time: "35 минут назад" },
+      { icon: "🌤", title: "В Москве ожидается потепление до +14°C", time: "1 час назад" },
+      { icon: "💰", title: "ЦБ РФ объявил о новых мерах поддержки рубля", time: "2 часа назад" },
+      { icon: "📱", title: "Telegram обновил функцию Mini Apps", time: "3 часа назад" },
+      { icon: "⚡", title: "Новый рекорд по скорости интернета в РФ", time: "4 часа назад" }
+    ];
+
+    function renderNews(count = 3) {
+      const container = document.getElementById('news-feed');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const toShow = mockNews.slice(0, count);
+      toShow.forEach(news => {
+        const item = document.createElement('div');
+        item.className = 'news-item';
+        item.innerHTML = `
+          <div class="news-icon">${news.icon}</div>
+          <div class="news-content">
+            <div class="news-title">${news.title}</div>
+            <div class="news-time">${news.time}</div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function loadMoreNews() {
+      const currentCount = document.querySelectorAll('.news-item').length;
+      const nextCount = Math.min(currentCount + 3, mockNews.length);
+      renderNews(nextCount);
+    }
+
+    // При загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      updateGreeting();
+      renderNews(3);
+    });
   </script>
 </body>
 </html>
