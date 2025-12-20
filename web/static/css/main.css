@@ -1,14 +1,8 @@
-/* === АНИМИРОВАННЫЙ ЗОЛОТОЙ ГРАДИЕНТ (реальный, а не через переменные) === */
+/* === АНИМИРОВАННЫЙ ЗОЛОТОЙ ГРАДИЕНТ === */
 @keyframes shimmer-gold-bg {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-}
-
-.animated-gold {
-  background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
-  background-size: 400% 400%;
-  animation: shimmer-gold-bg 8s ease-in-out infinite;
 }
 
 /* === АНИМИРОВАННЫЙ ЗЕЛЁНЫЙ АКЦЕНТ === */
@@ -17,13 +11,6 @@
   50% { background-position: 100% 50%; }
 }
 
-.animated-accent-light {
-  background: linear-gradient(90deg, #B2FF59, #C8FF70, #B2FF59);
-  background-size: 200% 200%;
-  animation: pulse-accent-bg 6s ease-in-out infinite;
-}
-
-/* === ГЛУБИНА И СТИЛЬ === */
 * {
   margin: 0;
   padding: 0;
@@ -38,7 +25,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Добавим noise */
+/* Лёгкий шум */
 body::before {
   content: "";
   position: fixed;
@@ -52,7 +39,7 @@ body::before {
   z-index: -1;
 }
 
-/* Радиальные градиенты — фон глубины */
+/* Глубина: радиальные градиенты */
 body::after {
   content: "";
   position: fixed;
@@ -118,12 +105,6 @@ nav .nav-link {
 nav .nav-link:hover {
   background: #B2FF59;
   color: #4CAF50;
-}
-
-nav .nav-link.active {
-  background: #B2FF59;
-  color: #4CAF50;
-  font-weight: 500;
 }
 
 /* === ХЕДЕР === */
@@ -204,11 +185,8 @@ header > div {
   pointer-events: none;
 }
 
-/* === КАРТОЧКА ПРЕМИУМ === */
 .card.highlight {
-  background: #B2FF59;
   background: linear-gradient(135deg, #B2FF59, #CCFF90);
-  position: relative;
   overflow: hidden;
 }
 
@@ -219,7 +197,6 @@ header > div {
   left: 0;
   right: 0;
   height: 4px;
-  background: #DAA520;
   background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
   background-size: 400% 400%;
   animation: shimmer-gold-bg 8s ease-in-out infinite;
@@ -278,17 +255,6 @@ header > div {
 .action-btn:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
-  border-color: #B2FF59;
-}
-
-.action-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.action-label {
-  font-size: 14px;
-  font-weight: 500;
 }
 
 /* === ВИДЖЕТЫ === */
@@ -324,29 +290,6 @@ header > div {
 
 .widget:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
-}
-
-.widget-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.widget-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #757575;
-}
-
-.widget-value {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4CAF50;
-}
-
-.widget-sub {
-  font-size: 12px;
-  color: #757575;
 }
 
 /* === НОВОСТИ === */
@@ -400,49 +343,6 @@ header > div {
 
 .news-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
-}
-
-.news-icon {
-  font-size: 24px;
-  min-width: 32px;
-  text-align: center;
-}
-
-.news-content {
-  flex: 1;
-}
-
-.news-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #212121;
-  margin-bottom: 4px;
-}
-
-.news-time {
-  font-size: 12px;
-  color: #757575;
-}
-
-.news-footer {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.news-footer .btn-sm {
-  background: #4CAF50;
-  color: white;
-  font-size: 13px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.news-footer .btn-sm:hover {
-  background: #388E3C;
 }
 
 /* === КНОПКИ === */
@@ -455,12 +355,10 @@ header > div {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
 .btn-primary:hover {
   background: #388E3C;
-  transform: translateY(-1px);
 }
 
 /* === FAB === */
@@ -482,17 +380,12 @@ header > div {
   align-items: center;
   justify-content: center;
   animation: pulse 2s infinite;
-  transition: all 0.3s ease;
 }
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
   70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-}
-
-.fab:hover {
-  transform: scale(1.1);
 }
 
 /* === ОВЕРЛЕЙ === */
