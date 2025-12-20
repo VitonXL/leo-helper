@@ -1,32 +1,21 @@
 # bot/features/admin.py
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import (
-    ContextTypes,
-    CommandHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    filters
-)
+from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from loguru import logger
-
-from database import (
-    get_user_role,
-    set_user_role,
-    is_admin,
-    get_referral_stats,
-    log_command_usage,
-)
+from database import get_user_role, set_user_role, is_admin, get_referral_stats, log_command_usage
 
 # Состояние: кто в режиме поиска
 user_search_state = {}
+
 
 # --- Проверка доступа ---
 async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     pool = context.application.bot_data['db_pool']
     user_id = update.effective_user.id
     if not await is_admin(pool, user_id):
-        await update.message.reply_text("❌ Доступ запрещён")
+        if update.message:
+            await update.message.reply_text("❌ Доступ запрещён")
         return False
     return True
 
@@ -38,8 +27,6 @@ async def cmd_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     pool = context.application.bot_data['db_pool']
     user_id = update.effective_user.id
-
-    # Логируем
     await log_command_usage(pool, user_id, '/admin')
 
     keyboard = [
@@ -52,65 +39,21 @@ async def cmd_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await update.message.reply_text(
-        "🛡️ <b>Панель администратора</b>\n\nВыберите раздел:",
-        reply_markup=reply_markup,
-        parse_mode='HTML'
-    )
-
-
-# --- Пересылка ответа админа ---
-async def forward_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Админ отвечает на сообщение с тикетом — бот отправляет пользователю.
-    """
-    if not update.message or not update.message.reply_to_message:
-        return
-
-    reply = update.message.reply_to_message
-    if not reply.text or not "ID: TICKET-" in reply.text:
-        return
-
-    try:
-        # Извлекаем ticket_id
-        lines = reply.text.splitlines()
-        ticket_line = next(line for line in lines if line.startswith("📌 ID:"))
-        ticket_id = ticket_line.split("ID:")[1].split("|")[0].strip()
-    except:
-        await update.message.reply_text("❌ Не удалось извлечь ID тикета.")
-        return
-
-    pool = context.application.bot_data['db_pool']
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow('''
-            SELECT user_id, username, first_name, message 
-            FROM support_tickets 
-            WHERE ticket_id = $1
-        ''', ticket_id)
-
-    if not row:
-        await update.message.reply_text("❌ Тикет не найден.")
-        return
-
-    user_id = row['user_id']
-    first_name = row['first_name']
-    username = f"@{row['username']}" if row['username'] else first_name
-
-    # Формируем ответ
-    admin_message = update.message.text_html
-    response_text = f"💬 Администратор:\n\n{admin_message}"
-
-    try:
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=response_text,
+    if update.message:
+        await update.message.reply_text(
+            "🛡️ <b>Панель администратора</b>\n\nВыберите раздел:",
+            reply_markup=reply_markup,
             parse_mode='HTML'
         )
-        await update.message.reply_text(f"✅ Ответ отправлен пользователю {username}")
-        logger.info(f"📨 Админ ответил пользователю {user_id} (тикет: {ticket_id})")
-    except Exception as e:
-        await update.message.reply_text(f"❌ Ошибка: {e}")
-        logger.error(f"❌ Отправка не удалась для {user_id}: {e}")
+    elif update.callback_query:
+        try:
+            await update.callback_query.edit_message_text(
+                "🛡️ <b>Панель администратора</b>\n\nВыберите раздел:",
+                reply_markup=reply_markup,
+                parse_mode='HTML'
+            )
+        except Exception as e:
+            logger.error(f"Ошибка редактирования сообщения: {e}")
 
 
 # --- Обработчик нажатий ---
@@ -134,7 +77,7 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
         cmd_text = "\n".join([f"  • <code>{c[0]}</code>: {c[1]}" for c in cmd_count]) if cmd_count else "Нет данных"
 
         text = f"""
-📊 <b>Статистика (7 дней)</b>
+📊 <b>Статистика (7 дня)</b>
 
 👥 Всего: <b>{total_users}</b>
 🟢 Активны: <b>{active_24h}</b>
@@ -157,29 +100,11 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
         user_search_state[query.from_user.id] = 'awaiting_id'
 
     elif data == "admin_back":
-        # Редактируем сообщение на главное меню
-        keyboard = [
-            [InlineKeyboardButton("👥 Пользователи", callback_data="admin_users")],
-            [InlineKeyboardButton("📊 Статистика", callback_data="admin_stats")],
-            [InlineKeyboardButton("📣 Рассылка", callback_data="admin_broadcast")],
-            [InlineKeyboardButton("📩 Тикеты", callback_data="admin_support_tickets")],
-            [InlineKeyboardButton("📝 Модерация", callback_data="admin_moderation")],
-            [InlineKeyboardButton("🧩 Настройки", callback_data="admin_settings")],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        try:
-            await query.edit_message_text(
-                "🛡️ <b>Панель администратора</b>\n\nВыберите раздел:",
-                reply_markup=reply_markup,
-                parse_mode='HTML'
-            )
-        except Exception as e:
-            logger.error(f"Ошибка при редактировании сообщения: {e}")
+        await cmd_admin(update, context)  # Теперь безопасно
 
     elif data == "admin_support_tickets":
         tickets = await pool.fetch('''
-            SELECT ticket_id, user_id, username, first_name, message, status, created_at
+            SELECT ticket_id, username, first_name, message, created_at
             FROM support_tickets
             WHERE status = 'open'
             ORDER BY created_at DESC
@@ -196,6 +121,7 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
             created = t['created_at'].strftime('%d.%m %H:%M')
             text += f"📌 <b>ID: {t['ticket_id']}</b> | {username} | {created}\n"
             text += f"💬 {t['message'][:60]}...\n\n"
+        text += "👆 Ответьте на это сообщение, чтобы отправить ответ пользователю."
 
         await query.edit_message_text(
             text,
@@ -203,13 +129,63 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
             disable_web_page_preview=True
         )
 
-        # Подсказка с кнопкой "назад"
-        await update.effective_message.reply_text(
-            "👆 Ответьте на любое из сообщений выше, чтобы отправить ответ пользователю.",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("⬅️ Назад", callback_data="admin_back")]
-            ])
+
+# --- Пересылка ответа админа ---
+async def forward_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info("📩 forward_admin_reply: вызван")
+
+    if not update.message:
+        logger.warning("❌ Нет update.message")
+        return
+    if not update.message.reply_to_message:
+        logger.warning("❌ Не ответ на сообщение")
+        return
+
+    reply = update.message.reply_to_message
+    logger.info(f"📄 Реплай на: {reply.text[:100]}")
+
+    if not reply.text or "ID: TICKET-" not in reply.text:
+        logger.warning("❌ Нет ID: TICKET- в тексте")
+        return
+
+    try:
+        # Извлекаем ticket_id
+        lines = reply.text.splitlines()
+        ticket_line = next((line for line in lines if line.startswith("📌 ID:")), None)
+        if not ticket_line:
+            await update.message.reply_text("❌ Не найдена строка с ID.")
+            return
+        ticket_id = ticket_line.split("ID:")[1].split("|")[0].strip()
+        logger.info(f"🔍 Найден ticket_id: {ticket_id}")
+
+        pool = context.application.bot_data['db_pool']
+        row = await pool.fetchrow('''
+            SELECT user_id, username FROM support_tickets WHERE ticket_id = $1
+        ''', ticket_id)
+
+        if not row:
+            await update.message.reply_text("❌ Тикет не найден.")
+            logger.warning(f"❌ Тикет {ticket_id} не найден в БД")
+            return
+
+        user_id = row['user_id']
+        username = f"@{row['username']}" if row['username'] else "Пользователь"
+        logger.info(f"🎯 Отправка ответа пользователю {user_id}")
+
+        admin_message = update.message.text_html or update.message.caption_html or "Без текста"
+        response_text = f"💬 Администратор:\n\n{admin_message}"
+
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=response_text,
+            parse_mode='HTML'
         )
+        await update.message.reply_text(f"✅ Ответ отправлен {username}")
+        logger.info(f"✅ Ответ доставлен {user_id}")
+
+    except Exception as e:
+        logger.exception(f"💥 Ошибка в forward_admin_reply: {e}")
+        await update.message.reply_text(f"❌ Ошибка: {e}")
 
 
 # --- Поиск пользователя ---
@@ -275,4 +251,4 @@ def setup_admin_handlers(app):
     app.add_handler(CallbackQueryHandler(admin_callback_handler, pattern="^admin_"))
     app.add_handler(CallbackQueryHandler(grant_callback_handler, pattern="^grant_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message_from_admin))
-    app.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, forward_admin_reply))
+    app.add_handler(MessageHandler(filters.REPLY & (filters.TEXT | filters.PHOTO | filters.DOCUMENT) & ~filters.COMMAND, forward_admin_reply))
