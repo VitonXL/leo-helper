@@ -187,18 +187,22 @@ def main():
     # Группа -1: активность
     app.add_handler(TypeHandler(Update, track_user_activity), group=-1)
 
-    # Основные фичи — группа 0
-    help_setup(app)
-    setup_menu(app)
-    setup_admin_handlers(app)
+    # === ГРУППА 0: КОМАНДЫ И ФИЧИ, КОТОРЫЕ ДОЛЖНЫ БЫТЬ РАНЬШЕ ===
+
+    # Сначала — команды и callback'и
+    help_setup(app)            # /help, callback'и
+    setup_menu(app)            # /menu, callback'и
+    setup_admin_handlers(app)  # /admin, callback'и
     setup_role_handlers(app)
     setup_referral_handlers(app)
     setup_premium_handlers(app)
 
-    # Команда /start
+    # /start — тоже команда, должна быть в группе 0
     app.add_handler(CommandHandler("start", start), group=0)
 
-    # 🔥 FAQ — САМЫЙ ПОСЛЕДНИЙ, группа 100
+    # === ГРУППА 100: ТЕКСТОВЫЕ СООБЩЕНИЯ ПОСЛЕ ВСЕГО ===
+
+    # FAQ — только если никто другой не отреагировал
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support_faq),
         group=100
