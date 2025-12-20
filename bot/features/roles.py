@@ -3,7 +3,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 
-from bot.database import get_user_role, set_user_role, is_admin
+from database import get_user_role, set_user_role, is_admin
 
 
 async def cmd_role(update: Update, context: ContextTypes.DEFAULT_TYPE):
