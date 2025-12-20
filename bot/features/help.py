@@ -2,7 +2,7 @@
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
-from database import get_db_pool
+from bot.database import get_db_pool
 
 # ✅ Добавь эту строку!
 from loguru import logger
