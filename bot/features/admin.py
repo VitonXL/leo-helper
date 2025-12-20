@@ -157,7 +157,25 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
         user_search_state[query.from_user.id] = 'awaiting_id'
 
     elif data == "admin_back":
-        await cmd_admin(update, context)  # Возврат в главное меню
+        # Редактируем сообщение на главное меню
+        keyboard = [
+            [InlineKeyboardButton("👥 Пользователи", callback_data="admin_users")],
+            [InlineKeyboardButton("📊 Статистика", callback_data="admin_stats")],
+            [InlineKeyboardButton("📣 Рассылка", callback_data="admin_broadcast")],
+            [InlineKeyboardButton("📩 Тикеты", callback_data="admin_support_tickets")],
+            [InlineKeyboardButton("📝 Модерация", callback_data="admin_moderation")],
+            [InlineKeyboardButton("🧩 Настройки", callback_data="admin_settings")],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        try:
+            await query.edit_message_text(
+                "🛡️ <b>Панель администратора</b>\n\nВыберите раздел:",
+                reply_markup=reply_markup,
+                parse_mode='HTML'
+            )
+        except Exception as e:
+            logger.error(f"Ошибка при редактировании сообщения: {e}")
 
     elif data == "admin_support_tickets":
         tickets = await pool.fetch('''
