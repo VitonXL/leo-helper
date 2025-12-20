@@ -1,16 +1,13 @@
 # bot/instance.py
+"""
+Глобальное хранилище для доступа к боту и application из других частей проекта.
+Инициализируется в bot/main.py при запуске бота.
+"""
 
+from typing import Optional
 from telegram.ext import Application
+from telegram import Bot
 
-application = None
-bot = None
-
-def get_bot():
-    if bot is None:
-        raise RuntimeError("Бот ещё не инициализирован")
-    return bot
-
-def get_application():
-    if application is None:
-        raise RuntimeError("Application ещё не инициализирован")
-    return application
+# Глобальные переменные — будут инициализированы при запуске бота
+application: Optional[Application] = None
+bot: Optional[Bot] = None
