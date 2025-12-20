@@ -1,37 +1,29 @@
-/* === АНИМАЦИИ === */
-@keyframes pulse-accent {
-  0% { --accent-light-animated: #B2FF59; }
-  50% { --accent-light-animated: #C8FF70; }
-  100% { --accent-light-animated: #B2FF59; }
-}
-
-@keyframes shimmer-gold {
-  0% { --gold-animated: linear-gradient(45deg, #DAA520, #FFD700); }
-  25% { --gold-animated: linear-gradient(45deg, #FFD700, #F4C430); }
-  50% { --gold-animated: linear-gradient(45deg, #F4C430, #DAA520); }
-  75% { --gold-animated: linear-gradient(45deg, #C5B358, #DAA520); }
-  100% { --gold-animated: linear-gradient(45deg, #DAA520, #FFD700); }
-}
-
-@keyframes gradient-shift {
+/* === АНИМИРОВАННЫЙ ЗОЛОТОЙ ГРАДИЕНТ (реальный, а не через переменные) === */
+@keyframes shimmer-gold-bg {
   0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* === ПЕРЕМЕННЫЕ === */
-:root {
-  --bg: #FFFFFF;
-  --text: #212121;
-  --text-light: #757575;
-  --accent-light: var(--accent-light-animated, #B2FF59);
-  --accent-dark: #4CAF50;
-  --gold: var(--gold-animated, #DAA520);
-  --border-radius: 16px;
-  --shadow: 0 4px 12px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-deep: 0 12px 32px rgba(0, 0, 0, 0.12);
-  --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+.animated-gold {
+  background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
+  background-size: 400% 400%;
+  animation: shimmer-gold-bg 8s ease-in-out infinite;
 }
 
+/* === АНИМИРОВАННЫЙ ЗЕЛЁНЫЙ АКЦЕНТ === */
+@keyframes pulse-accent-bg {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animated-accent-light {
+  background: linear-gradient(90deg, #B2FF59, #C8FF70, #B2FF59);
+  background-size: 200% 200%;
+  animation: pulse-accent-bg 6s ease-in-out infinite;
+}
+
+/* === ГЛУБИНА И СТИЛЬ === */
 * {
   margin: 0;
   padding: 0;
@@ -40,30 +32,14 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  color: var(--text);
-  background: linear-gradient(to bottom, #f9f9ff, #ffffff);
+  background: #f9f9ff;
+  color: #212121;
   position: relative;
-  animation: 
-    pulse-accent 12s ease-in-out infinite,
-    shimmer-gold 16s ease-in-out infinite;
-  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
-/* === ФОН С ГЛУБИНОЙ === */
+/* Добавим noise */
 body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 30% 20%, rgba(178, 255, 89, 0.08) 0%, transparent 40%),
-              radial-gradient(circle at 70% 80%, rgba(218, 165, 32, 0.06) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: -2;
-}
-
-body::after {
   content: "";
   position: fixed;
   top: 0;
@@ -76,24 +52,38 @@ body::after {
   z-index: -1;
 }
 
+/* Радиальные градиенты — фон глубины */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(178, 255, 89, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(218, 165, 32, 0.06) 0%, transparent 35%);
+  pointer-events: none;
+  z-index: -2;
+}
+
 /* === САЙДБАР === */
 .sidebar {
   position: fixed;
-  left: 0;
+  left: -250px;
   top: 0;
   width: 250px;
   height: 100%;
-  background: var(--bg);
+  background: #fff;
   border-right: 1px solid #eee;
   padding: 20px 0;
   z-index: 1000;
-  transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow);
+  transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .sidebar.active {
-  transform: translateX(0);
+  left: 0;
 }
 
 .logo {
@@ -103,13 +93,13 @@ body::after {
   padding: 0 20px 24px;
   font-size: 22px;
   font-weight: 700;
-  color: var(--accent-dark);
-  border-bottom: 2px solid var(--accent-light);
+  color: #4CAF50;
+  border-bottom: 2px solid #B2FF59;
 }
 
 .logo-icon {
   font-size: 28px;
-  color: var(--accent-dark);
+  color: #4CAF50;
 }
 
 nav .nav-link {
@@ -117,22 +107,22 @@ nav .nav-link {
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  color: var(--text);
+  color: #212121;
   text-decoration: none;
   border-radius: 8px;
   margin: 4px 10px;
   font-size: 14px;
-  transition: var(--transition);
+  transition: background 0.3s;
 }
 
 nav .nav-link:hover {
-  background: var(--accent-light);
-  color: var(--accent-dark);
+  background: #B2FF59;
+  color: #4CAF50;
 }
 
 nav .nav-link.active {
-  background: var(--accent-light);
-  color: var(--accent-dark);
+  background: #B2FF59;
+  color: #4CAF50;
   font-weight: 500;
 }
 
@@ -149,14 +139,13 @@ header {
 .hamburger {
   font-size: 24px;
   cursor: pointer;
-  color: var(--accent-dark);
-  padding: 6px;
+  color: #4CAF50;
 }
 
 header > div {
   font-size: 18px;
   font-weight: 500;
-  color: var(--accent-dark);
+  color: #4CAF50;
 }
 
 .header-icons {
@@ -167,14 +156,14 @@ header > div {
 
 .material-icons {
   font-size: 20px;
-  color: var(--text-light);
+  color: #757575;
   cursor: pointer;
 }
 
 .avatar {
   width: 40px;
   height: 40px;
-  background: var(--accent-dark);
+  background: #4CAF50;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -194,13 +183,13 @@ header > div {
 /* === КАРТОЧКИ === */
 .card {
   position: relative;
-  background: var(--bg);
-  border-radius: var(--border-radius);
+  background: #fff;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
   border: 1px solid #f0f0f0;
-  transition: var(--transition);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card::before {
@@ -213,26 +202,27 @@ header > div {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
   border-radius: 16px 16px 0 0;
   pointer-events: none;
-  z-index: 1;
 }
 
+/* === КАРТОЧКА ПРЕМИУМ === */
 .card.highlight {
-  background: linear-gradient(135deg, var(--accent-light), #CCFF90);
+  background: #B2FF59;
+  background: linear-gradient(135deg, #B2FF59, #CCFF90);
   position: relative;
   overflow: hidden;
 }
 
-.card.highlight::before {
+.card.highlight::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--gold);
-  background: var(--gold-animated);
-  background-size: 200% 100%;
-  animation: gradient-shift 8s linear infinite;
+  background: #DAA520;
+  background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
+  background-size: 400% 400%;
+  animation: shimmer-gold-bg 8s ease-in-out infinite;
 }
 
 /* === ПРЕМИУМ БЕЙДЖ === */
@@ -247,10 +237,9 @@ header > div {
 }
 
 .subscription-badge.premium {
-  background: var(--gold);
-  background: var(--gold-animated);
-  background-size: 200% 100%;
-  animation: gradient-shift 8s linear infinite;
+  background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
+  background-size: 400% 400%;
+  animation: shimmer-gold-bg 8s ease-in-out infinite;
 }
 
 /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
@@ -264,14 +253,14 @@ header > div {
 .action-btn {
   position: relative;
   text-decoration: none;
-  color: var(--text);
+  color: #212121;
   border-radius: 12px;
   padding: 16px 12px;
   text-align: center;
   background: white;
   border: 1px solid #eee;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .action-btn::before {
@@ -288,8 +277,8 @@ header > div {
 
 .action-btn:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-deep);
-  border-color: var(--accent-light);
+  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
+  border-color: #B2FF59;
 }
 
 .action-icon {
@@ -316,9 +305,9 @@ header > div {
   border-radius: 12px;
   padding: 16px;
   text-align: center;
-  box-shadow: var(--shadow);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
   border: 1px solid #f0f0f0;
-  transition: var(--transition);
+  transition: transform 0.4s ease;
 }
 
 .widget::before {
@@ -335,7 +324,7 @@ header > div {
 
 .widget:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-deep);
+  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
 }
 
 .widget-icon {
@@ -346,18 +335,18 @@ header > div {
 .widget-title {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-light);
+  color: #757575;
 }
 
 .widget-value {
   font-size: 18px;
   font-weight: 600;
-  color: var(--accent-dark);
+  color: #4CAF50;
 }
 
 .widget-sub {
   font-size: 12px;
-  color: var(--text-light);
+  color: #757575;
 }
 
 /* === НОВОСТИ === */
@@ -365,7 +354,7 @@ header > div {
   font-size: 18px;
   font-weight: 500;
   margin: 24px 0 12px;
-  color: var(--text-light);
+  color: #757575;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -392,9 +381,9 @@ header > div {
   background: white;
   border-radius: 12px;
   padding: 12px 16px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
   border: 1px solid #f0f0f0;
-  transition: var(--transition);
+  transition: transform 0.4s ease;
 }
 
 .news-item::before {
@@ -411,7 +400,7 @@ header > div {
 
 .news-item:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-deep);
+  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
 }
 
 .news-icon {
@@ -427,13 +416,13 @@ header > div {
 .news-title {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text);
+  color: #212121;
   margin-bottom: 4px;
 }
 
 .news-time {
   font-size: 12px;
-  color: var(--text-light);
+  color: #757575;
 }
 
 .news-footer {
@@ -442,14 +431,14 @@ header > div {
 }
 
 .news-footer .btn-sm {
-  background: var(--accent-dark);
+  background: #4CAF50;
   color: white;
   font-size: 13px;
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: background 0.3s;
 }
 
 .news-footer .btn-sm:hover {
@@ -458,7 +447,7 @@ header > div {
 
 /* === КНОПКИ === */
 .btn-primary {
-  background: var(--accent-dark);
+  background: #4CAF50;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -466,7 +455,7 @@ header > div {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: background 0.3s;
 }
 
 .btn-primary:hover {
@@ -482,18 +471,18 @@ header > div {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: var(--accent-dark);
+  background: #4CAF50;
   color: white;
   border: none;
   font-size: 24px;
-  box-shadow: var(--shadow-deep);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
   animation: pulse 2s infinite;
+  transition: all 0.3s ease;
 }
 
 @keyframes pulse {
@@ -504,7 +493,6 @@ header > div {
 
 .fab:hover {
   transform: scale(1.1);
-  box-shadow: var(--shadow-deep);
 }
 
 /* === ОВЕРЛЕЙ === */
@@ -526,8 +514,4 @@ header > div {
   .card { padding: 20px; }
   .widget-grid,
   .button-grid { grid-template-columns: 1fr 1fr; }
-}
-
-@media (min-width: 768px) {
-  .overlay { display: none; }
 }
