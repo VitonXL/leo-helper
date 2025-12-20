@@ -11,6 +11,8 @@ SUPPORT_WAITING = set()
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.debug(f"🔧 help_command вызван пользователем {update.effective_user.id}")
+    
     keyboard = [[InlineKeyboardButton("📬 Написать в поддержку", callback_data="help_support")]]
     await update.message.reply_text(
         "🔧 Доступные команды:\n"
