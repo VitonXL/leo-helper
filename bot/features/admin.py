@@ -5,8 +5,8 @@ from telegram.ext import (
     ContextTypes,
     CommandHandler,
     CallbackQueryHandler,
-    MessageHandler,  # ← добавлен
-    filters  # ← добавлен
+    MessageHandler,
+    filters
 )
 from loguru import logger
 
@@ -17,6 +17,7 @@ from database import (
     get_referral_stats,
     log_command_usage,
 )
+
 # Состояние: кто в режиме поиска
 user_search_state = {}
 
@@ -56,6 +57,53 @@ async def cmd_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='HTML'
     )
+
+
+# --- Пересылка сообщения от админа пользователю ---
+async def forward_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Админ отвечает на сообщение с тикетом — бот перешлёт пользователю.
+    """
+    if not update.message or not update.message.reply_to_message:
+        return
+
+    reply = update.message.reply_to_message
+    if not reply.text or not reply.text.startswith("ID: TICKET-"):
+        return
+
+    # Извлекаем ticket_id
+    ticket_id = reply.text.split("|")[0].split("ID: ")[1].strip()
+
+    pool = context.application.bot_data['db_pool']
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow('''
+            SELECT user_id, first_name, message 
+            FROM support_tickets 
+            WHERE ticket_id = $1
+        ''', ticket_id)
+
+    if not row:
+        await update.message.reply_text("❌ Тикет не найден.")
+        return
+
+    user_id = row['user_id']
+    first_name = row['first_name']
+
+    # Формируем сообщение
+    admin_message = update.message.text_html
+    response_text = f"💬 Администратор:\n\n{admin_message}"
+
+    try:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=response_text,
+            parse_mode='HTML'
+        )
+        await update.message.reply_text(f"✅ Ответ отправлен пользователю {first_name}")
+        logger.info(f"📨 Админ ответил пользователю {user_id} (тикет: {ticket_id})")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Не удалось отправить: {e}")
+        logger.error(f"❌ Ошибка отправки пользователю {user_id}: {e}")
 
 
 # --- Обработчик нажатий ---
@@ -107,33 +155,35 @@ async def admin_callback_handler(update: Update, context: ContextTypes.DEFAULT_T
         await cmd_admin(update, context)
 
     elif data == "admin_support_tickets":
-         pool = context.application.bot_data['db_pool']
-         tickets = await pool.fetch('''
-        SELECT ticket_id, user_id, first_name, message, status, created_at
-        FROM support_tickets
-        WHERE status = 'open'
-        ORDER BY created_at DESC
-        LIMIT 10
-    ''')
+        pool = context.application.bot_data['db_pool']
+        tickets = await pool.fetch('''
+            SELECT ticket_id, user_id, first_name, message, status, created_at
+            FROM support_tickets
+            WHERE status = 'open'
+            ORDER BY created_at DESC
+            LIMIT 10
+        ''')
 
-    if not tickets:
-        await query.edit_message_text("📭 Нет открытых тикетов")
-        return
+        if not tickets:
+            await query.edit_message_text("📭 Нет открытых тикетов")
+            return
 
-    text = "📬 <b>Открытые тикеты:</b>\n\n"
-    for t in tickets:
-        username = f"@{t['first_name']}" if t['first_name'] else "Без имени"
-        created = t['created_at'].strftime('%d.%m %H:%M')
-        text += f"📌 <b>ID: {t['ticket_id']}</b> | {username} | {created}\n"
-        text += f"💬 {t['message'][:50]}...\n\n"
+        text = "📬 <b>Открытые тикеты:</b>\n\n"
+        for t in tickets:
+            username = f"@{t['first_name']}" if t['first_name'] else "Без имени"
+            created = t['created_at'].strftime('%d.%m %H:%M')
+            text += f"📌 <b>ID: {t['ticket_id']}</b> | {username} | {created}\n"
+            text += f"💬 {t['message'][:50]}...\n\n"
 
-    await query.edit_message_text(text, parse_mode='HTML')
+        await query.edit_message_text(text, parse_mode='HTML')
 
-    # Кнопка "назад"
-    await update.effective_message.reply_text(
-        "👆 Выберите тикет и ответьте на это сообщение — ваш текст будет отправлен пользователю",
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Назад", callback_data="admin_back")]])
-    )
+        # Кнопка "назад"
+        await update.effective_message.reply_text(
+            "👆 Выберите тикет и ответьте на это сообщение — ваш текст будет отправлен пользователю",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("⬅️ Назад", callback_data="admin_back")]
+            ])
+        )
 
 
 # --- Поиск пользователя ---
@@ -201,52 +251,4 @@ def setup_admin_handlers(app):
     app.add_handler(CallbackQueryHandler(admin_callback_handler, pattern="^admin_"))
     app.add_handler(CallbackQueryHandler(grant_callback_handler, pattern="^grant_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message_from_admin))
-
-    # ✅ НОВОЕ: ответ от админа
     app.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, forward_admin_reply))
-
-# --- Пересылка сообщения от админа пользователю ---
-async def forward_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Админ отвечает на сообщение с тикетом — бот перешлёт пользователю.
-    """
-    if not update.message or not update.message.reply_to_message:
-        return
-
-    reply = update.message.reply_to_message
-    if not reply.text or not reply.text.startswith("ID: TICKET-"):
-        return
-
-    # Извлекаем ticket_id
-    ticket_id = reply.text.split("|")[0].split("ID: ")[1].strip()
-
-    pool = context.application.bot_data['db_pool']
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow('''
-            SELECT user_id, first_name, message 
-            FROM support_tickets 
-            WHERE ticket_id = $1
-        ''', ticket_id)
-
-    if not row:
-        await update.message.reply_text("❌ Тикет не найден.")
-        return
-
-    user_id = row['user_id']
-    first_name = row['first_name']
-
-    # Формируем сообщение
-    admin_message = update.message.text_html
-    response_text = f"💬 Администратор:\n\n{admin_message}"
-
-    try:
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=response_text,
-            parse_mode='HTML'
-        )
-        await update.message.reply_text(f"✅ Ответ отправлен пользователю {first_name}")
-        logger.info(f"📨 Админ ответил пользователю {user_id} (тикет: {ticket_id})")
-    except Exception as e:
-        await update.message.reply_text(f"❌ Не удалось отправить: {e}")
-        logger.error(f"❌ Ошибка отправки пользователю {user_id}: {e}")
