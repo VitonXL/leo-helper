@@ -1,33 +1,53 @@
-/* === АНИМИРОВАННЫЙ ЗОЛОТОЙ ГРАДИЕНТ === */
-@keyframes shimmer-gold-bg {
+/* === ЯРКАЯ АНИМАЦИЯ ЗОЛОТА === */
+@keyframes shimmer-gold-strong {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* === АНИМИРОВАННЫЙ ЗЕЛЁНЫЙ АКЦЕНТ === */
-@keyframes pulse-accent-bg {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+/* === МЯГКОЕ ДЫХАНИЕ КАРТОЧЕК === */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.005); }
 }
 
-/* === ОБЩИЕ СТИЛИ === */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* === СЕТЬ-ФОН === */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(178, 255, 89, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(178, 255, 89, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: -2;
 }
 
+/* === ГЛУБОКИЙ МЯГКИЙ ГРАДИЕНТ ФОНА === */
 body {
+  margin: 0;
   font-family: 'Inter', sans-serif;
-  background: #f9f9ff;
+  background: linear-gradient(135deg, #f5fcf5, #f0f8ff, #ffffff);
+  background-size: 400% 400%;
+  animation: gradient-flow 15s ease-in-out infinite;
   color: #212121;
   position: relative;
   overflow-x: hidden;
 }
 
-/* Едва заметный шум фона */
-body::before {
+/* Движение градиента */
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* === ЛЁГКИЙ ШУМ === */
+body::after {
   content: "";
   position: fixed;
   top: 0;
@@ -40,21 +60,6 @@ body::before {
   z-index: -1;
 }
 
-/* Глубина: лёгкие радиальные градиенты */
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(178, 255, 89, 0.08) 0%, transparent 35%),
-    radial-gradient(circle at 80% 70%, rgba(218, 165, 32, 0.06) 0%, transparent 35%);
-  pointer-events: none;
-  z-index: -2;
-}
-
 /* === САЙДБАР === */
 .sidebar {
   position: fixed;
@@ -62,12 +67,13 @@ body::after {
   top: 0;
   width: 250px;
   height: 100%;
-  background: #fff;
-  border-right: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(76, 175, 80, 0.1);
   padding: 20px 0;
   z-index: 1000;
   transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .sidebar.active {
@@ -120,8 +126,8 @@ header {
   align-items: center;
   justify-content: space-between;
   padding: 16px 16px 20px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  margin-bottom: 24px;
 }
 
 .hamburger {
@@ -171,13 +177,15 @@ header > div {
 /* === КАРТОЧКИ === */
 .card {
   position: relative;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
-  border: 1px solid #f0f0f0;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.08), 
+              0 4px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(178, 255, 89, 0.2);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: breathe 6s ease-in-out infinite;
 }
 
 .card::before {
@@ -187,15 +195,18 @@ header > div {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7), transparent);
   border-radius: 16px 16px 0 0;
   pointer-events: none;
 }
 
+/* === КАРТОЧКА ПРЕМИУМ === */
 .card.highlight {
   background: linear-gradient(135deg, #B2FF59, #CCFF90);
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
+  border: none;
+  animation: breathe 6s ease-in-out infinite;
 }
 
 .card.highlight::after {
@@ -204,10 +215,10 @@ header > div {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 6px;
   background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
   background-size: 400% 400%;
-  animation: shimmer-gold-bg 8s ease-in-out infinite;
+  animation: shimmer-gold-strong 6s ease-in-out infinite;
 }
 
 /* === ПРЕМИУМ БЕЙДЖ === */
@@ -219,12 +230,14 @@ header > div {
   font-weight: 500;
   color: white;
   margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .subscription-badge.premium {
   background: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
   background-size: 400% 400%;
-  animation: shimmer-gold-bg 8s ease-in-out infinite;
+  animation: shimmer-gold-strong 6s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
 }
 
 /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
@@ -242,22 +255,11 @@ header > div {
   border-radius: 12px;
   padding: 16px 12px;
   text-align: center;
-  background: white;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(178, 255, 89, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.06);
   transition: all 0.3s ease;
-}
-
-.action-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
-  border-radius: 12px 12px 0 0;
-  pointer-events: none;
 }
 
 .action-btn:hover {
@@ -286,52 +288,18 @@ header > div {
 
 .widget {
   position: relative;
-  background: white;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
   border-radius: 12px;
   padding: 16px;
   text-align: center;
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.08);
+  border: 1px solid rgba(178, 255, 89, 0.2);
   transition: transform 0.4s ease;
-}
-
-.widget::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
-  border-radius: 12px 12px 0 0;
-  pointer-events: none;
 }
 
 .widget:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
-}
-
-.widget-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.widget-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #757575;
-}
-
-.widget-value {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4CAF50;
-}
-
-.widget-sub {
-  font-size: 12px;
-  color: #757575;
 }
 
 /* === НОВОСТИ === */
@@ -349,7 +317,7 @@ header > div {
   content: '';
   flex: 1;
   height: 1px;
-  background: #eee;
+  background: linear-gradient(to right, transparent, #B2FF59, transparent);
 }
 
 .news-feed {
@@ -363,69 +331,17 @@ header > div {
   position: relative;
   display: flex;
   gap: 12px;
-  background: white;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
   border-radius: 12px;
   padding: 12px 16px;
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.08);
+  border: 1px solid rgba(178, 255, 89, 0.2);
   transition: transform 0.4s ease;
-}
-
-.news-item::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
-  border-radius: 12px 12px 0 0;
-  pointer-events: none;
 }
 
 .news-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
-}
-
-.news-icon {
-  font-size: 24px;
-  min-width: 32px;
-  text-align: center;
-}
-
-.news-content {
-  flex: 1;
-}
-
-.news-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #212121;
-  margin-bottom: 4px;
-}
-
-.news-time {
-  font-size: 12px;
-  color: #757575;
-}
-
-/* === КНОПКИ === */
-.btn-primary {
-  background: #4CAF50;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.btn-primary:hover {
-  background: #388E3C;
-  transform: translateY(-1px);
 }
 
 /* === FAB === */
@@ -440,7 +356,7 @@ header > div {
   color: white;
   border: none;
   font-size: 24px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
   cursor: pointer;
   z-index: 100;
   display: flex;
@@ -474,9 +390,7 @@ header > div {
 
 /* === АДАПТИВ === */
 @media (max-width: 767px) {
-  .main-content { padding: 0; }
   .container { padding: 0 16px; }
   .card { padding: 20px; }
-  .widget-grid,
-  .button-grid { grid-template-columns: 1fr 1fr; }
+  .widget-grid, .button-grid { grid-template-columns: 1fr 1fr; }
 }
