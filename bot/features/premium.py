@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 
 # ✅ Абсолютный импорт
-from bot.database import is_premium_or_admin
+from database import is_premium_or_admin
 
 
 async def cmd_premium(update: Update, context: ContextTypes.DEFAULT_TYPE):
