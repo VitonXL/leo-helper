@@ -11,6 +11,7 @@ if not DATABASE_URL:
 # Глобальный пул
 _db_pool = None
 
+
 async def create_db_pool():
     """
     Создаёт пул подключений к PostgreSQL.
@@ -23,6 +24,7 @@ async def create_db_pool():
     except Exception as e:
         logger.critical(f"❌ Не удалось создать пул БД: {e}")
         raise
+
 
 async def init_db(pool):
     """
@@ -101,13 +103,15 @@ async def init_db(pool):
                 message TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'open',
                 created_at TIMESTAMPTZ DEFAULT NOW(),
-                updated_at TIMESTAMPTZ DEFAULT NOW()
+                updated_at TIMESTAMPTZ DEFAULT NOW(),
+                ticket_id TEXT UNIQUE  -- ✅ Уникальный ID тикета
             );
         ''')
 
         # Индексы
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets(user_id);')
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_status ON support_tickets(status);')
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_ticket_id ON support_tickets(ticket_id);')  
 
         # --- Миграции — расширения ---
         migrations = [
@@ -117,6 +121,7 @@ async def init_db(pool):
             ('is_bot', 'BOOLEAN'),
             ('last_seen', 'TIMESTAMPTZ DEFAULT NOW()'),
             ('premium_expires', 'TIMESTAMPTZ'),
+            ('ticket_id', 'TEXT UNIQUE'),  # ✅ Миграция: добавляет колонку, если её нет
         ]
 
         for column, type_def in migrations:
@@ -124,12 +129,16 @@ async def init_db(pool):
                 await conn.execute(f'''
                     ALTER TABLE users 
                     ADD COLUMN IF NOT EXISTS {column} {type_def};
+                ''') if column != 'ticket_id' else await conn.execute(f'''
+                    ALTER TABLE support_tickets 
+                    ADD COLUMN IF NOT EXISTS {column} {type_def};
                 ''')
                 logger.info(f"✅ Колонка {column} добавлена (если отсутствовала)")
             except Exception as e:
                 logger.warning(f"⚠️ Ошибка при добавлении колонки {column}: {e}")
 
     logger.info("✅ Все таблицы и миграции применены")
+
 
 # --- Работа с пользователями ---
 async def add_or_update_user(pool, user):
@@ -147,7 +156,7 @@ async def add_or_update_user(pool, user):
                 language_code = EXCLUDED.language_code,
                 is_bot = EXCLUDED.is_bot,
                 last_seen = NOW();
-        ''', 
+        ''',
         user.id,
         user.username,
         user.first_name,
@@ -157,10 +166,12 @@ async def add_or_update_user(pool, user):
     )
     logger.info(f"👤 Пользователь {user.id} добавлен/обновлён")
 
+
 async def get_user_role(pool, user_id: int) -> str:
     async with pool.acquire() as conn:
         role = await conn.fetchval('SELECT role FROM users WHERE id = $1', user_id)
         return role or 'user'
+
 
 async def set_user_role(pool, user_id: int, role: str):
     valid_roles = ['user', 'premium', 'admin']
@@ -170,13 +181,16 @@ async def set_user_role(pool, user_id: int, role: str):
         await conn.execute('UPDATE users SET role = $1 WHERE id = $2', role, user_id)
     logger.info(f"🔐 Пользователю {user_id} установлена роль: {role}")
 
+
 async def is_admin(pool, user_id: int) -> bool:
     role = await get_user_role(pool, user_id)
     return role == 'admin'
 
+
 async def is_premium_or_admin(pool, user_id: int) -> bool:
     role = await get_user_role(pool, user_id)
     return role in ['premium', 'admin']
+
 
 # --- Работа с настройками интерфейса ---
 async def get_user_settings(pool, user_id: int) -> dict:
@@ -191,6 +205,7 @@ async def get_user_settings(pool, user_id: int) -> dict:
             }
         return {"theme": "light", "language": "ru"}
 
+
 async def update_user_theme(pool, user_id: int, theme: str):
     if theme not in ["light", "dark"]:
         raise ValueError("Тема должна быть 'light' или 'dark'")
@@ -198,12 +213,14 @@ async def update_user_theme(pool, user_id: int, theme: str):
         await conn.execute('UPDATE users SET theme = $1 WHERE id = $2', theme, user_id)
     logger.info(f"🎨 Пользователь {user_id} сменил тему: {theme}")
 
+
 async def update_user_language(pool, user_id: int, lang: str):
     if lang not in ["ru", "en"]:
         raise ValueError("Язык должен быть 'ru' или 'en'")
     async with pool.acquire() as conn:
         await conn.execute('UPDATE users SET language = $1 WHERE id = $2', lang, user_id)
     logger.info(f"🌐 Пользователь {user_id} сменил язык: {lang}")
+
 
 # --- Рефералы ---
 async def register_referral(pool, referrer_id: int, referred_id: int):
@@ -218,12 +235,14 @@ async def register_referral(pool, referrer_id: int, referred_id: int):
             logger.debug(f"⚠️ Пользователь {referred_id} уже был приглашён")
             return False
 
+
 async def get_referral_stats(pool, user_id: int) -> int:
     async with pool.acquire() as conn:
         count = await conn.fetchval('''
             SELECT COUNT(*) FROM referrals WHERE referrer_id = $1
         ''', user_id)
         return count or 0
+
 
 # --- Статистика ---
 async def log_command_usage(pool, user_id: int, command: str):
@@ -232,6 +251,7 @@ async def log_command_usage(pool, user_id: int, command: str):
             INSERT INTO usage_stats (user_id, command) VALUES ($1, $2)
         ''', user_id, command)
     logger.debug(f"📊 Команда: {command} от {user_id}")
+
 
 # --- Очистка неактивных ---
 async def delete_inactive_users(pool, days=90):
@@ -251,6 +271,7 @@ async def delete_inactive_users(pool, days=90):
         else:
             logger.debug("✅ Нет неактивных для удаления")
         return count
+
 
 # --- Очистка старых тикетов поддержки ---
 async def cleanup_support_tickets(pool, days=7):
@@ -272,6 +293,7 @@ async def cleanup_support_tickets(pool, days=7):
             logger.debug("✅ Нет старых тикетов для удаления")
         return count or 0
 
+
 async def ensure_support_table_exists():
     """
     Гарантирует, что таблица support_tickets существует.
@@ -289,14 +311,17 @@ async def ensure_support_table_exists():
                     message TEXT NOT NULL,
                     status TEXT NOT NULL DEFAULT 'open',
                     created_at TIMESTAMPTZ DEFAULT NOW(),
-                    updated_at TIMESTAMPTZ DEFAULT NOW()
+                    updated_at TIMESTAMPTZ DEFAULT NOW(),
+                    ticket_id TEXT UNIQUE  -- ✅
                 )
             ''')
             await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets(user_id);')
             await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_status ON support_tickets(status);')
+            await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_ticket_id ON support_tickets(ticket_id);')
             logger.info("✅ Таблица support_tickets проверена и готова")
         except Exception as e:
             logger.error(f"❌ Ошибка при создании таблицы support_tickets: {e}")
+
 
 # === Глобальный пул подключений ===
 async def get_db_pool():
