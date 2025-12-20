@@ -3,7 +3,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 
-from database import register_referral, get_referral_stats
+from bot.database import register_referral, get_referral_stats
 
 
 async def cmd_referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
