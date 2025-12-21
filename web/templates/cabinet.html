@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru" class="gradient-bg" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,7 +7,7 @@
   <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/main.css?v=14" />
+  <link rel="stylesheet" href="/static/css/main.css" />
 </head>
 <body>
 
@@ -66,7 +66,7 @@
         <div class="subscription-badge" id="sub-badge">Базовая</div>
         <h2>🌱 Добро пожаловать в Лео</h2>
         <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
-        <button class="btn-primary" onclick="navigateTo('premium')">
+        <button class="btn" onclick="navigateTo('premium')">
           {{ 'Управлять' if user.is_premium else 'Получить премиум' }}
         </button>
       </div>
@@ -94,25 +94,25 @@
 
       <!-- Виджеты -->
       <div class="widget-grid">
-        <div class="widget weather-widget">
+        <div class="card widget weather-widget">
           <div class="widget-icon">🌤</div>
           <div class="widget-title">Погода</div>
           <div class="widget-value"><span id="current-temp">+12°C</span></div>
           <div class="widget-sub">в Москве</div>
         </div>
-        <div class="widget currency-widget">
+        <div class="card widget currency-widget">
           <div class="widget-icon">💵</div>
           <div class="widget-title">Курс USD</div>
           <div class="widget-value"><span id="usd-rate">98.50</span> ₽</div>
           <div class="widget-sub">на сегодня</div>
         </div>
-        <div class="widget chat-widget">
+        <div class="card widget chat-widget">
           <div class="widget-icon">🤖</div>
           <div class="widget-title">GigaChat</div>
           <div class="widget-value">{{ user.gigachat_requests or 0 }}/10</div>
           <div class="widget-sub">запросов</div>
         </div>
-        <div class="widget reminder-widget">
+        <div class="card widget reminder-widget">
           <div class="widget-icon">🛎</div>
           <div class="widget-title">Напоминания</div>
           <div class="widget-value">{{ user.reminders or 2 }}</div>
@@ -124,7 +124,7 @@
       <div class="section-title">📰 Новости дня</div>
       <div class="news-feed" id="news-feed"></div>
       <div class="news-footer">
-        <button class="btn-sm" onclick="loadMoreNews()">Ещё новости</button>
+        <button class="btn" style="padding: 8px 16px; font-size: 14px;" onclick="loadMoreNews()">Ещё новости</button>
       </div>
 
     </div>
@@ -158,6 +158,7 @@
       document.getElementById('mood-icon').textContent = i;
     }
 
+    // Обновляем бейдж премиума
     const badge = document.getElementById('sub-badge');
     if (badge) {
       if (userData.isPremium) {
@@ -168,6 +169,7 @@
       }
     }
 
+    // Показываем админ-ссылку
     if (userData.role === 'admin' && document.getElementById('admin-link')) {
       document.getElementById('admin-link').style.display = 'flex';
     }
@@ -189,12 +191,12 @@
       const toShow = mockNews.slice(0, count);
       toShow.forEach(news => {
         const item = document.createElement('div');
-        item.className = 'news-item';
+        item.className = 'card news-item';
         item.innerHTML = `
-          <div class="news-icon">${news.icon}</div>
-          <div class="news-content">
-            <div class="news-title">${news.title}</div>
-            <div class="news-time">${news.time}</div>
+          <div class="news-icon" style="font-size: 24px; margin-right: 12px;">${news.icon}</div>
+          <div class="news-content" style="flex: 1;">
+            <div class="news-title" style="font-weight: 500; margin: 0 0 4px; color: var(--text);">${news.title}</div>
+            <div class="news-time" style="font-size: 14px; color: var(--text-secondary); margin: 0;">${news.time}</div>
           </div>
         `;
         container.appendChild(item);
