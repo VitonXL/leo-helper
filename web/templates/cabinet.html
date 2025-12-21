@@ -6,13 +6,13 @@
 <style>
 /* === ЕДИНАЯ ДИЗАЙН-СИСТЕМА === */
 :root {
-  --bg: #ffffff;
+  --bg: transparent;
   --card-bg: rgba(255, 255, 255, 0.95);
   --text: #212121;
   --text-secondary: #757575;
   --border: rgba(178, 255, 89, 0.2);
   --accent: #4CAF50;
-  --accent-light: #B2FF59;
+  --accent-light: #42a5f5;
   --gold: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
   --radius-sm: 8px;
   --radius-md: 16px;
@@ -24,7 +24,7 @@
 
 /* === ТЕМНАЯ ТЕМА === */
 [data-theme="dark"] {
-  --bg: #121212;
+  --bg: transparent;
   --card-bg: rgba(30, 30, 30, 0.95);
   --text: #ffffff;
   --text-secondary: #b0b0b0;
@@ -35,9 +35,23 @@
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: var(--bg);
   color: var(--text);
-  transition: background 0.3s, color 0.3s;
+  transition: color 0.3s ease;
+  background: linear-gradient(135deg, #e0f7fa, #b2ebf2, #80deea);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+[data-theme="dark"] body {
+  background: linear-gradient(135deg, #0d1b2a, #1b263b, #102027);
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* === САЙДБАР === */
@@ -135,7 +149,7 @@ header {
 .header-icons {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .material-icons {
@@ -154,6 +168,10 @@ header {
   justify-content: center;
   font-weight: 500;
   font-size: 16px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid var(--accent-light);
 }
 
 /* === КОНТЕЙНЕР === */
@@ -179,7 +197,9 @@ header {
 }
 
 .card.highlight {
-  background: linear-gradient(135deg, #B2FF59, #CCFF90);
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb, #90caf9);
+  border: 1px solid #bbdefb;
+  box-shadow: 0 4px 16px rgba(144, 202, 249, 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -189,27 +209,15 @@ header {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 6px;
-  background: var(--gold);
+  background: linear-gradient(to right, #42a5f5, #1e88e5, #42a5f5);
   background-size: 400% 400%;
-  animation: shimmer-gold-strong 6s ease-in-out infinite;
+  animation: shimmer-blue 6s ease-in-out infinite;
 }
 
-/* === ЗАГОЛОВКИ === */
-.section-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 24px 0 12px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-title::before {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--accent-light), transparent);
+@keyframes shimmer-blue {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* === КНОПКИ === */
@@ -221,16 +229,34 @@ header {
   color: white;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.8s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.25);
 }
 
-.btn-primary {
-  background: var(--accent);
+.btn:active {
+  transform: translateY(-1px);
 }
 
 .btn-sm {
@@ -275,43 +301,62 @@ header {
   font-weight: 500;
 }
 
-/* === ВИДЖЕТЫ === */
-.widget-grid {
+/* === ДЕТАЛЬНЫЕ ВИДЖЕТЫ === */
+.detailed-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 16px;
   margin-bottom: 30px;
 }
 
-.widget {
+.detailed-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 16px;
-  text-align: center;
   font-size: 14px;
+  transition: transform 0.3s ease;
 }
 
-.widget-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
+.detailed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
 }
 
-.widget-title {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 4px 0;
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 12px;
+  font-size: 15px;
 }
 
-.widget-value {
-  font-size: 18px;
+.temp-large {
+  font-size: 24px;
   font-weight: 700;
   color: var(--text);
 }
 
-.widget-sub {
+.weather-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 8px 0;
+}
+
+.weather-more {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+@media (min-width: 768px) {
+  .detailed-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* === НОВОСТИ === */
@@ -357,7 +402,7 @@ header {
   margin: 16px 0;
 }
 
-/* === PREMIUM BADGE === */
+/* === ПОДПИСКА === */
 .subscription-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -375,8 +420,6 @@ header {
   box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
 }
 
-/* === FAB — УДАЛЁН === */
-
 /* === ОВЕРЛЕЙ === */
 .overlay {
   display: none;
@@ -392,12 +435,6 @@ header {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
 /* === АДАПТИВ === */
@@ -460,6 +497,11 @@ header {
         <span class="material-icons" onclick="toggleTheme()">
           <span id="theme-icon">🌙</span>
         </span>
+        <div id="admin-button" style="display: none;">
+          <button class="btn btn-sm" onclick="navigateTo('admin')">
+            <span class="material-icons">admin_panel_settings</span> Админка
+          </button>
+        </div>
         <div class="avatar">{{ user.first_name[0].upper() }}</div>
       </div>
     </header>
@@ -471,7 +513,7 @@ header {
         <div class="subscription-badge" id="sub-badge">Базовая</div>
         <h2>🌱 Добро пожаловать в Лео</h2>
         <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
-        <button class="btn-primary" onclick="navigateTo('premium')">
+        <button class="btn" onclick="navigateTo('premium')">
           {{ 'Управлять' if user.is_premium else 'Получить премиум' }}
         </button>
       </div>
@@ -497,31 +539,38 @@ header {
         </a>
       </div>
 
-      <!-- Виджеты -->
-      <div class="widget-grid">
-        <div class="widget weather-widget">
-          <div class="widget-icon">🌤</div>
-          <div class="widget-title">Погода</div>
-          <div class="widget-value"><span id="current-temp">+12°C</span></div>
-          <div class="widget-sub">в Москве</div>
+      <!-- Подробные виджеты -->
+      <div class="detailed-grid">
+        <!-- Погода -->
+        <div class="detailed-card weather-card">
+          <div class="card-header">
+            <span class="material-icons">wb_sunny</span>
+            <span>Погода в Москве</span>
+          </div>
+          <div class="card-body">
+            <div class="temp-large">+14°C</div>
+            <div class="weather-desc">Облачно, без осадков</div>
+            <div class="weather-more">
+              <span>Ощущается как +12°C</span>
+              <span>Влажность: 65%</span>
+            </div>
+          </div>
         </div>
-        <div class="widget currency-widget">
-          <div class="widget-icon">💵</div>
-          <div class="widget-title">Курс USD</div>
-          <div class="widget-value"><span id="usd-rate">98.50</span> ₽</div>
-          <div class="widget-sub">на сегодня</div>
-        </div>
-        <div class="widget chat-widget">
-          <div class="widget-icon">🤖</div>
-          <div class="widget-title">GigaChat</div>
-          <div class="widget-value">{{ user.gigachat_requests or 0 }}/10</div>
-          <div class="widget-sub">запросов</div>
-        </div>
-        <div class="widget reminder-widget">
-          <div class="widget-icon">🛎</div>
-          <div class="widget-title">Напоминания</div>
-          <div class="widget-value">{{ user.reminders or 2 }}</div>
-          <div class="widget-sub">активных</div>
+
+        <!-- Курс USD -->
+        <div class="detailed-card currency-card">
+          <div class="card-header">
+            <span class="material-icons">trending_up</span>
+            <span>Курс доллара</span>
+          </div>
+          <div class="card-body">
+            <div class="temp-large">98.72 ₽</div>
+            <div class="weather-desc">ЦБ РФ, сегодня</div>
+            <div class="weather-more">
+              <span>Изм. за день: +0.25 ₽</span>
+              <span>Макс. за неделю: 99.40 ₽</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -529,7 +578,7 @@ header {
       <div class="section-title">📰 Новости дня</div>
       <div class="news-feed" id="news-feed"></div>
       <div class="news-footer">
-        <button class="btn-sm" onclick="loadMoreNews()">Ещё новости</button>
+        <button class="btn btn-sm" onclick="loadMoreNews()">Ещё новости</button>
       </div>
 
     </div>
@@ -572,10 +621,12 @@ header {
       }
     }
 
-    if (userData.role === 'admin' && document.getElementById('admin-link')) {
+    if (userData.role === 'admin') {
       document.getElementById('admin-link').style.display = 'flex';
+      document.getElementById('admin-button').style.display = 'block';
     } else {
       document.getElementById('admin-link').style.display = 'none';
+      document.getElementById('admin-button').style.display = 'none';
     }
 
     const mockNews = [
@@ -639,12 +690,19 @@ header {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = getCookie('theme') || 'light';
+      const savedTheme = getCookie('theme') || 'dark';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
       updateGreeting();
       renderNews(3);
       Toast.info('Добро пожаловать, ' + userData.firstName + '!');
+
+      // Подставляем фото из Telegram
+      if (window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url) {
+        const avatar = document.querySelector('.avatar');
+        avatar.style.backgroundImage = `url(${window.Telegram.WebApp.initDataUnsafe.user.photo_url})`;
+        avatar.innerHTML = '';
+      }
     });
 
     function getCookie(name) {
