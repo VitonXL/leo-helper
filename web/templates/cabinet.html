@@ -239,32 +239,50 @@ header {
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #4CAF50;
 }
 
 .btn-primary {
   background: var(--gold);
   background-size: 200% 200%;
   animation: gradient-shift-gold 3s ease infinite;
+  color: white;
 }
 
-@keyframes gradient-shift-gold {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+  background: #4CAF50;
+  color: white;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
 }
 
-.btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.25);
+.btn-sm:hover {
+  background: #45a049;
+  transform: translateY(-2px);
 }
 
 .btn:active {
   transform: translateY(-1px);
 }
 
-.btn-sm {
-  padding: 8px 16px;
-  font-size: 14px;
+#admin-button .btn {
+  background: #4CAF50;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+}
+
+#admin-button .btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+@keyframes gradient-shift-gold {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
@@ -580,7 +598,7 @@ header {
       <div class="section-title">📰 Новости дня</div>
       <div class="news-feed" id="news-feed"></div>
       <div class="news-footer">
-        <button class="btn btn-sm" onclick="loadMoreNews()">Ещё новости</button>
+        <button class="btn btn-sm" style="width: 100%;" onclick="loadMoreNews()">⚡ Ещё новости</button>
       </div>
 
     </div>
