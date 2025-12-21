@@ -1,3 +1,61 @@
-<button class="btn" style="position: absolute; top: 20px; right: 20px; padding: 8px 12px; font-size: 14px;" onclick="toggleTheme()">
-  {{ '🌙 Тёмная' if theme == 'light' else '☀️ Светлая' }} тема
-</button>
+<!-- web/templates/partials/theme-toggle.html -->
+<div class="theme-toggle-container">
+  <button class="btn toggle-btn" id="theme-toggle" onclick="toggleTheme()">
+    <span class="icon">🌙</span>
+    <span class="label">Тёмная тема</span>
+  </button>
+</div>
+
+<script>
+  function toggleTheme() {
+    const btn = document.getElementById('theme-toggle');
+    const icon = btn.querySelector('.icon');
+    const label = btn.querySelector('.label');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    const newTheme = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+
+    // Обновляем UI
+    icon.textContent = isDark ? '🌙' : '☀️';
+    label.textContent = isDark ? 'Тёмная тема' : 'Светлая тема';
+
+    // Сохраняем в куки
+    document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
+
+    // Отправляем на сервер
+    const urlParams = new URLSearchParams(window.location.search);
+    const user_id = urlParams.get('user_id');
+    const hash = urlParams.get('hash');
+
+    if (user_id && hash) {
+      fetch('/api/set-theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: parseInt(user_id), theme: newTheme, hash })
+      }).catch(console.warn);
+    }
+  }
+
+  // Восстанавливаем тему
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = getCookie('theme') || '{{ theme }}' || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+      const icon = btn.querySelector('.icon');
+      const label = btn.querySelector('.label');
+      if (savedTheme === 'dark') {
+        icon.textContent = '☀️';
+        label.textContent = 'Светлая тема';
+      }
+    }
+  });
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+</script>
