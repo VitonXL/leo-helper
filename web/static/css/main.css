@@ -394,3 +394,114 @@ header > div {
   .card { padding: 20px; }
   .widget-grid, .button-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* === НИЖНЕЕ МЕНЮ (только на телефонах) === */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(76, 175, 80, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #757575;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.3s;
+  flex: 1;
+}
+
+.nav-item.active {
+  color: #4CAF50;
+}
+
+.nav-item .material-icons {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+/* === СКРЫТЬ САЙДБАР И ПОКАЗАТЬ НИЗ НА МАЛЕНЬКИХ ЭКРАНАХ === */
+@media (max-width: 767px) {
+  .sidebar {
+    display: none;
+  }
+
+  .header-icons {
+    gap: 10px;
+  }
+
+  .header-icons .material-icons {
+    font-size: 18px;
+  }
+
+  .main-content {
+    padding-bottom: 70px; /* под нижнее меню */
+  }
+
+  .bottom-nav {
+    display: flex;
+  }
+
+  /* Увеличим отступы на мобильных */
+  .container {
+    padding: 0 12px;
+  }
+
+  .card {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .button-grid,
+  .widget-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .action-btn,
+  .widget {
+    padding: 14px 8px;
+    font-size: 14px;
+  }
+
+  .action-icon {
+    font-size: 24px;
+  }
+
+  .news-item {
+    padding: 10px 12px;
+  }
+
+  .news-title {
+    font-size: 14px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .btn-primary {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .fab {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+}
