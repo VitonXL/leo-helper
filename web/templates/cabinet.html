@@ -2,6 +2,418 @@
 
 {% block title %}Лео — Личный кабинет{% endblock %}
 
+{% block styles %}
+<style>
+/* === ЕДИНАЯ ДИЗАЙН-СИСТЕМА === */
+:root {
+  --bg: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --text: #212121;
+  --text-secondary: #757575;
+  --border: rgba(178, 255, 89, 0.2);
+  --accent: #4CAF50;
+  --accent-light: #B2FF59;
+  --gold: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow: 0 6px 20px rgba(76, 175, 80, 0.08);
+  --shadow-hover: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
+  --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* === ТЕМНАЯ ТЕМА === */
+[data-theme="dark"] {
+  --bg: #121212;
+  --card-bg: rgba(30, 30, 30, 0.95);
+  --text: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border: rgba(178, 255, 89, 0.1);
+}
+
+/* === ГЛАВНЫЙ ФОН === */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* === САЙДБАР === */
+.sidebar {
+  position: fixed;
+  left: -280px;
+  top: 0;
+  width: 280px;
+  height: 100%;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-hover);
+  z-index: 1000;
+  transition: left 0.3s ease;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+}
+
+nav {
+  padding: 20px 0;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 16px;
+  transition: var(--transition);
+  border-left: 4px solid transparent;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 4px solid var(--accent);
+}
+
+.nav-link.active {
+  font-weight: 500;
+}
+
+/* === ОСНОВНОЙ КОНТЕНТ === */
+.main-content {
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.open ~ .main-content {
+  margin-left: 280px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.hamburger {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.hamburger:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.material-icons {
+  cursor: pointer;
+  user-select: none;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* === КОНТЕЙНЕР === */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* === КАРТЫ === */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  transition: transform var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card.highlight {
+  background: linear-gradient(135deg, #B2FF59, #CCFF90);
+  position: relative;
+  overflow: hidden;
+}
+
+.card.highlight::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: var(--gold);
+  background-size: 400% 400%;
+  animation: shimmer-gold-strong 6s ease-in-out infinite;
+}
+
+/* === ЗАГОЛОВКИ === */
+.section-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 24px 0 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent-light), transparent);
+}
+
+/* === КНОПКИ === */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-primary {
+  background: var(--accent);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* === БЫСТРЫЕ ДЕЙСТВИЯ === */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.action-btn:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.action-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.action-label {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* === ВИДЖЕТЫ === */
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.widget {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.widget-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.widget-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 4px 0;
+}
+
+.widget-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.widget-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* === НОВОСТИ === */
+.news-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.news-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.news-icon {
+  font-size: 24px;
+}
+
+.news-content {
+  flex: 1;
+}
+
+.news-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+}
+
+.news-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.news-footer {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* === PREMIUM BADGE === */
+.subscription-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.subscription-badge.premium {
+  background: var(--gold);
+  background-size: 400% 400%;
+  animation: shimmer-gold-strong 6s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
+}
+
+/* === FAB — УДАЛЁН (по твоему желанию) === */
+
+/* === ОВЕРЛЕЙ === */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+/* === АНИМАЦИИ === */
+@keyframes shimmer-gold-strong {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+/* === АДАПТИВ === */
+@media (max-width: 768px) {
+  .widget-grid,
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    left: -100%;
+  }
+}
+</style>
+{{ super() }}
+{% endblock %}
+
 {% block content %}
 
   <!-- Сайдбар -->
@@ -81,9 +493,6 @@
 
     </div>
   </div>
-
-  <!-- FAB -->
-  <button class="fab" onclick="navigateTo('gigachat')">💬</button>
 
   <!-- Оверлей -->
   <div class="overlay" onclick="toggleSidebar()"></div>
