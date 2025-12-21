@@ -4,7 +4,7 @@
 
 {% block styles %}
 <style>
-/* === ЕДИНАЯ ДИЗАЙН-СИСТЕМА (как в cabinet) === */
+/* === ЕДИНАЯ ДИЗАЙН-СИСТЕМА === */
 :root {
   --bg: transparent;
   --card-bg: rgba(255, 255, 255, 0.95);
@@ -60,7 +60,7 @@ body, html {
 
 /* === КОНТЕЙНЕР === */
 .container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -76,6 +76,10 @@ body, html {
   font-weight: 700;
   color: var(--accent);
   margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .admin-header p {
@@ -83,7 +87,7 @@ body, html {
   font-size: 15px;
 }
 
-/* === КАРТА АДМИНКИ === */
+/* === КАРТЫ === */
 .admin-card {
   background: var(--card-bg);
   border-radius: var(--radius-lg);
@@ -114,52 +118,64 @@ body, html {
   color: var(--accent);
 }
 
-/* === СПИСКИ ПОЛЬЗОВАТЕЛЕЙ === */
-.user-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 8px;
+/* === ТАБЛИЦЫ === */
+.user-table, .support-table {
+  width: 100%;
+  border-collapse: collapse;
   margin-bottom: 20px;
+  font-size: 14px;
 }
 
-.user-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px;
-  background: rgba(76, 175, 80, 0.06);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  font-size: 15px;
-  transition: background 0.2s;
+.user-table th, .user-table td,
+.support-table th, .support-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 
-.user-item:hover {
-  background: rgba(76, 175, 80, 0.1);
-}
-
-.user-name {
+.user-table th,
+.support-table th {
+  background: rgba(76, 175, 80, 0.08);
+  color: var(--text-secondary);
   font-weight: 500;
-  color: var(--text);
+  font-size: 13px;
+  text-transform: uppercase;
 }
 
-.user-role {
-  font-size: 12px;
+.user-table tr:hover,
+.support-table tr:hover {
+  background: rgba(76, 175, 80, 0.06);
+}
+
+/* === СТАТУСЫ === */
+.status {
   padding: 4px 10px;
   border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.status.premium {
   background: var(--gold-soft);
   color: #1a1a1a;
-  font-weight: 500;
   background-size: 400% 400%;
   animation: shimmer-gold 6s ease-in-out infinite;
 }
 
+.status.admin {
+  background: #4CAF50;
+  color: white;
+}
+
+.status.user {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--text);
+}
+
 /* === КНОПКИ === */
 .btn {
-  padding: 12px 24px;
+  padding: 10px 20px;
   border: none;
   border-radius: var(--radius-sm);
   color: white;
@@ -171,7 +187,8 @@ body, html {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: #4CAF50;
-  font-size: 15px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -190,11 +207,16 @@ body, html {
   transform: translateY(-1px);
 }
 
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
 .btn-group {
   display: flex;
   gap: 16px;
   justify-content: center;
-  margin-top: 20px;
+  margin: 20px 0;
   flex-wrap: wrap;
 }
 
@@ -237,6 +259,13 @@ body, html {
 
 /* === АДАПТИВ === */
 @media (max-width: 768px) {
+  .user-table, .support-table {
+    font-size: 13px;
+  }
+  .user-table th, .user-table td,
+  .support-table th, .support-table td {
+    padding: 8px;
+  }
   .btn-group {
     flex-direction: column;
     align-items: center;
@@ -244,10 +273,6 @@ body, html {
   .btn {
     width: 100%;
     max-width: 280px;
-    text-align: center;
-  }
-  .admin-header h1 {
-    font-size: 24px;
   }
 }
 </style>
@@ -257,50 +282,102 @@ body, html {
 {% block content %}
   <div class="container">
     <div class="admin-header">
-      <h1>🔐 Админ-панель</h1>
-      <p>Управление пользователями и системой</p>
+      <h1><span class="material-icons">admin_panel_settings</span> Админ-панель</h1>
+      <p>Управление пользователями, поддержкой и системой</p>
     </div>
 
+    <!-- Управление пользователями -->
     <div class="admin-card">
       <h2><span class="material-icons">group</span> Пользователи</h2>
-      <div id="user-list" class="user-list">
-        <!-- Загрузка -->
-        <div class="loading">
-          <div class="spinner"></div>
-          <span>Загрузка данных...</span>
-        </div>
-      </div>
-
       <div class="btn-group">
         <button class="btn btn-primary" onclick="refreshUsers()">
           <span class="material-icons">refresh</span> Обновить
+        </button>
+        <button class="btn" onclick="patchUsers()">
+          <span class="material-icons">update</span> Обновить из users.yml
         </button>
         <button class="btn" onclick="exportUsers()">
           <span class="material-icons">download</span> Экспорт
         </button>
       </div>
+
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Пользователь</th>
+            <th>Роль</th>
+            <th>Премиум</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="user-list">
+          <tr>
+            <td colspan="5" class="loading">
+              <div class="spinner"></div>
+              <span>Загрузка пользователей...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
+    <!-- Техподдержка -->
+    <div class="admin-card">
+      <h2><span class="material-icons">help</span> Техподдержка</h2>
+      <table class="support-table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Пользователь</th>
+            <th>Сообщение</th>
+            <th>Дата</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody id="support-list">
+          <tr>
+            <td>1</td>
+            <td>@vitron</td>
+            <td>Не работает GigaChat</td>
+            <td>10:30</td>
+            <td><div class="status">Новое</div></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>@user_123</td>
+            <td>Ошибка при оплате</td>
+            <td>09:15</td>
+            <td><div class="status">В обработке</div></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="btn-group">
+        <button class="btn" onclick="markAsRead()">
+          <span class="material-icons">check</span> Отметить прочитанными
+        </button>
+      </div>
+    </div>
+
+    <!-- Система -->
     <div class="admin-card">
       <h2><span class="material-icons">settings</span> Система</h2>
-      <div class="user-list">
-        <div class="user-item">
-          <div class="user-name">Версия</div>
-          <div>v1.2.0</div>
-        </div>
-        <div class="user-item">
-          <div class="user-name">База данных</div>
-          <div>Подключена</div>
-        </div>
-        <div class="user-item">
-          <div class="user-name">Темы</div>
-          <div>Активны</div>
+      <div class="user-table">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div><strong>Версия:</strong> v1.2.0</div>
+          <div><strong>База данных:</strong> Подключена</div>
+          <div><strong>Активных пользователей:</strong> 128</div>
+          <div><strong>Премиум:</strong> 24</div>
         </div>
       </div>
 
       <div class="btn-group">
         <button class="btn" onclick="clearCache()">
           <span class="material-icons">delete</span> Очистить кэш
+        </button>
+        <button class="btn" onclick="restartBot()">
+          <span class="material-icons">restart_alt</span> Перезапустить
         </button>
       </div>
     </div>
@@ -310,59 +387,90 @@ body, html {
 {% block scripts %}
   {{ super() }}
   <script>
-    // Пример данных (заменится на API)
+    // Моковые данные
     const mockUsers = [
-      { id: 1, name: "vitron", role: "admin", premium: true },
-      { id: 2, name: "user_12345", role: "user", premium: false },
-      { id: 3, name: "premium_user", role: "user", premium: true }
+      { id: 1, username: "vitron", role: "admin", is_premium: true },
+      { id: 2, username: "user_12345", role: "user", is_premium: false },
+      { id: 3, username: "premium_user", role: "user", is_premium: true }
     ];
 
     function renderUsers(users) {
-      const container = document.getElementById('user-list');
-      container.innerHTML = '';
+      const tbody = document.getElementById('user-list');
+      tbody.innerHTML = '';
       users.forEach(user => {
-        const item = document.createElement('div');
-        item.className = 'user-item';
-        item.innerHTML = `
-          <div class="user-name">@${user.name}</div>
-          <div class="user-role">${user.role === 'admin' ? 'Админ' : 'Пользователь'}</div>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${user.id}</code></td>
+          <td>@${user.username}</td>
+          <td><div class="status ${user.role}">${user.role === 'admin' ? 'Админ' : 'Пользователь'}</div></td>
+          <td><div class="status ${user.is_premium ? 'premium' : 'user'}">${user.is_premium ? 'Да' : 'Нет'}</div></td>
+          <td>
+            <button class="btn btn-sm" onclick="setRole(${user.id}, '${user.role === 'admin' ? 'user' : 'admin'}')">
+              ${user.role === 'admin' ? 'Снять админа' : 'Сделать админом'}
+            </button>
+          </td>
         `;
-        container.appendChild(item);
+        tbody.appendChild(tr);
       });
     }
 
     function refreshUsers() {
-      document.getElementById('user-list').innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <span>Загрузка...</span>
-        </div>
+      const tbody = document.getElementById('user-list');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="loading">
+            <div class="spinner"></div>
+            <span>Загрузка...</span>
+          </td>
+        </tr>
       `;
       setTimeout(() => {
         renderUsers(mockUsers);
-        Toast.info('Данные обновлены');
-      }, 1000);
+        Toast.info('Пользователи обновлены');
+      }, 800);
+    }
+
+    function patchUsers() {
+      Toast.info('Запуск патча из users.yml...');
+      setTimeout(() => {
+        Toast.success('База обновлена из users.yml');
+      }, 1500);
     }
 
     function exportUsers() {
-      Toast.success('Экспорт начат');
+      Toast.info('Экспорт пользователей...');
+    }
+
+    function setRole(id, newRole) {
+      Toast.success(`Роль пользователя ${id} изменена на ${newRole}`);
+      refreshUsers();
+    }
+
+    function markAsRead() {
+      Toast.info('Все обращения отмечены как прочитанные');
     }
 
     function clearCache() {
       Toast.info('Кэш очищен');
     }
 
+    function restartBot() {
+      Toast.info('Перезапуск бота...');
+      setTimeout(() => {
+        Toast.success('Бот перезапущен');
+      }, 2000);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      // Тема
       const savedTheme = getCookie('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
 
-      // Загрузка
+      // Симуляция загрузки
       setTimeout(() => {
         renderUsers(mockUsers);
       }, 800);
 
-      Toast.info('Добро пожаловать в админку, ' + (userData?.firstName || 'Админ') + '!');
+      Toast.info('Добро пожаловать, админ!');
     });
 
     function getCookie(name) {
