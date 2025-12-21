@@ -64,26 +64,61 @@ body, html {
   padding: 20px;
 }
 
-/* === ЗАГОЛОВОК === */
-.finance-header {
-  text-align: center;
-  margin: 40px 0 30px;
+/* === НАВИГАЦИЯ СВЕРХУ (единый стиль с кабинетом) === */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-bg);
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 30px;
+  z-index: 100;
 }
 
-.finance-header h1 {
-  font-size: 28px;
-  font-weight: 700;
+.navbar-title {
+  font-size: 20px;
+  font-weight: 600;
   color: var(--accent);
-  margin: 0 0 8px 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.navbar-actions {
+  display: flex;
   gap: 12px;
 }
 
-.finance-header p {
-  color: var(--text-secondary);
-  font-size: 15px;
+.nav-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-btn:hover {
+  background: rgba(76, 175, 80, 0.08);
+  transform: translateY(-1px);
+}
+
+.nav-btn.accent {
+  background: var(--accent);
+  color: white;
+}
+
+.nav-btn.accent:hover {
+  background: #3d8b40;
 }
 
 /* === КАРТЫ === */
@@ -315,6 +350,15 @@ body, html {
   .catalog-btn .name {
     max-width: 140px;
   }
+  .navbar {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  .navbar-actions {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
 {{ super() }}
@@ -322,9 +366,23 @@ body, html {
 
 {% block content %}
   <div class="container">
-    <div class="finance-header">
-      <h1><span class="material-icons">payments</span> Финансы</h1>
-      <p>Управление проектами, валютами и бюджетом</p>
+
+    <!-- ЕДИНОЕ НАВИГАЦИОННОЕ МЕНЮ (как в кабинете) -->
+    <div class="navbar">
+      <h2 class="navbar-title">
+        <span class="material-icons">payments</span> Финансы
+      </h2>
+      <div class="navbar-actions">
+        <button class="nav-btn" onclick="history.back()">
+          <span class="material-icons">arrow_back</span> Назад
+        </button>
+        <button class="nav-btn" onclick="toggleTheme()">
+          <span class="material-icons" id="theme-icon">dark_mode</span> Тема
+        </button>
+        <button class="nav-btn accent" onclick="window.location.href='/cabinet'">
+          <span class="material-icons">account_circle</span> Кабинет
+        </button>
+      </div>
     </div>
 
     <!-- Создание каталога -->
@@ -407,9 +465,31 @@ body, html {
 
     // Инициализация
     function init() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+
       renderCatalogs();
-      if (catalogs.length > 0) {
+      if (catalogs.length > 0 && !currentCatalogId) {
         selectCatalog(catalogs[0].id);
+      }
+    }
+
+    // Смена темы
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      
+      if (isDark) {
+        html.setAttribute('data-theme', 'light');
+        document.getElementById('theme-icon').textContent = 'dark_mode';
+        localStorage.setItem('theme', 'light');
+        Toast.info('Светлая тема');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').textContent = 'light_mode';
+        localStorage.setItem('theme', 'dark');
+        Toast.info('Тёмная тема');
       }
     }
 
@@ -436,6 +516,10 @@ body, html {
       renderCatalogs();
       document.getElementById('catalog-name').value = '';
       Toast.success(`📁 "${name}" создан`);
+
+      if (catalogs.length === 1) {
+        selectCatalog(newCatalog.id);
+      }
     }
 
     // Отображение каталогов
@@ -467,7 +551,6 @@ body, html {
     // Выбрать каталог
     function selectCatalog(id) {
       currentCatalogId = id;
-      renderCatalogs();
       const cat = catalogs.find(c => c.id === id);
       if (!cat) return;
 
@@ -475,6 +558,8 @@ body, html {
       document.getElementById('current-catalog').textContent = cat.name;
       document.getElementById('current-icon').textContent = cat.icon;
       document.getElementById('current-currency').textContent = cat.currency;
+
+      renderCatalogs();
       renderOperations(cat);
     }
 
@@ -521,40 +606,60 @@ body, html {
 
     // Доход
     function addIncomeToCatalog() {
-      const amount = parseFloat(document.getElementById('op-amount').value);
-      const note = document.getElementById('op-note').value.trim() || 'Доход';
+      const amountInput = document.getElementById('op-amount');
+      const noteInput = document.getElementById('op-note');
+      const amount = parseFloat(amountInput.value);
+      const note = noteInput.value.trim() || 'Доход';
+
       if (isNaN(amount) || amount <= 0) return Toast.error('Введите сумму');
 
       const cat = catalogs.find(c => c.id === currentCatalogId);
-      cat.balance += amount;
-      cat.income += amount;
-      cat.operations.push({ type: 'income', amount, note, date: new Date().toISOString() });
+      cat.balance = (parseFloat(cat.balance) + amount).toFixed(2);
+      cat.income = (parseFloat(cat.income) + amount).toFixed(2);
+      cat.operations.push({
+        type: 'income',
+        amount: parseFloat(amount),
+        note,
+        date: new Date().toISOString()
+      });
 
       saveCatalogs();
       selectCatalog(currentCatalogId);
-      document.getElementById('op-amount').value = '';
-      document.getElementById('op-note').value = '';
+
+      amountInput.value = '';
+      noteInput.value = '';
       Toast.success(`+${amount} ${cat.currency} добавлено`);
     }
 
     // Расход
     function addExpenseToCatalog() {
-      const amount = parseFloat(document.getElementById('op-amount').value);
-      const note = document.getElementById('op-note').value.trim() || 'Расход';
+      const amountInput = document.getElementById('op-amount');
+      const noteInput = document.getElementById('op-note');
+      const amount = parseFloat(amountInput.value);
+      const note = noteInput.value.trim() || 'Расход';
+
       if (isNaN(amount) || amount <= 0) return Toast.error('Введите сумму');
-      if (amount > catalogs.find(c => c.id === currentCatalogId)?.balance) {
+
+      const cat = catalogs.find(c => c.id === currentCatalogId);
+      const newBalance = (parseFloat(cat.balance) - amount).toFixed(2);
+      if (newBalance < 0) {
         return Toast.error('Недостаточно средств');
       }
 
-      const cat = catalogs.find(c => c.id === currentCatalogId);
-      cat.balance -= amount;
-      cat.expense += amount;
-      cat.operations.push({ type: 'expense', amount, note, date: new Date().toISOString() });
+      cat.balance = newBalance;
+      cat.expense = (parseFloat(cat.expense) + amount).toFixed(2);
+      cat.operations.push({
+        type: 'expense',
+        amount: parseFloat(amount),
+        note,
+        date: new Date().toISOString()
+      });
 
       saveCatalogs();
       selectCatalog(currentCatalogId);
-      document.getElementById('op-amount').value = '';
-      document.getElementById('op-note').value = '';
+
+      amountInput.value = '';
+      noteInput.value = '';
       Toast.info(`-${amount} ${cat.currency} списано`);
     }
 
@@ -566,15 +671,21 @@ body, html {
       let rate = 1;
       if (cat.currency === 'USD') rate = 92;
       else if (cat.currency === 'EUR') rate = 100;
-      else if (cat.currency === 'BTC') rate = 4000000;
+      else if (cat.currency === 'BTC') rate = 4_000_000;
 
-      const rub = (cat.balance * rate).toFixed(2);
-      Toast.info(`Текущий баланс: ${cat.balance} ${cat.currency} ≈ ${rub} RUB`, 5000);
+      const rub = (cat.balance * rate).toLocaleString('ru-RU');
+      Toast.info(`Баланс: ${cat.balance} ${cat.currency} ≈ ${rub} RUB`, 6000);
     }
 
     // Сохранение
     function saveCatalogs() {
-      localStorage.setItem('finance_catalogs', JSON.stringify(catalogs));
+      const safeCatalogs = catalogs.map(cat => ({
+        ...cat,
+        balance: parseFloat(cat.balance) || 0,
+        income: parseFloat(cat.income) || 0,
+        expense: parseFloat(cat.expense) || 0
+      }));
+      localStorage.setItem('finance_catalogs', JSON.stringify(safeCatalogs));
     }
 
     // Загрузка
