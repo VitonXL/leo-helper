@@ -1,7 +1,7 @@
 /* === ЕДИНАЯ ДИЗАЙН-СИСТЕМА === */
 :root {
   --bg: #ffffff;
-  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-bg: rgba(255, 255, 255, 0.95);
   --text: #212121;
   --text-secondary: #757575;
   --border: rgba(178, 255, 89, 0.2);
@@ -19,7 +19,7 @@
 /* === ТЕМНАЯ ТЕМА === */
 [data-theme="dark"] {
   --bg: #121212;
-  --card-bg: rgba(30, 30, 30, 0.9);
+  --card-bg: rgba(30, 30, 30, 0.95);
   --text: #ffffff;
   --text-secondary: #b0b0b0;
   --border: rgba(178, 255, 89, 0.1);
@@ -49,14 +49,14 @@
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
-/* === ФОН ДЛЯ КАБИНЕТА И ЛЕНДИНГА === */
+/* === ГРАДИЕНТНЫЙ ФОН === */
 .gradient-bg {
   background: linear-gradient(135deg, #f5fcf5, #f0f8ff, #ffffff);
   background-size: 400% 400%;
   animation: gradient-flow 15s ease-in-out infinite;
 }
 
-/* === СЕТЬ И ШУМ (фон) === */
+/* === ФОН-СЕТЬ === */
 .gradient-bg::before {
   content: "";
   position: fixed;
@@ -70,6 +70,7 @@
   z-index: -2;
 }
 
+/* === ФОН-ШУМ === */
 .gradient-bg::after {
   content: "";
   position: fixed;
@@ -79,17 +80,6 @@
   opacity: 0.03;
   pointer-events: none;
   z-index: -1;
-}
-
-/* === ОСНОВНОЕ ТЕЛО === */
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  transition: background 0.3s, color 0.3s;
-  position: relative;
-  overflow-x: hidden;
 }
 
 /* === КАРТОЧКИ === */
@@ -130,24 +120,6 @@ body {
   background: var(--gold);
   background-size: 400% 400%;
   animation: shimmer-gold-strong 6s ease-in-out infinite;
-}
-
-/* === НАДПИСИ === */
-.section-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 24px 0 12px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-title::before {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--accent-light), transparent);
 }
 
 /* === КНОПКИ === */
@@ -195,16 +167,32 @@ body {
   transform: scale(1.1);
 }
 
+/* === ЗАГОЛОВКИ === */
+.section-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 24px 0 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent-light), transparent);
+}
+
 /* === АДАПТИВ === */
 @media (max-width: 768px) {
   .container {
     padding: 0 16px;
   }
-
   .card {
     padding: 16px;
   }
-
   .button-grid,
   .widget-grid {
     grid-template-columns: 1fr;
