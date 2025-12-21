@@ -9,6 +9,8 @@
   {% block head %}{% endblock %}
 </head>
 <body class="{{ body_class }}" style="{{ body_style }}">
+
+  <!-- Контейнер -->
   <div class="container" style="max-width: 100%; padding: 20px;">
 
     <!-- Хедер -->
@@ -31,13 +33,13 @@
     </footer>
     {% endblock %}
 
-    <!-- FAB (если closable) -->
+    <!-- FAB -->
     {% if closable %}
       <button class="fab" onclick="closeApp()">✕</button>
     {% endif %}
   </div>
 
-  <!-- Универсальная функция закрытия -->
+  <!-- Глобальные скрипты -->
   <script>
     function closeApp() {
       if (window.Telegram?.WebApp) {
