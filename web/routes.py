@@ -5,6 +5,7 @@ import urllib.parse
 import os
 from .utils import verify_webapp_data, verify_cabinet_link
 from .api import get_user_data
+from database import get_db_pool, get_user_stats, get_referral_stats
 
 router = APIRouter()
 templates = Jinja2Templates(directory="web/templates")
@@ -63,7 +64,7 @@ async def cabinet(request: Request):
     try:
         user_id = int(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user_id")
+        raise HTTPException(status_code:400, detail="Invalid user_id")
 
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
@@ -78,9 +79,15 @@ async def cabinet(request: Request):
             "premium_expires": None,
             "is_premium": False,
             "language": "ru",
-            "theme": "light",
-            "referrals": 0
+            "theme": "light"
         }
+
+    # 🔽 Получаем статистику и рефералов
+    pool = await get_db_pool()
+    stats = await get_user_stats(pool, user_id)
+    referrals_count = await get_referral_stats(pool, user_id)
+
+    user_data["referrals"] = referrals_count
 
     theme = request.cookies.get("theme", user_data.get("theme", "light"))
 
@@ -89,6 +96,11 @@ async def cabinet(request: Request):
         {
             "request": request,
             "user": user_data,
+            "stats": stats,
+            "news_list": [
+                {"date": "21.12", "text": "Добавлен <b>AI-помощник</b> 🧠 — попробуйте в разделе 'Быстрые действия'"},
+                {"date": "20.12", "text": "Обновлён дизайн кабинета — стал ещё удобнее! ✨"},
+            ],
             "title": "Личный кабинет",
             "theme": theme
         }
@@ -107,7 +119,7 @@ async def finance_page(request: Request):
     try:
         user_id = int(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user_id")
+        raise HTTPException(status_code:400, detail="Invalid user_id")
 
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
@@ -135,6 +147,7 @@ async def finance_page(request: Request):
         }
     )
 
+
 @router.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
     user_id = request.query_params.get("user_id")
@@ -146,7 +159,7 @@ async def admin_page(request: Request):
     try:
         user_id = int(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user_id")
+        raise HTTPException(status_code:400, detail="Invalid user_id")
 
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
@@ -155,7 +168,6 @@ async def admin_page(request: Request):
     if not user_data:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # 🔐 Только администраторы
     if user_data.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Access denied. Admins only.")
 
