@@ -10,16 +10,16 @@
     </button>
   </div>
 
-  <!-- Центр: название страницы в овале -->
+  <!-- Центр: овал с названием -->
   <div class="header-center">
     <div class="page-badge">
-      <span id="page-title">Финансы</span>
+      <span id="page-title">Лео</span>
     </div>
   </div>
 
-  <!-- Правая часть: кабинет, тема, админка -->
+  <!-- Правая часть: иконки -->
   <div class="header-right">
-    <!-- Кабинет -->
+    <!-- Кабинет (иконка из Telegram) -->
     <a href="/cabinet" class="btn-icon" aria-label="Личный кабинет">
       <img src="/static/img/tg-user-icon.png" alt="Кабинет" class="tg-icon">
     </a>
@@ -29,9 +29,9 @@
       <span class="material-icons" id="theme-icon">dark_mode</span>
     </button>
 
-    <!-- Админ-панель (только если user.is_admin) -->
+    <!-- Админка (только если админ) -->
     {% if current_user and current_user.is_admin %}
-    <a href="/admin" class="btn-icon" aria-label="Админка">
+    <a href="/admin" class="btn-icon" aria-label="Админ-панель">
       <span class="material-icons">shield</span>
     </a>
     {% endif %}
@@ -41,27 +41,27 @@
 <!-- Бургер-меню -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h3>Меню навигации</h3>
+    <h3>Навигация</h3>
     <button class="btn-icon" onclick="closeSidebar()">
       <span class="material-icons">close</span>
     </button>
   </div>
   <div class="sidebar-body">
     <a href="/"><span class="material-icons">home</span> Главная</a>
-    <a href="/cabinet"><span class="material-icons">account_circle</span> Кабинет</a>
+    <a href="/cabinet"><span class="material-icons">dashboard</span> Кабинет</a>
     <a href="/finance"><span class="material-icons">payments</span> Финансы</a>
+    <a href="/premium"><span class="material-icons">star</span> Подписка</a>
+    <a href="https://t.me/leo_aide_bot" target="_blank"><span class="material-icons">send</span> В бота</a>
     {% if current_user and current_user.is_admin %}
     <a href="/admin"><span class="material-icons">shield</span> Админка</a>
     {% endif %}
-    <a href="https://t.me/leo_aide_bot" target="_blank"><span class="material-icons">send</span> В бота</a>
   </div>
 </div>
 
-<!-- Фон затемнения при открытом меню -->
+<!-- Затемнение фона -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <style>
-/* === УНИВЕРСАЛЬНАЯ ШАПКА === */
 .leo-header {
   position: sticky;
   top: 0;
@@ -95,7 +95,6 @@
   justify-content: center;
 }
 
-/* === КНОПКИ === */
 .btn-icon {
   background: transparent;
   border: none;
@@ -116,7 +115,6 @@
   transform: translateY(-2px);
 }
 
-/* === ИКОНКА ТЕЛЕГРАММА === */
 .tg-icon {
   width: 24px;
   height: 24px;
@@ -124,7 +122,6 @@
   object-fit: cover;
 }
 
-/* === ОВАЛ С НАЗВАНИЕМ === */
 .page-badge {
   background: var(--accent-light);
   color: var(--accent);
@@ -136,7 +133,6 @@
   white-space: nowrap;
 }
 
-/* === БУРГЕР-МЕНЮ === */
 .sidebar {
   position: fixed;
   top: 0;
@@ -169,10 +165,6 @@
   color: var(--text);
 }
 
-.sidebar-body {
-  padding: 16px;
-}
-
 .sidebar-body a {
   display: flex;
   align-items: center;
@@ -194,7 +186,6 @@
   color: var(--accent);
 }
 
-/* === ЗАТЕМНЕНИЕ === */
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -210,7 +201,6 @@
   display: block;
 }
 
-/* === АДАПТИВ === */
 @media (max-width: 768px) {
   .leo-header {
     padding: 12px 12px;
@@ -223,7 +213,6 @@
 </style>
 
 <script>
-// Бургер-меню
 function toggleMenu() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -238,12 +227,10 @@ function closeSidebar() {
   overlay.classList.remove('active');
 }
 
-// Смена темы
 function toggleTheme() {
   const html = document.documentElement;
   const icon = document.getElementById('theme-icon');
   const isDark = html.getAttribute('data-theme') === 'dark';
-  
   if (isDark) {
     html.setAttribute('data-theme', 'light');
     icon.textContent = 'dark_mode';
@@ -257,7 +244,6 @@ function toggleTheme() {
   }
 }
 
-// Установка темы
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
@@ -267,10 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Назначаем кнопку меню
 document.getElementById('menu-toggle')?.addEventListener('click', toggleMenu);
 
-// Обновление названия страницы
 function setPageTitle(title) {
   const el = document.getElementById('page-title');
   if (el) el.textContent = title;
