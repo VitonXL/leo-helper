@@ -1,0 +1,278 @@
+<!-- web/templates/components/header.html -->
+<div class="leo-header">
+  <!-- Левая часть: бургер и назад -->
+  <div class="header-left">
+    <button class="btn-icon" id="menu-toggle" aria-label="Меню">
+      <span class="material-icons">menu</span>
+    </button>
+    <button class="btn-icon" onclick="history.back()" aria-label="Назад">
+      <span class="material-icons">arrow_back</span>
+    </button>
+  </div>
+
+  <!-- Центр: название страницы в овале -->
+  <div class="header-center">
+    <div class="page-badge">
+      <span id="page-title">Финансы</span>
+    </div>
+  </div>
+
+  <!-- Правая часть: кабинет, тема, админка -->
+  <div class="header-right">
+    <!-- Кабинет -->
+    <a href="/cabinet" class="btn-icon" aria-label="Личный кабинет">
+      <img src="/static/img/tg-user-icon.png" alt="Кабинет" class="tg-icon">
+    </a>
+
+    <!-- Смена темы -->
+    <button class="btn-icon" onclick="toggleTheme()" aria-label="Сменить тему">
+      <span class="material-icons" id="theme-icon">dark_mode</span>
+    </button>
+
+    <!-- Админ-панель (только если user.is_admin) -->
+    {% if current_user and current_user.is_admin %}
+    <a href="/admin" class="btn-icon" aria-label="Админка">
+      <span class="material-icons">shield</span>
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Бургер-меню -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3>Меню навигации</h3>
+    <button class="btn-icon" onclick="closeSidebar()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  <div class="sidebar-body">
+    <a href="/"><span class="material-icons">home</span> Главная</a>
+    <a href="/cabinet"><span class="material-icons">account_circle</span> Кабинет</a>
+    <a href="/finance"><span class="material-icons">payments</span> Финансы</a>
+    {% if current_user and current_user.is_admin %}
+    <a href="/admin"><span class="material-icons">shield</span> Админка</a>
+    {% endif %}
+    <a href="https://t.me/leo_aide_bot" target="_blank"><span class="material-icons">send</span> В бота</a>
+  </div>
+</div>
+
+<!-- Фон затемнения при открытом меню -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<style>
+/* === УНИВЕРСАЛЬНАЯ ШАПКА === */
+.leo-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* === КНОПКИ === */
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 20px;
+}
+
+.btn-icon:hover {
+  background: rgba(76, 175, 80, 0.1);
+  transform: translateY(-2px);
+}
+
+/* === ИКОНКА ТЕЛЕГРАММА === */
+.tg-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* === ОВАЛ С НАЗВАНИЕМ === */
+.page-badge {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 16px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  white-space: nowrap;
+}
+
+/* === БУРГЕР-МЕНЮ === */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 280px;
+  height: 100%;
+  background: var(--card-bg);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  z-index: 1100;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.sidebar-body {
+  padding: 16px;
+}
+
+.sidebar-body a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.sidebar-body a:hover {
+  background: rgba(76, 175, 80, 0.08);
+}
+
+.sidebar-body .material-icons {
+  font-size: 18px;
+  color: var(--accent);
+}
+
+/* === ЗАТЕМНЕНИЕ === */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1050;
+  display: none;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* === АДАПТИВ === */
+@media (max-width: 768px) {
+  .leo-header {
+    padding: 12px 12px;
+  }
+  .page-badge {
+    font-size: 15px;
+    padding: 6px 12px;
+  }
+}
+</style>
+
+<script>
+// Бургер-меню
+function toggleMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+}
+
+// Смена темы
+function toggleTheme() {
+  const html = document.documentElement;
+  const icon = document.getElementById('theme-icon');
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  
+  if (isDark) {
+    html.setAttribute('data-theme', 'light');
+    icon.textContent = 'dark_mode';
+    localStorage.setItem('theme', 'light');
+    Toast.info('Светлая тема');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    icon.textContent = 'light_mode';
+    localStorage.setItem('theme', 'dark');
+    Toast.info('Тёмная тема');
+  }
+}
+
+// Установка темы
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+  }
+});
+
+// Назначаем кнопку меню
+document.getElementById('menu-toggle')?.addEventListener('click', toggleMenu);
+
+// Обновление названия страницы
+function setPageTitle(title) {
+  const el = document.getElementById('page-title');
+  if (el) el.textContent = title;
+}
+</script>
