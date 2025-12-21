@@ -6,6 +6,7 @@ from datetime import datetime
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi import APIRouter  # ✅ Добавлен импорт
 from .routes import router
 from .api import router as api_router
 from loguru import logger
@@ -17,6 +18,9 @@ print(f"🚀 ARGS: {' '.join(sys.argv)}")
 print("🔍 sys.path обновлён для импортов")
 
 app = FastAPI(title="Лео Помощник — UI")
+
+# --- Создаём отдельный роутер для админ-API ---
+admin_api = APIRouter(prefix="/admin", tags=["admin"])  # ✅ Теперь router определён
 
 # --- ФАЙЛЫ ДЛЯ СОХРАНЕНИЯ ДАННЫХ ---
 USERS_YML = "users.yml"
@@ -52,7 +56,7 @@ async def get_admin_stats():
     )
     premium = sum(
         1 for user_id, count in usage["gigachat"]["users"].items()
-        if count > 5  # Пример: если сделал >5 запросов — "активный"
+        if count > 5  # Пример: "активный" — если >5 запросов
     )
 
     return {
@@ -101,7 +105,7 @@ async def patch_users_from_yml():
         with open(USERS_YML, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or []
 
-        # Пример: обновление usage на основе users.yml
+        # Обновим usage: добавим новых пользователей
         usage = load_usage()
         for item in data:
             user_id = str(item.get("id"))
@@ -109,7 +113,7 @@ async def patch_users_from_yml():
                 usage["gigachat"]["users"][user_id] = 0
         save_usage(usage)
 
-        return {"status": "success", "message": f"Пользователи обновлены из users.yml", "count": len(data)}
+        return {"status": "success", "message": "Пользователи обновлены", "count": len(data)}
     except Exception as e:
         logger.error(f"Ошибка при обработке users.yml: {e}")
         raise HTTPException(status_code=500, detail="Ошибка при чтении файла")
@@ -122,24 +126,21 @@ async def reset_usage_counters():
     usage["gigachat"]["users"] = {uid: 0 for uid in usage["gigachat"]["users"]}
     usage["last_reset"] = str(datetime.now())
     save_usage(usage)
-    logger.info("Счётчики API сброшены администратором")
+    logger.info("Счётчики GigaChat сброшены администратором")
     return {"status": "success", "message": "Счётчики GigaChat сброшены"}
 
 
 @admin_api.post("/overuse")
-async def toggle_overuse(enable: bool = True):
-    # Можно добавить в будущем проверку на Redis/флаг
-    action = "включён" if enable else "отключён"
-    logger.info(f"Режим перегрузки GigaChat {action}")
-    return {"status": "success", "message": f"Режим перегрузки {action}"}
+async def toggle_overuse():
+    # Заглушка — можно расширить (хранить в Redis/файле)
+    logger.info("Режим перегрузки GigaChat активирован")
+    return {"status": "success", "message": "Режим перегрузки включён"}
 
-# --- Регистрация роутеров ---
+# --- Монтируем статику и роуты ---
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 app.include_router(api_router, prefix="/api")
 app.include_router(router)
-
-# Добавляем админ API
-app.include_router(admin_api, prefix="/api/admin", tags=["admin"])
+app.include_router(admin_api, prefix="/api")  # ✅ Роутер добавлен
 
 @app.get("/health")
 async def health():
@@ -148,4 +149,4 @@ async def health():
 @app.on_event("startup")
 async def startup_event():
     logger.info("🟢 Веб-сервер запущен")
-    logger.info("✨ Доступные роуты: /admin, /cabinet, /finance, /api/user/{id}, /api/admin/stats")
+    logger.info("✨ Доступные роуты: /admin, /cabinet, /finance, /api/admin/stats")
