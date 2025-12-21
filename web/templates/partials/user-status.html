@@ -1,12 +1,64 @@
-<div class="card" style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-  <div class="avatar" style="background-color: #{{ '%06x' % (user.id % 0xFFFFFF) }}; width: 56px; height: 56px; font-size: 24px; font-weight: 600; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
-    {{ user.first_name[0].upper() }}
+<!-- web/templates/partials/user-status.html -->
+<div class="card user-status-card">
+  <div class="user-header">
+    <div class="avatar" style="background-color: #{{ '%06x' % (user.id % 0xFFFFFF) }};">
+      {{ user.first_name[0].upper() }}
+    </div>
+    <div class="user-info">
+      <h2 id="greeting">Привет</h2>
+      <p class="user-name">{{ user.first_name }} 
+        {% if user.is_premium %}
+          <img src="/static/premium.svg" alt="Premium" class="premium-badge">
+        {% endif %}
+      </p>
+      <p class="user-id">ID: <code>{{ user.id }}</code></p>
+    </div>
   </div>
-  <div>
-    <strong style="font-size: 18px; color: var(--text);">{{ user.first_name }}</strong>
-    {% if user.is_premium %}
-      <img src="/static/premium.svg" alt="Premium" class="premium-badge" style="width: 18px; height: 18px; margin-left: 6px; vertical-align: middle;">
-    {% endif %}
-    <p style="margin: 4px 0; font-size: 13px; color: var(--text-secondary);">ID: <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; font-family: monospace;">{{ user.id }}</code></p>
+
+  <div class="user-stats-grid">
+    <div class="stat-item">
+      <span class="stat-label">Рефералы</span>
+      <span class="stat-value">{{ user.referrals }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Подписка</span>
+      <span class="stat-value">
+        {% if user.is_premium %}
+          <span class="status active">Активна</span>
+        {% else %}
+          <span class="status inactive">Нет</span>
+        {% endif %}
+      </span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Баланс</span>
+      <span class="stat-value">{{ "%.2f"|format(stats.balance) }} ₽</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Доход</span>
+      <span class="stat-value">{{ "%.2f"|format(stats.income) }} ₽</span>
+    </div>
   </div>
 </div>
+
+<script>
+  // Приветствие по времени
+  document.addEventListener('DOMContentLoaded', () => {
+    const hour = new Date().getHours();
+    const greeting = document.getElementById('greeting');
+    const greetings = [
+      { hour: 5, text: "Доброй ночи", icon: "😴" },
+      { hour: 6, text: "Доброе утро", icon: "☀️" },
+      { hour: 12, text: "Добрый день", icon: "🌤" },
+      { hour: 18, text: "Добрый вечер", icon: "🌙" },
+      { hour: 22, text: "Доброй ночи", icon: "😴" }
+    ];
+    const current = greetings.reverse().find(g => hour >= g.hour);
+    if (greeting) {
+      greeting.textContent = `${current.text}, ${{{ user.first_name }}}`;
+      if (current.icon) {
+        greeting.innerHTML += ` ${current.icon}`;
+      }
+    }
+  });
+</script>
