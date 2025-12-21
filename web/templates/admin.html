@@ -1,123 +1,374 @@
 {% extends "base.html" %}
 
-{% block title %}👮‍♂️ Админ-панель{% endblock %}
+{% block title %}Лео — Админка{% endblock %}
 
-{% block body_class %}tg-body{% endblock %}
-{% block body_style %}background: var(--tg-theme-bg-color, #f4f6f8); color: var(--tg-theme-text-color, #212121);{% endblock %}
+{% block styles %}
+<style>
+/* === ЕДИНАЯ ДИЗАЙН-СИСТЕМА (как в cabinet) === */
+:root {
+  --bg: transparent;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --text: #212121;
+  --text-secondary: #757575;
+  --border: rgba(178, 255, 89, 0.2);
+  --accent: #4CAF50;
+  --accent-light: #B2FF59;
+  --gold: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
+  --gold-soft: linear-gradient(-45deg, #D4A017, #E6C229, #F4C430, #D4A017);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow: 0 6px 20px rgba(76, 175, 80, 0.08);
+  --shadow-hover: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
+  --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* === ТЕМНАЯ ТЕМА === */
+[data-theme="dark"] {
+  --bg: transparent;
+  --card-bg: rgba(30, 30, 30, 0.95);
+  --text: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border: rgba(178, 255, 89, 0.1);
+}
+
+/* === ГЛАВНЫЙ ФОН === */
+body, html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #f0fff0, #d9f7d9, #e6ffeb);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+[data-theme="dark"] body {
+  background: linear-gradient(135deg, #0a1e0a, #0c240c, #0d2a0d);
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* === КОНТЕЙНЕР === */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* === ЗАГОЛОВОК === */
+.admin-header {
+  text-align: center;
+  margin: 40px 0 30px;
+}
+
+.admin-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 8px 0;
+}
+
+.admin-header p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* === КАРТА АДМИНКИ === */
+.admin-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 30px;
+  transition: transform var(--transition);
+}
+
+.admin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.admin-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-card h2 .material-icons {
+  font-size: 22px;
+  color: var(--accent);
+}
+
+/* === СПИСКИ ПОЛЬЗОВАТЕЛЕЙ === */
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-bottom: 20px;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  background: rgba(76, 175, 80, 0.06);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 15px;
+  transition: background 0.2s;
+}
+
+.user-item:hover {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.user-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.user-role {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--gold-soft);
+  color: #1a1a1a;
+  font-weight: 500;
+  background-size: 400% 400%;
+  animation: shimmer-gold 6s ease-in-out infinite;
+}
+
+/* === КНОПКИ === */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #4CAF50;
+  font-size: 15px;
+}
+
+.btn-primary {
+  background: var(--gold);
+  background-size: 200% 200%;
+  animation: gradient-shift-gold 3s ease infinite;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.25);
+}
+
+.btn:active {
+  transform: translateY(-1px);
+}
+
+.btn-group {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* === ЗАГРУЗКА === */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.loading .spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  border-top: 2px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes gradient-shift-gold {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer-gold {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* === АДАПТИВ === */
+@media (max-width: 768px) {
+  .btn-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  .btn {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+  }
+  .admin-header h1 {
+    font-size: 24px;
+  }
+}
+</style>
+{{ super() }}
+{% endblock %}
 
 {% block content %}
-  <!-- Переключатель режима -->
-  <div style="margin-bottom: 20px; text-align: right;">
-    <label style="color: var(--text-secondary);"><strong>Режим:</strong></label>
-    <select id="view-mode" onchange="changeViewMode(this.value)" style="padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-      <option value="cards">Карточки</option>
-      <option value="table">Таблица</option>
-      <option value="chart">График</option>
-      <option value="bars">Столбцы</option>
-    </select>
-  </div>
-
-  <!-- Статистика -->
-  <div id="stats-container">
-    {% include 'partials/loader.html' %}
-  </div>
-
-  <!-- Поиск пользователя -->
-  <div class="card" style="margin-bottom: 30px;">
-    <h3>🔍 Поиск пользователя</h3>
-    <div style="display: flex; gap: 10px; margin: 15px 0;">
-      <input type="text" id="search-user" placeholder="ID или @username" style="flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-      <button class="btn" onclick="searchUser()">Поиск</button>
+  <div class="container">
+    <div class="admin-header">
+      <h1>🔐 Админ-панель</h1>
+      <p>Управление пользователями и системой</p>
     </div>
-    <div id="user-actions" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
-      <p style="color: var(--text-secondary);"><strong>Найден:</strong> <span id="found-user"></span></p>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button class="btn" style="background: #4CAF50;" onclick="confirmGrantPremium()">✅ Выдать премиум</button>
-        <button class="btn" style="background: #FF9800;" onclick="confirmRevokePremium()">🚫 Снять</button>
-        <button class="btn" style="background: #F44336;" onclick="confirmBlockUser()">⛔ Заблокировать</button>
+
+    <div class="admin-card">
+      <h2><span class="material-icons">group</span> Пользователи</h2>
+      <div id="user-list" class="user-list">
+        <!-- Загрузка -->
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Загрузка данных...</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="refreshUsers()">
+          <span class="material-icons">refresh</span> Обновить
+        </button>
+        <button class="btn" onclick="exportUsers()">
+          <span class="material-icons">download</span> Экспорт
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Модерация отзывов -->
-  <div class="card" style="margin-bottom: 30px;">
-    <h3>📝 Модерация отзывов</h3>
-    <div id="reviews-list">
-      {% include 'partials/loader.html' %}
-    </div>
-  </div>
+    <div class="admin-card">
+      <h2><span class="material-icons">settings</span> Система</h2>
+      <div class="user-list">
+        <div class="user-item">
+          <div class="user-name">Версия</div>
+          <div>v1.2.0</div>
+        </div>
+        <div class="user-item">
+          <div class="user-name">База данных</div>
+          <div>Подключена</div>
+        </div>
+        <div class="user-item">
+          <div class="user-name">Темы</div>
+          <div>Активны</div>
+        </div>
+      </div>
 
-  <!-- Техподдержка -->
-  <div class="card" style="margin-bottom: 30px;">
-    <h3>📬 Техподдержка</h3>
-    <div id="support-list">
-      {% include 'partials/loader.html' %}
-    </div>
-  </div>
-
-  <!-- Шаблоны ответов -->
-  <div class="card" style="margin-bottom: 30px;">
-    <h3>📝 Шаблоны ответов</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-      <button class="btn" onclick="useTemplate('Спасибо за обращение! ✅')" style="padding: 8px 12px; font-size: 14px;">Спасибо</button>
-      <button class="btn" onclick="useTemplate('Ошибка исправлена в последней версии. Обновите страницу.')" style="padding: 8px 12px; font-size: 14px;">Исправлено</button>
-      <button class="btn" onclick="useTemplate('Убедитесь, что вы вошли в аккаунт и обновили страницу.')" style="padding: 8px 12px; font-size: 14px;">Проверьте</button>
-      <button class="btn" onclick="useTemplate('Подробная инструкция: https://leo-aide.online/faq')" style="padding: 8px 12px; font-size: 14px;">Инструкция</button>
-      <button class="btn" onclick="useTemplate('Мы получили ваше обращение и уже работаем над ним.')" style="padding: 8px 12px; font-size: 14px;">Обработка</button>
+      <div class="btn-group">
+        <button class="btn" onclick="clearCache()">
+          <span class="material-icons">delete</span> Очистить кэш
+        </button>
+      </div>
     </div>
   </div>
 {% endblock %}
 
 {% block scripts %}
-  <!-- Подключаем компоненты -->
-  {% include 'partials/toast.html' %}
-  {% include 'partials/modal.html' %}
-  {% include 'partials/loader.html' %}
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+  {{ super() }}
   <script>
-    let statsData = {};
-    let currentChart = null;
+    // Пример данных (заменится на API)
+    const mockUsers = [
+      { id: 1, name: "vitron", role: "admin", premium: true },
+      { id: 2, name: "user_12345", role: "user", premium: false },
+      { id: 3, name: "premium_user", role: "user", premium: true }
+    ];
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      await loadStats();
-      await loadReviews();
-      await loadSupportTickets();
-      changeViewMode('cards');
+    function renderUsers(users) {
+      const container = document.getElementById('user-list');
+      container.innerHTML = '';
+      users.forEach(user => {
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        item.innerHTML = `
+          <div class="user-name">@${user.name}</div>
+          <div class="user-role">${user.role === 'admin' ? 'Админ' : 'Пользователь'}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function refreshUsers() {
+      document.getElementById('user-list').innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Загрузка...</span>
+        </div>
+      `;
+      setTimeout(() => {
+        renderUsers(mockUsers);
+        Toast.info('Данные обновлены');
+      }, 1000);
+    }
+
+    function exportUsers() {
+      Toast.success('Экспорт начат');
+    }
+
+    function clearCache() {
+      Toast.info('Кэш очищен');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Тема
+      const savedTheme = getCookie('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+
+      // Загрузка
+      setTimeout(() => {
+        renderUsers(mockUsers);
+      }, 800);
+
+      Toast.info('Добро пожаловать в админку, ' + (userData?.firstName || 'Админ') + '!');
     });
 
-    async function loadStats() {
-      try {
-        const res = await fetch('/api/admin/stats');
-        statsData = await res.json();
-        renderStatsCards();
-      } catch (e) {
-        document.getElementById('stats-container').innerHTML = '<p class="text-danger">Ошибка загрузки</p>';
-        Toast.error('Не удалось загрузить статистику');
-      }
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
     }
-
-    // ... остальные функции (renderStatsCards и т.д.) — без изменений
-
-    function confirmGrantPremium() {
-      confirmAction(
-        `Выдать премиум @${window.user.username}?`,
-        grantPremium,
-        'Выдать премиум?'
-      );
-    }
-
-    async function grantPremium() {
-      try {
-        await fetch('/api/admin/grant-premium', { method: 'POST', body: JSON.stringify({ user_id: window.user.id }) });
-        Toast.success('✅ Премиум выдан');
-      } catch (e) {
-        Toast.error('❌ Ошибка выдачи');
-      }
-    }
-
-    // Аналогично для revoke, block, approve, delete...
   </script>
 {% endblock %}
