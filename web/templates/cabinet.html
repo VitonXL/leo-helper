@@ -213,4 +213,23 @@
     });
   </script>
 </body>
+<!-- Нижнее меню (только на телефонах) -->
+<div class="bottom-nav">
+  <a href="#" onclick="navigateTo('dashboard')" class="nav-item active">
+    <span class="material-icons">dashboard</span>
+    <span class="nav-label">Главная</span>
+  </a>
+  <a href="/finance?user_id={{ user.id }}&hash={{ request.query_params.hash }}" class="nav-item">
+    <span class="material-icons">account_balance_wallet</span>
+    <span class="nav-label">Финансы</span>
+  </a>
+  <a href="#" onclick="navigateTo('gigachat')" class="nav-item">
+    <span class="material-icons">smart_toy</span>
+    <span class="nav-label">GigaChat</span>
+  </a>
+  <a href="#" onclick="navigateTo('premium')" class="nav-item">
+    <span class="material-icons">star</span>
+    <span class="nav-label">Премиум</span>
+  </a>
+</div>
 </html>
