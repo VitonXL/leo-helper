@@ -1,0 +1,46 @@
+<!-- Овал с "Лео" -->
+<div class="leo-badge-3d" id="leo-badge">
+  <div class="leo-logo">
+    <span class="l">Л</span><span class="eo">ео</span>
+  </div>
+  <div class="page-tag" id="page-title">Главная</div>
+</div>
+
+<!-- Прозрачная шапка -->
+<div class="full-header" id="main-header">
+  <div class="header-left">
+    <button class="btn-icon" id="menu-toggle" aria-label="Меню">
+      <span class="material-icons">menu</span>
+    </button>
+    <button class="btn-icon" onclick="history.back()" aria-label="Назад">
+      <span class="material-icons">arrow_back</span>
+    </button>
+  </div>
+
+  <div class="header-right">
+    <a href="/cabinet" class="btn-icon" aria-label="Кабинет">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMzc5ZDg2IiBkPSJNMTcxLjYsNDQ4LjJjLTEuOSwwLTMuOC0wLjctNS40LTEuOGMtNC4yLTMuMi00LjktOS4yLTEuNy0xMy40bDEyLjYtMTYuNWMwLjktMS4yLDEuNS0yLjcsMS43LTQuMWMwLjItMS42LTAuMS0zLjItMS4yLTQuNGwtMjMuOS0yNy44Yy0xLjYtMS45LTQuMy0yLjEtNi4yLTAuNWwtNTIuOSw0NC4xYy01LjIsNC40LTExLjgsMS43LTEzLjEtNC4zTDIwLjIsMTg1LjJjLTEuMy01LjksMi4xLTExLjgsNy45LTEzLjFsMjQ2LjktNTYuOWM1LjgtMS4zLDExLjcsMi4xLDEzLjEsNy45bDE3LjQsNzEuOWMwLjgsMy4zLDMuMiwyLjQsMy4yLTIuNGw3LjctMzQ1LjRjMC4yLTkuMiwyLjEtMTguMyw1LjYtMjYuOGMzLjYtOC43LDkuNC0xNi4yLDE2LjktMjEuOGM3LjUtNS42LDE2LjQtOS41LDI1LjctOS41aDIwMC4yYzE0LjQsMCwyOC4zLDUuNywyOC4zLDUuN3YxNjQuMmMwLDIzLjYtOS4yLDQ1LjgtMjUuNyw2MS40bC0xMC45LDEwLjJjLTE2LjUsMTUtNDMuOSwxNS4yLTU5LjYsMC44TDI3MCw0MDkuM2MtOC41LTE5LjEsMzAuMy0yNy41LDI4LjYtNS41bC0zLjQsMzguNWMwLjIsMC44LDAuMywxLjcsMC4zLDIuNnYxNS43YzAsMC43LTAuMSwxLjQtMC4yLDIuMWMyLjgsMC41LDUuNi44LDguNS44aDEwLjVjMTMuNywwLDI2LjgtMi45LDM4LjYtOC40bDU0LjctMjUuNGMxMS45LTUuNSwyMS42LTE0LjgsMjcuNy0yNi4yYzYuMi0xMS40LDktMjQuMyw4LjQtMzcuN2wtMTYuNy0xODMuOEM0NTIuOSwzNS41LDQzMC44LDI0LDQwNC45LDI0SDEwNi43Yy0xMC41LDAtMjAuOCwzLjEtMjkuNCw4LjhsLTEwLjIsMTIuNWMtOC42LDUuNS0xMy44LDE0LjgtMTMuOCwyNC44VjQyOEM3My41LDQ0Mi41LDgzLjgsNDUyLDk0LjMsNDUySDQwNGMtNi4xLDAsMCwwLDAsMHoiPjwvcGF0aD48L3N2Zz4=" alt="Кабинет" class="tg-icon">
+    </a>
+    <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
+      <span class="material-icons" id="theme-icon">dark_mode</span>
+    </button>
+  </div>
+</div>
+
+<!-- Бургер-меню -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3>Меню</h3>
+    <button class="btn-icon" onclick="closeSidebar()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  <div class="sidebar-body">
+    <a href="/"><span class="material-icons">home</span> Главная</a>
+    <a href="/cabinet"><span class="material-icons">dashboard</span> Кабинет</a>
+    <a href="/finance"><span class="material-icons">payments</span> Финансы</a>
+    <a href="/premium"><span class="material-icons">star</span> Подписка</a>
+    <a href="https://t.me/leo_aide_bot" target="_blank"><span class="material-icons">send</span> В бота</a>
+  </div>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
