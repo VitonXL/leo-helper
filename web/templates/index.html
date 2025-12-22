@@ -27,7 +27,7 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #fafcff; /* Почти белый, очень нежный голубой */
+      background: #fbfdff; /* Почти белый, с лёгким небесным оттенком */
       transition: background 0.3s ease;
     }
 
@@ -137,7 +137,7 @@
       color: white;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА С ГРАДИЕНТОМ ВЫСОТЫ === */
+    /* === ПРОЗРАЧНАЯ ШАПКА С ТРАВОЙ СНИЗУ === */
     .full-header {
       position: fixed;
       top: 0;
@@ -147,9 +147,9 @@
       background: linear-gradient(
         to bottom,
         rgba(255, 255, 255, 0.96),
-        rgba(255, 255, 255, 0.85),
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.3)
+        rgba(255, 255, 255, 0.8),
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.2)
       );
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -161,20 +161,9 @@
       justify-content: space-between;
       padding: 0 16px;
       z-index: 1002;
-    }
-
-    /* === ТРАВЯНАЯ ЛИНИЯ — НА НИЖНЕЙ ГРАНИ ШАПКИ === */
-    .grass-line {
-      position: fixed;
-      bottom: 58px; /* Точно по нижнему краю шапки */
-      left: 10px;
-      width: calc(100% - 20px);
-      height: 4px;
-      background: url("data:image/svg+xml,%3Csvg width='100' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,4 Q10,1 20,4 T40,4 T60,4 T80,4 T100,4' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") repeat-x left center;
-      z-index: 1001;
-      pointer-events: none;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
+      overflow: hidden;
+      border-bottom: 4px solid transparent;
+      border-image: url("data:image/svg+xml,%3Csvg width='100' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,6 Q10,2 20,6 T40,6 T60,6 T80,6 T100,6' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") 4 stretch;
     }
 
     /* === КНОПКИ В ШАПКЕ === */
@@ -220,59 +209,36 @@
       transform: scale(1.1);
     }
 
-    /* === КНОПКА АДМИНКИ === */
-    .admin-badge {
+    /* === КРАСИВАЯ АДМИН КНОПКА — ЩИТ С СИЛЬНОЙ ИКОНКОЙ === */
+    .admin-btn {
       display: none;
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: #f48b29; /* Приглушённый оранжево-красный */
+      background: #f48b29;
       color: white;
-      font-size: 10px;
-      font-weight: 600;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 14px;
+      margin-left: 8px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(244, 139, 41, 0.35);
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 0 2px #fafcff;
-      cursor: pointer;
-      z-index: 2;
     }
 
-    .admin-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    [data-role="admin"] .admin-badge {
-      display: flex;
-    }
-
-    /* === ИКОНКА ЩИТА — АДМИН-ПАНЕЛЬ === */
-    .admin-btn {
-      display: none;
-      margin-left: 12px;
-      background: #f48b29;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(244, 139, 41, 0.3);
-      transition: all 0.3s ease;
-    }
-
-    [data-role="admin"] .admin-btn {
-      display: flex;
+    .admin-btn span {
+      font-size: 20px;
     }
 
     .admin-btn:hover {
       background: #e07b20;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(244, 139, 41, 0.4);
+      box-shadow: 0 6px 16px rgba(244, 139, 41, 0.4);
+    }
+
+    [data-role="admin"] .admin-btn {
+      display: flex;
     }
 
     /* === ОСНОВНОЙ КОНТЕНТ === */
@@ -350,7 +316,7 @@
       transform: translateY(-2px);
     }
 
-    /* === БЫСТРЫЕ ДЕЙСТВИЯ (4 штуки) === */
+    /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
     .button-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -387,44 +353,61 @@
       font-weight: 500;
     }
 
-    /* === КРУПНЫЕ ВИДЖЕТЫ: ПОГОДА И КУРСЫ === */
-    .widget-large {
+    /* === ВИДЖЕТЫ В ДВА СТОЛБИКА === */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .stat-card {
       background: white;
       border: 1px solid rgba(178, 255, 89, 0.2);
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-      display: flex;
-      align-items: center;
-      gap: 16px;
     }
 
-    .widget-icon-large {
-      font-size: 40px;
-      color: #4CAF50;
-    }
-
-    .widget-content {
-      flex: 1;
-    }
-
-    .widget-title-large {
+    .stat-title {
       font-size: 16px;
       font-weight: 600;
-      color: #212121;
-      margin: 0 0 6px;
+      color: #2E7D32;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .widget-value-large {
-      font-size: 22px;
-      font-weight: 700;
-      color: #212121;
+    .stat-title i {
+      font-size: 20px;
     }
 
-    .widget-sub-large {
-      font-size: 13px;
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+      font-size: 14px;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
       color: #757575;
-      margin-top: 4px;
+    }
+
+    .stat-value {
+      font-weight: 500;
+      color: #212121;
+    }
+
+    .stat-change {
+      color: #4CAF50;
+      font-size: 12px;
+      margin-left: 6px;
     }
 
     /* === НОВОСТИ === */
@@ -505,31 +488,6 @@
     .fab:hover {
       transform: scale(1.08);
     }
-
-    /* === АДАПТИВ === */
-    @media (max-width: 768px) {
-      .button-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .widget-large {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .full-header {
-        padding: 0 12px;
-      }
-
-      .btn-icon, .user-avatar {
-        width: 36px;
-        height: 36px;
-      }
-
-      .main-content {
-        padding: 12px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -542,7 +500,7 @@
     <div class="page-tag">Главная</div>
   </div>
 
-  <!-- Прозрачная шапка -->
+  <!-- Прозрачная шапка с ТРАВОЙ СНИЗУ -->
   <div class="full-header" id="main-header">
     <div class="header-left">
       <button class="btn-icon" aria-label="Меню">
@@ -560,25 +518,21 @@
           alt="Аватар" 
           class="user-avatar"
           id="user-avatar"
-          onclick="alert('Переход в кабинет')"
+          onclick="alert('Переход в личный кабинет')"
         />
-        <div class="admin-badge" id="admin-badge">!</div>
       </div>
 
-      <!-- Кнопка админки — щит -->
-      <button class="admin-btn" id="admin-btn" title="Админ панель">
+      <!-- Кнопка админки — красивый щит -->
+      <button class="admin-btn" id="admin-btn">
         <span class="material-icons">shield</span>
       </button>
 
-      <!-- Кнопка темы -->
+      <!-- Тема -->
       <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
         <span class="material-icons" id="theme-icon">dark_mode</span>
       </button>
     </div>
   </div>
-
-  <!-- Травяная линия — по нижнему краю шапки -->
-  <div class="grass-line"></div>
 
   <!-- Основной контент -->
   <div class="main-content">
@@ -593,7 +547,7 @@
       </button>
     </div>
 
-    <!-- 4 Быстрых действия -->
+    <!-- Быстрые действия -->
     <div class="section-title">⚡ Быстрые действия</div>
     <div class="button-grid">
       <a href="#" class="action-btn">
@@ -614,29 +568,64 @@
       </a>
     </div>
 
-    <!-- Крупный виджет: Погода -->
-    <div class="widget-large">
-      <div class="widget-icon-large">🌤</div>
-      <div class="widget-content">
-        <div class="widget-title-large">Погода в Москве</div>
-        <div class="widget-value-large">+14°C</div>
-        <div class="widget-sub-large">Облачно, ветер 3 м/с</div>
+    <!-- ПОГОДА И КУРСЫ — ВЕРТИКАЛЬНЫЕ КАРТОЧКИ -->
+    <div class="stats-grid">
+      
+      <!-- ПОГОДА -->
+      <div class="stat-card">
+        <div class="stat-title">
+          <i>🌤</i> Погода в Москве
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Температура</div>
+          <div class="stat-value">+14°C</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Ощущается как</div>
+          <div class="stat-value">+12°C</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Влажность</div>
+          <div class="stat-value">68%</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Давление</div>
+          <div class="stat-value">746 мм</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Ветер</div>
+          <div class="stat-value">3 м/с <span class="stat-change">СЗ</span></div>
+        </div>
       </div>
-    </div>
 
-    <!-- Крупный виджет: Курсы -->
-    <div class="widget-large">
-      <div class="widget-icon-large">💵</div>
-      <div class="widget-content">
-        <div class="widget-title-large">Курс USD</div>
-        <div class="widget-value-large">98.50 ₽</div>
-        <div class="widget-sub-large">+0.25 за день</div>
+      <!-- КУРСЫ -->
+      <div class="stat-card">
+        <div class="stat-title">
+          <i>💵</i> Курсы валют
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">USD → RUB</div>
+          <div class="stat-value">98.50 ₽ <span class="stat-change">+0.25</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">EUR → RUB</div>
+          <div class="stat-value">109.80 ₽ <span class="stat-change">+0.18</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">CNY → RUB</div>
+          <div class="stat-value">14.12 ₽ <span class="stat-change">+0.05</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">GBP → RUB</div>
+          <div class="stat-value">123.40 ₽ <span class="stat-change">-0.10</span></div>
+        </div>
       </div>
+
     </div>
 
     <!-- Новости -->
     <div class="section-title">📰 Новости дня</div>
-    <div class="news-feed" id="news-feed">
+    <div class="news-feed">
       <div class="news-item">
         <div class="news-icon">🌍</div>
         <div class="news-content">
@@ -679,12 +668,11 @@
 
     const userData = {
       first_name: "Иван",
-      role: "admin" // ← поменяй на "user", чтобы скрыть админку
+      role: "admin"
     };
 
     document.addEventListener('DOMContentLoaded', () => {
       const avatar = document.getElementById('user-avatar');
-      const adminContainer = document.getElementById('admin-container');
       const adminBtn = document.getElementById('admin-btn');
 
       // Фото из Telegram
@@ -692,19 +680,10 @@
         avatar.src = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
       }
 
-      // Показ админ-элементов
+      // Показ админки
       if (userData.role === 'admin') {
-        adminContainer.setAttribute('data-role', 'admin');
         adminBtn.style.display = 'flex';
-
-        document.getElementById('admin-badge').onclick = (e) => {
-          e.stopPropagation();
-          alert('🔐 Добро пожаловать в админ-панель');
-        };
-
-        adminBtn.onclick = () => {
-          alert('🛡 Доступ к админке');
-        };
+        adminBtn.onclick = () => alert('🛡 Доступ к администрированию');
       }
 
       // Тема
