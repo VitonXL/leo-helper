@@ -1,16 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru" class="gradient-bg" data-theme="light">
+<html lang="ru" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}Лео{% endblock %}</title>
-  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Favicon — только один раз, но с поддержкой всех форматов -->
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-  <!-- или если SVG -->
+  <!-- Для современных браузеров -->
+  <link rel="icon" type="image/png" sizes="64x64" href="/static/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+  <!-- Для Apple устройств -->
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" sizes="180x180">
+  <!-- Если есть SVG (опционально) -->
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
   {% block styles %}{% endblock %}
 </head>
 <body>
