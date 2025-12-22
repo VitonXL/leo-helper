@@ -27,12 +27,12 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #f8fbff; /* Почти белый, с лёгким голубым */
+      background: #fafcff; /* Почти белый, очень нежный голубой */
       transition: background 0.3s ease;
     }
 
     [data-theme="dark"] {
-      background: #0a0e17;
+      background: #0a0c12;
       color: #e0e0e0;
     }
 
@@ -53,7 +53,7 @@
       justify-content: center;
       padding: 6px 12px;
       box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #FFD700;
-      z-index: 1002;
+      z-index: 1003;
       border: 1.5px solid #FFD700;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
@@ -137,16 +137,22 @@
       color: white;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА С ГРАДИЕНТОМ === */
+    /* === ПРОЗРАЧНАЯ ШАПКА С ГРАДИЕНТОМ ВЫСОТЫ === */
     .full-header {
       position: fixed;
       top: 0;
       left: 10px;
       width: calc(100% - 20px);
       height: 60px;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.96),
+        rgba(255, 255, 255, 0.85),
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.3)
+      );
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       border-bottom-left-radius: 16px;
       border-bottom-right-radius: 16px;
@@ -154,19 +160,21 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
-      z-index: 1001;
+      z-index: 1002;
     }
 
-    /* === ТРАВЯНАЯ ЛИНИЯ === */
+    /* === ТРАВЯНАЯ ЛИНИЯ — НА НИЖНЕЙ ГРАНИ ШАПКИ === */
     .grass-line {
       position: fixed;
-      bottom: 58px; /* Под овал, но над шапкой */
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: url("data:image/svg+xml,%3Csvg width='100' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,6 Q10,2 20,6 T40,6 T60,6 T80,6 T100,6' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") repeat-x;
+      bottom: 58px; /* Точно по нижнему краю шапки */
+      left: 10px;
+      width: calc(100% - 20px);
+      height: 4px;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,4 Q10,1 20,4 T40,4 T60,4 T80,4 T100,4' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") repeat-x left center;
       z-index: 1001;
       pointer-events: none;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
     }
 
     /* === КНОПКИ В ШАПКЕ === */
@@ -212,12 +220,13 @@
       transform: scale(1.1);
     }
 
+    /* === КНОПКА АДМИНКИ === */
     .admin-badge {
       display: none;
       position: absolute;
       top: -8px;
       right: -8px;
-      background: #ff5722;
+      background: #f48b29; /* Приглушённый оранжево-красный */
       color: white;
       font-size: 10px;
       font-weight: 600;
@@ -227,7 +236,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 0 2px #f8fbff;
+      box-shadow: 0 0 0 2px #fafcff;
       cursor: pointer;
       z-index: 2;
     }
@@ -239,6 +248,31 @@
 
     [data-role="admin"] .admin-badge {
       display: flex;
+    }
+
+    /* === ИКОНКА ЩИТА — АДМИН-ПАНЕЛЬ === */
+    .admin-btn {
+      display: none;
+      margin-left: 12px;
+      background: #f48b29;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(244, 139, 41, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    [data-role="admin"] .admin-btn {
+      display: flex;
+    }
+
+    .admin-btn:hover {
+      background: #e07b20;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(244, 139, 41, 0.4);
     }
 
     /* === ОСНОВНОЙ КОНТЕНТ === */
@@ -316,7 +350,7 @@
       transform: translateY(-2px);
     }
 
-    /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
+    /* === БЫСТРЫЕ ДЕЙСТВИЯ (4 штуки) === */
     .button-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -353,43 +387,44 @@
       font-weight: 500;
     }
 
-    /* === ВИДЖЕТЫ === */
-    .widget-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin: 24px 0;
-    }
-
-    .widget {
+    /* === КРУПНЫЕ ВИДЖЕТЫ: ПОГОДА И КУРСЫ === */
+    .widget-large {
       background: white;
       border: 1px solid rgba(178, 255, 89, 0.2);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
-    .widget-icon {
-      font-size: 24px;
-      margin-bottom: 4px;
+    .widget-icon-large {
+      font-size: 40px;
+      color: #4CAF50;
     }
 
-    .widget-title {
-      font-size: 14px;
-      color: #757575;
-      margin: 0 0 4px 0;
+    .widget-content {
+      flex: 1;
     }
 
-    .widget-value {
-      font-size: 18px;
+    .widget-title-large {
+      font-size: 16px;
       font-weight: 600;
+      color: #212121;
+      margin: 0 0 6px;
+    }
+
+    .widget-value-large {
+      font-size: 22px;
+      font-weight: 700;
       color: #212121;
     }
 
-    .widget-sub {
-      font-size: 12px;
-      color: #999;
+    .widget-sub-large {
+      font-size: 13px;
+      color: #757575;
+      margin-top: 4px;
     }
 
     /* === НОВОСТИ === */
@@ -471,23 +506,22 @@
       transform: scale(1.08);
     }
 
-    /* === АДАПТИВНОСТЬ === */
+    /* === АДАПТИВ === */
     @media (max-width: 768px) {
-      .button-grid,
-      .widget-grid {
+      .button-grid {
         grid-template-columns: 1fr;
+      }
+
+      .widget-large {
+        flex-direction: column;
+        text-align: center;
       }
 
       .full-header {
         padding: 0 12px;
       }
 
-      .btn-icon {
-        width: 36px;
-        height: 36px;
-      }
-
-      .user-avatar {
+      .btn-icon, .user-avatar {
         width: 36px;
         height: 36px;
       }
@@ -507,9 +541,6 @@
     </div>
     <div class="page-tag">Главная</div>
   </div>
-
-  <!-- Травяная линия -->
-  <div class="grass-line"></div>
 
   <!-- Прозрачная шапка -->
   <div class="full-header" id="main-header">
@@ -533,11 +564,21 @@
         />
         <div class="admin-badge" id="admin-badge">!</div>
       </div>
+
+      <!-- Кнопка админки — щит -->
+      <button class="admin-btn" id="admin-btn" title="Админ панель">
+        <span class="material-icons">shield</span>
+      </button>
+
+      <!-- Кнопка темы -->
       <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
         <span class="material-icons" id="theme-icon">dark_mode</span>
       </button>
     </div>
   </div>
+
+  <!-- Травяная линия — по нижнему краю шапки -->
+  <div class="grass-line"></div>
 
   <!-- Основной контент -->
   <div class="main-content">
@@ -552,7 +593,7 @@
       </button>
     </div>
 
-    <!-- Быстрые действия -->
+    <!-- 4 Быстрых действия -->
     <div class="section-title">⚡ Быстрые действия</div>
     <div class="button-grid">
       <a href="#" class="action-btn">
@@ -573,31 +614,23 @@
       </a>
     </div>
 
-    <!-- Виджеты -->
-    <div class="widget-grid">
-      <div class="widget">
-        <div class="widget-icon">🌤</div>
-        <div class="widget-title">Погода</div>
-        <div class="widget-value">+12°C</div>
-        <div class="widget-sub">в Москве</div>
+    <!-- Крупный виджет: Погода -->
+    <div class="widget-large">
+      <div class="widget-icon-large">🌤</div>
+      <div class="widget-content">
+        <div class="widget-title-large">Погода в Москве</div>
+        <div class="widget-value-large">+14°C</div>
+        <div class="widget-sub-large">Облачно, ветер 3 м/с</div>
       </div>
-      <div class="widget">
-        <div class="widget-icon">💵</div>
-        <div class="widget-title">Курс USD</div>
-        <div class="widget-value">98.50 ₽</div>
-        <div class="widget-sub">на сегодня</div>
-      </div>
-      <div class="widget">
-        <div class="widget-icon">🤖</div>
-        <div class="widget-title">GigaChat</div>
-        <div class="widget-value">3/10</div>
-        <div class="widget-sub">запросов</div>
-      </div>
-      <div class="widget">
-        <div class="widget-icon">🛎</div>
-        <div class="widget-title">Напоминания</div>
-        <div class="widget-value">2</div>
-        <div class="widget-sub">активных</div>
+    </div>
+
+    <!-- Крупный виджет: Курсы -->
+    <div class="widget-large">
+      <div class="widget-icon-large">💵</div>
+      <div class="widget-content">
+        <div class="widget-title-large">Курс USD</div>
+        <div class="widget-value-large">98.50 ₽</div>
+        <div class="widget-sub-large">+0.25 за день</div>
       </div>
     </div>
 
@@ -646,25 +679,35 @@
 
     const userData = {
       first_name: "Иван",
-      role: "admin"
+      role: "admin" // ← поменяй на "user", чтобы скрыть админку
     };
 
     document.addEventListener('DOMContentLoaded', () => {
       const avatar = document.getElementById('user-avatar');
       const adminContainer = document.getElementById('admin-container');
+      const adminBtn = document.getElementById('admin-btn');
 
+      // Фото из Telegram
       if (window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url) {
         avatar.src = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
       }
 
+      // Показ админ-элементов
       if (userData.role === 'admin') {
         adminContainer.setAttribute('data-role', 'admin');
+        adminBtn.style.display = 'flex';
+
         document.getElementById('admin-badge').onclick = (e) => {
           e.stopPropagation();
-          alert('🔐 Админ-панель');
+          alert('🔐 Добро пожаловать в админ-панель');
+        };
+
+        adminBtn.onclick = () => {
+          alert('🛡 Доступ к админке');
         };
       }
 
+      // Тема
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
