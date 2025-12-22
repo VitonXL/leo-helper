@@ -1,5 +1,12 @@
 <!-- web/templates/components/header.html -->
-<div class="leo-header">
+<!-- Центр: овал (выпирает вверх) -->
+<div class="leo-badge-3d">
+  <div class="leo-text">Лео</div>
+  <div class="page-tag" id="page-title">Финансы</div>
+</div>
+
+<!-- Шапка — на всю ширину, с закруглением снизу -->
+<div class="full-header">
   <div class="header-left">
     <button class="btn-icon" id="menu-toggle" aria-label="Меню">
       <span class="material-icons">menu</span>
@@ -7,18 +14,6 @@
     <button class="btn-icon" onclick="history.back()" aria-label="Назад">
       <span class="material-icons">arrow_back</span>
     </button>
-  </div>
-
-  <!-- Центр: животик змеи (11122111) -->
-  <div class="header-center">
-    <div class="snake-bulge">
-      <div class="snake-logo">
-        <span class="l">Л</span><span class="eo">ео</span>
-      </div>
-      <div class="page-pill">
-        <span id="page-title">Финансы</span>
-      </div>
-    </div>
   </div>
 
   <div class="header-right">
@@ -39,7 +34,7 @@
 <!-- Бургер-меню -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h3>Навигация</h3>
+    <h3>Меню</h3>
     <button class="btn-icon" onclick="closeSidebar()">
       <span class="material-icons">close</span>
     </button>
@@ -58,139 +53,84 @@
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <style>
-/* === ОСНОВНАЯ ШАПКА === */
-.leo-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  background: #f8f3e6; /* тёплый кремовый — как в favicon */
-  border-bottom: 1px solid #d4a017; /* золото */
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 4px 20px rgba(212, 160, 23, 0.15);
+/* === ОВАЛ В ЦЕНТРЕ (выпирает вверх) === */
+.leo-badge-3d {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 72px;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  color: white;
+  border-radius: 36px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 10px 16px;
-  overflow: hidden;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  justify-content: center;
+  padding: 8px 16px;
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3), 0 0 0 2px #FFD700;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  z-index: 1002;
+  border: 2px solid #FFD700;
+  animation: float 3s ease-in-out infinite;
 }
 
+.leo-text {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.page-tag {
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(255, 215, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+@keyframes float {
+  0% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-2px); }
+  100% { transform: translateX(-50%) translateY(0); }
+}
+
+/* === ШАПКА — НА ВСЮ ШИРИНУ, ЗАКРУГЛЕНА СНИЗУ === */
+.full-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(135deg, #e6f9ff, #d0f0ff);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1001;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* === КНОПКИ === */
 .header-left,
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
+  gap: 12px;
+  z-index: 1003;
 }
 
-.header-center {
-  flex: 0 0 auto;
-  position: relative;
-}
-
-/* === ЖИВОТИК ЗМЕИ (11122111) === */
-.snake-bulge {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 140px;
-  height: 72px;
-}
-
-/* === ЛОГО "ЛЕО" === */
-.snake-logo {
-  display: flex;
-  align-items: center;
-  font-weight: 700;
-  font-size: 22px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -1px;
-  margin-bottom: 4px;
-}
-
-.snake-logo .l {
-  color: #8B4513; /* коричневый — как в дереве */
-  font-size: 26px;
-  position: relative;
-}
-
-.snake-logo .l::before,
-.snake-logo .l::after {
-  content: '';
-  position: absolute;
-  width: 8px;
-  height: 10px;
-  background: #8B4513;
-  bottom: -8px;
-  border-radius: 40% 40% 60% 60%;
-}
-
-.snake-logo .l::before {
-  left: 2px;
-  transform: rotate(30deg);
-  width: 7px;
-  height: 9px;
-}
-
-.snake-logo .l::after {
-  right: 2px;
-  transform: rotate(-30deg);
-  width: 7px;
-  height: 9px;
-}
-
-.snake-logo .eo {
-  color: #D4A017; /* золото — как в favicon */
-  font-size: 22px;
-  position: relative;
-}
-
-.snake-logo .eo::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: -4px;
-  width: 12px;
-  height: 12px;
-  background: #32CD32;
-  border-radius: 50%;
-  box-shadow: 
-    8px -2px 0 1px #32CD32,
-    4px -6px 0 1px #32CD32,
-    12px 2px 0 1px #32CD32;
-}
-
-/* === ФИШКА СТРАНИЦЫ (утолщение) === */
-.page-pill {
-  width: 110px;
-  background: #D4A017; /* золото */
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 5px 10px;
-  border-radius: 18px;
-  box-shadow: 
-    0 2px 8px rgba(212, 160, 23, 0.3),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-  border: 1px solid #b8860b;
-  white-space: nowrap;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  font-family: 'Inter', sans-serif;
-  transform: translateY(1px);
-  text-align: center;
-}
-
-/* === КНОПКИ === */
 .btn-icon {
   background: transparent;
   border: none;
-  color: #8B4513;
+  color: #2E7D32;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -203,7 +143,7 @@
 }
 
 .btn-icon:hover {
-  background: rgba(212, 160, 23, 0.1);
+  background: rgba(76, 175, 80, 0.1);
   transform: translateY(-2px);
 }
 
@@ -214,18 +154,17 @@
   object-fit: cover;
 }
 
-/* === БУРГЕР-МЕНЮ === */
+/* === Бургер-меню (остаётся прежним) === */
 .sidebar {
   position: fixed;
   top: 0;
   left: -300px;
   width: 280px;
   height: 100%;
-  background: #f8f3e6;
-  box-shadow: 2px 0 16px rgba(178, 255, 89, 0.2);
+  background: white;
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.15);
   z-index: 1100;
   transition: left 0.3s ease;
-  border-right: 1px solid #d4a017;
 }
 
 .sidebar.open {
@@ -237,29 +176,23 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #d4a017;
-}
-
-.sidebar-header h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #8B4513;
+  border-bottom: 1px solid #eee;
 }
 
 .sidebar-body a {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 8px;
+  padding: 12px 16px;
   text-decoration: none;
   color: #212121;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin: 8px;
   font-size: 15px;
 }
 
 .sidebar-body a:hover {
-  background: rgba(212, 160, 23, 0.1);
+  background: #e8f5e8;
 }
 
 .sidebar-overlay {
@@ -276,63 +209,37 @@
 .sidebar-overlay.active {
   display: block;
 }
-
-/* === АДАПТИВ === */
-@media (max-width: 768px) {
-  .leo-header {
-    padding: 10px 12px;
-  }
-  .snake-bulge {
-    width: 120px;
-  }
-  .snake-logo {
-    font-size: 20px;
-  }
-  .snake-logo .l {
-    font-size: 24px;
-  }
-  .snake-logo .eo {
-    font-size: 20px;
-  }
-  .page-pill {
-    width: 100px;
-    font-size: 12px;
-    padding: 5px 8px;
-  }
-}
 </style>
 
 <script>
 function toggleMenu() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  sidebar.classList.add('open');
-  overlay.classList.add('active');
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('active');
 }
 
 function closeSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  sidebar.classList.remove('open');
-  overlay.classList.remove('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('active');
 }
 
 function toggleTheme() {
   const html = document.documentElement;
   const icon = document.getElementById('theme-icon');
   const isDark = html.getAttribute('data-theme') === 'dark';
-
   if (isDark) {
     html.setAttribute('data-theme', 'light');
     icon.textContent = 'dark_mode';
     localStorage.setItem('theme', 'light');
-    Toast.info('Светлая тема');
   } else {
     html.setAttribute('data-theme', 'dark');
     icon.textContent = 'light_mode';
     localStorage.setItem('theme', 'dark');
-    Toast.info('Тёмная тема');
   }
+}
+
+function setPageTitle(title) {
+  const el = document.getElementById('page-title');
+  if (el) el.textContent = title;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -343,9 +250,4 @@ document.addEventListener('DOMContentLoaded', () => {
     icon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
   }
 });
-
-function setPageTitle(title) {
-  const el = document.getElementById('page-title');
-  if (el) el.textContent = title;
-}
 </script>
