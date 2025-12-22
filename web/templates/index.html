@@ -27,16 +27,16 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #f0f7ff; /* Спокойный светло-голубой фон */
+      background: #f0f7ff; /* Голубо-белый фон */
       transition: background 0.4s ease;
     }
 
     [data-theme="dark"] {
-      background: #0a1128; /* Глубокий тёмно-синий */
+      background: #0a1128; /* Тёмно-синий фон */
       color: #e0f7ff;
     }
 
-    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" — ПОЗНАВАЕМОЕ "Л" С ДУПЛОМ === */
+    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" — С ЗЕЛЁНЫМИ АКЦЕНТАМИ === */
     .leo-badge-3d {
       position: fixed;
       top: 8px;
@@ -44,7 +44,7 @@
       transform: translateX(-50%);
       width: 130px;
       height: 62px;
-      background: linear-gradient(135deg, #0080ff, #0050a0);
+      background: linear-gradient(135deg, #B2FF59, #4CAF50); /* Светло- и тёмно-зелёный */
       color: white;
       border-radius: 30px;
       display: flex;
@@ -52,9 +52,9 @@
       align-items: center;
       justify-content: center;
       padding: 6px 12px;
-      box-shadow: 0 4px 12px rgba(0, 120, 255, 0.3), 0 0 0 1.5px #FFD700;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #DAA520; /* Золотая обводка */
       z-index: 1003;
-      border: 1.5px solid #FFD700;
+      border: 1.5px solid #DAA520;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
       font-weight: 700;
@@ -72,50 +72,68 @@
       align-items: center;
       font-weight: 700;
       font-size: 18px;
+      letter-spacing: -1px;
     }
 
     .l {
-      color: #0080ff;
-      font-weight: 800;
-      font-size: 20px;
+      color: #4CAF50;
+      font-size: 22px;
       position: relative;
     }
 
-    .l::before {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 20px;
-      background: #003366;
-      border-radius: 2px 2px 0 0;
-      top: 4px;
-      left: 2px;
-    }
-
+    .l::before,
     .l::after {
       content: '';
       position: absolute;
-      width: 4px;
-      height: 6px;
-      background: #000;
-      border-radius: 1px;
-      top: 14px;
-      left: 4px;
+      width: 7px;
+      height: 8px;
+      background: #4CAF50;
+      bottom: -7px;
+      border-radius: 40% 40% 60% 60%;
+    }
+
+    .l::before {
+      left: 2px;
+      transform: rotate(30deg);
+      width: 6px;
+      height: 7px;
+    }
+
+    .l::after {
+      right: 2px;
+      transform: rotate(-30deg);
+      width: 6px;
+      height: 7px;
     }
 
     .eo {
-      color: #FFD700;
+      color: #DAA520;
       font-size: 18px;
-      margin-left: 2px;
+      position: relative;
+    }
+
+    .eo::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -3px;
+      width: 10px;
+      height: 10px;
+      background: #B2FF59;
+      border-radius: 50%;
+      box-shadow: 
+        7px -2px 0 1px #B2FF59,
+        3px -5px 0 1px #B2FF59,
+        10px 1px 0 1px #B2FF59;
     }
 
     .page-tag {
       font-size: 12px;
       font-weight: 500;
-      background: rgba(255, 215, 0, 0.25);
+      background: rgba(218, 165, 32, 0.25);
       padding: 1px 6px;
       border-radius: 10px;
-      border: 1px solid rgba(255, 215, 0, 0.4);
+      border: 1px solid rgba(218, 165, 32, 0.4);
       color: white;
     }
 
@@ -149,7 +167,7 @@
     .btn-icon {
       background: transparent;
       border: none;
-      color: #0080ff;
+      color: #4CAF50;
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -160,7 +178,7 @@
     }
 
     .btn-icon:hover {
-      background: rgba(0, 128, 255, 0.1);
+      background: rgba(76, 175, 80, 0.1);
     }
 
     /* === АВАТАРКА === */
@@ -168,10 +186,10 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      border: 2px solid #0080ff;
+      border: 2px solid #4CAF50;
       object-fit: cover;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0, 128, 255, 0.2);
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
     }
 
     /* === АДМИН-КНОПКА === */
@@ -201,53 +219,53 @@
       padding: 16px;
     }
 
-    /* === КАРТОЧКИ — ВЫДЕЛЕНИЕ В РЕЖИМЕ СВЕТА И ТЬМЫ === */
+    /* === КАРТОЧКИ === */
     .card {
       background: white;
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-      border: 1px solid rgba(0, 120, 255, 0.12);
+      border: 1px solid rgba(178, 255, 89, 0.2);
       margin-bottom: 24px;
       transition: all 0.3s ease;
     }
 
     [data-theme="dark"] .card {
       background: #0f172a;
-      border: 1px solid #00b8ff;
-      box-shadow: 0 0 0 1px #00b8ff, 0 8px 24px rgba(0, 184, 255, 0.15);
+      border: 1px solid #B2FF59;
+      box-shadow: 0 0 0 1px #B2FF59, 0 8px 24px rgba(178, 255, 89, 0.15);
       color: #e0f7ff;
     }
 
-    /* === НЕОНОВЫЕ КНОПКИ БЫСТРОГО ДОСТУПА === */
+    /* === КНОПКИ БЫСТРОГО ДОСТУПА === */
     .action-btn {
-      background: #f0f8ff;
-      border: 1px solid rgba(0, 120, 255, 0.2);
+      background: #f8fff8;
+      border: 1px solid rgba(76, 175, 80, 0.2);
       border-radius: 16px;
       padding: 18px;
       text-decoration: none;
-      color: #0050a0;
+      color: #2E7D32;
       font-weight: 500;
       transition: all 0.3s ease;
       text-align: center;
     }
 
     .action-btn:hover {
-      background: #e0f0ff;
+      background: #e8f5e9;
       transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0, 120, 255, 0.12);
+      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.12);
     }
 
     [data-theme="dark"] .action-btn {
-      background: #0d1424;
-      border: 1px solid #00ffaa;
-      color: #00ffaa;
-      box-shadow: 0 0 0 1px #00ffaa, 0 4px 12px rgba(0, 255, 170, 0.1);
+      background: #1a2e1b;
+      border: 1px solid #B2FF59;
+      color: #B2FF59;
+      box-shadow: 0 0 0 1px #B2FF59, 0 4px 12px rgba(178, 255, 89, 0.1);
     }
 
     [data-theme="dark"] .action-btn:hover {
-      background: #001833;
-      box-shadow: 0 0 0 2px #00ffaa, 0 8px 20px rgba(0, 255, 170, 0.2);
+      background: #244426;
+      box-shadow: 0 0 0 2px #B2FF59, 0 8px 20px rgba(178, 255, 89, 0.2);
       transform: translateY(-4px);
     }
 
@@ -255,6 +273,11 @@
       font-size: 28px;
       margin-bottom: 8px;
       display: block;
+      color: #4CAF50;
+    }
+
+    [data-theme="dark"] .action-icon {
+      color: #B2FF59;
     }
 
     .action-label {
@@ -274,20 +297,20 @@
       background: white;
       border-radius: 16px;
       padding: 20px;
-      border: 1px solid rgba(0, 120, 255, 0.1);
+      border: 1px solid rgba(178, 255, 89, 0.2);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     }
 
     [data-theme="dark"] .stat-card {
       background: #0f172a;
-      border: 1px solid #00b8ff;
-      box-shadow: 0 0 0 1px #00b8ff, 0 4px 16px rgba(0, 184, 255, 0.1);
+      border: 1px solid #B2FF59;
+      box-shadow: 0 0 0 1px #B2FF59, 0 4px 16px rgba(178, 255, 89, 0.1);
     }
 
     .stat-title {
       font-size: 16px;
       font-weight: 600;
-      color: #0080ff;
+      color: #4CAF50;
       margin: 0 0 12px;
       display: flex;
       align-items: center;
@@ -295,7 +318,7 @@
     }
 
     [data-theme="dark"] .stat-title {
-      color: #00b8ff;
+      color: #B2FF59;
     }
 
     .stat-row {
@@ -307,7 +330,7 @@
     }
 
     [data-theme="dark"] .stat-row {
-      border-bottom-color: rgba(0, 184, 255, 0.2);
+      border-bottom-color: rgba(178, 255, 89, 0.2);
     }
 
     .stat-row:last-child {
@@ -315,11 +338,11 @@
     }
 
     .stat-label {
-      color: #555;
+      color: #757575;
     }
 
     [data-theme="dark"] .stat-label {
-      color: #80d0ff;
+      color: #b2ff59cc;
     }
 
     .stat-value {
@@ -332,21 +355,25 @@
     }
 
     .stat-change {
-      color: #00b8ff;
+      color: #4CAF50;
       font-size: 12px;
       margin-left: 6px;
+    }
+
+    [data-theme="dark"] .stat-change {
+      color: #B2FF59;
     }
 
     /* === НОВОСТИ === */
     .section-title {
       font-size: 16px;
-      color: #0080ff;
+      color: #4CAF50;
       margin: 24px 0 12px;
       font-weight: 600;
     }
 
     [data-theme="dark"] .section-title {
-      color: #00b8ff;
+      color: #B2FF59;
     }
 
     .news-feed {
@@ -357,7 +384,7 @@
 
     .news-item {
       background: white;
-      border: 1px solid rgba(0, 120, 255, 0.12);
+      border: 1px solid rgba(178, 255, 89, 0.2);
       border-radius: 8px;
       padding: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -365,17 +392,17 @@
 
     [data-theme="dark"] .news-item {
       background: #0f172a;
-      border: 1px solid #00b8ff;
-      box-shadow: 0 0 0 1px #00b8ff, 0 2px 8px rgba(0, 184, 255, 0.1);
+      border: 1px solid #B2FF59;
+      box-shadow: 0 0 0 1px #B2FF59, 0 2px 8px rgba(178, 255, 89, 0.1);
     }
 
     .news-icon {
       font-size: 20px;
-      color: #0080ff;
+      color: #4CAF50;
     }
 
     [data-theme="dark"] .news-icon {
-      color: #00b8ff;
+      color: #B2FF59;
     }
 
     .news-title {
@@ -395,7 +422,7 @@
     }
 
     [data-theme="dark"] .news-time {
-      color: #66a0ff;
+      color: #80c755;
     }
 
     /* === КНОПКИ ВНИЗУ === */
@@ -403,32 +430,32 @@
       text-align: center;
       padding: 20px 16px;
       margin-top: 24px;
-      background: rgba(240, 248, 255, 0.9);
+      background: rgba(248, 255, 248, 0.9);
       border-radius: 16px;
-      border: 1px solid rgba(0, 120, 255, 0.1);
+      border: 1px solid rgba(178, 255, 89, 0.2);
     }
 
     [data-theme="dark"] .footer-info {
       background: #0f172a;
-      border: 1px solid #00b8ff;
-      box-shadow: 0 0 0 1px #00b8ff;
+      border: 1px solid #B2FF59;
+      box-shadow: 0 0 0 1px #B2FF59;
     }
 
     .footer-tag {
       font-size: 14px;
-      color: #0080ff;
+      color: #4CAF50;
       margin-bottom: 12px;
       font-weight: 500;
     }
 
     [data-theme="dark"] .footer-tag {
-      color: #00b8ff;
+      color: #B2FF59;
     }
 
     .footer-btn {
-      background: #f0f8ff;
-      color: #0080ff;
-      border: 1px solid rgba(0, 120, 255, 0.2);
+      background: #f8fff8;
+      color: #4CAF50;
+      border: 1px solid rgba(76, 175, 80, 0.2);
       padding: 8px 16px;
       border-radius: 10px;
       font-size: 13px;
@@ -438,18 +465,18 @@
     }
 
     .footer-btn:hover {
-      background: #e0f0ff;
+      background: #e8f5e9;
     }
 
     [data-theme="dark"] .footer-btn {
-      background: #001833;
-      color: #00b8ff;
-      border: 1px solid #00b8ff;
+      background: #1a2e1b;
+      color: #B2FF59;
+      border: 1px solid #B2FF59;
     }
 
     [data-theme="dark"] .footer-btn:hover {
-      background: #000f22;
-      box-shadow: 0 0 0 2px #00b8ff;
+      background: #244426;
+      box-shadow: 0 0 0 2px #B2FF59;
     }
 
     /* === АДАПТИВ === */
@@ -470,8 +497,6 @@
         max-width: 240px;
       }
     }
-
-    /* === НЕ УДАЛЯТЬ — JS УЖЕ ЗДЕСЬ === */
   </style>
 </head>
 <body>
@@ -498,7 +523,7 @@
       <!-- Аватарка -->
       <div class="admin-container" id="admin-container">
         <img 
-          src="https://ui-avatars.com/api/?name=Иван&background=0080ff&color=fff&size=128" 
+          src="https://ui-avatars.com/api/?name=Иван&background=4CAF50&color=fff&size=128" 
           alt="Аватар" 
           class="user-avatar"
           id="user-avatar"
