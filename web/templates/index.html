@@ -27,24 +27,24 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #f0f9f2; /* Фон страницы — нежный зелёный */
+      background: #f0f7ff; /* Спокойный светло-голубой фон */
       transition: background 0.4s ease;
     }
 
     [data-theme="dark"] {
-      background: #0a1a0f;
-      color: #e0f2f1;
+      background: #0a1128; /* Глубокий тёмно-синий */
+      color: #e0f7ff;
     }
 
-    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" — ДЕРЕВО === */
+    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" — ПОЗНАВАЕМОЕ "Л" С ДУПЛОМ === */
     .leo-badge-3d {
       position: fixed;
       top: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 140px;
+      width: 130px;
       height: 62px;
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      background: linear-gradient(135deg, #0080ff, #0050a0);
       color: white;
       border-radius: 30px;
       display: flex;
@@ -52,7 +52,7 @@
       align-items: center;
       justify-content: center;
       padding: 6px 12px;
-      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #FFD700;
+      box-shadow: 0 4px 12px rgba(0, 120, 255, 0.3), 0 0 0 1.5px #FFD700;
       z-index: 1003;
       border: 1.5px solid #FFD700;
       animation: float 3s ease-in-out infinite;
@@ -69,63 +69,44 @@
 
     .leo-logo {
       display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      position: relative;
+      align-items: center;
+      font-weight: 700;
       font-size: 18px;
-      line-height: 1;
     }
 
-    .l-tree {
-      width: 22px;
-      height: 32px;
-      background: #8B4513;
-      border-radius: 4px 4px 0 0;
+    .l {
+      color: #0080ff;
+      font-weight: 800;
+      font-size: 20px;
       position: relative;
-      overflow: hidden;
     }
 
-    .l-tree::before {
-      content: '';
-      position: absolute;
-      top: -10px;
-      width: 26px;
-      height: 18px;
-      background: #4CAF50;
-      border-radius: 50% 50% 20% 20%;
-      box-shadow: -4px -2px 0 1px #4CAF50, 4px -4px 0 1px #4CAF50, 0 -6px 0 1px #4CAF50;
-    }
-
-    .l-tree::after {
+    .l::before {
       content: '';
       position: absolute;
       width: 8px;
-      height: 10px;
-      background: #3E2723;
-      border-radius: 50%;
+      height: 20px;
+      background: #003366;
+      border-radius: 2px 2px 0 0;
+      top: 4px;
+      left: 2px;
+    }
+
+    .l::after {
+      content: '';
+      position: absolute;
+      width: 4px;
+      height: 6px;
+      background: #000;
+      border-radius: 1px;
       top: 14px;
-      left: 7px;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+      left: 4px;
     }
 
-    .e {
-      font-size: 20px;
-      font-weight: 700;
+    .eo {
       color: #FFD700;
-      transform: rotate(10deg);
-      position: relative;
-      left: -4px;
-      bottom: -2px;
-      text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-    }
-
-    .o {
       font-size: 18px;
-      font-weight: 700;
-      color: #FFD700;
-      position: relative;
-      bottom: 0;
-      text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+      margin-left: 2px;
     }
 
     .page-tag {
@@ -136,23 +117,16 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
-      margin-top: 2px;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА С ТРАВОЙ === */
+    /* === ПРОЗРАЧНАЯ ШАПКА === */
     .full-header {
       position: fixed;
       top: 0;
       left: 10px;
       width: calc(100% - 20px);
       height: 60px;
-      background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.96),
-        rgba(255, 255, 255, 0.8),
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.3)
-      );
+      background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -163,67 +137,19 @@
       justify-content: space-between;
       padding: 0 16px;
       z-index: 1002;
-      overflow: hidden;
-      position: relative;
     }
 
-    /* === ТРАВЯНАЯ ВОЛНА === */
-    .header-grass-line {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: url("data:image/svg+xml,%3Csvg width='100' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,6 Q10,2 20,6 T40,6 T60,6 T80,6 T100,6' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") repeat-x left bottom;
-      z-index: 1;
-    }
-
-    /* === ТОРЧАЩИЕ ТРАВИНКИ === */
-    .grass-blades {
-      position: absolute;
-      bottom: 2px;
-      left: 0;
-      width: 100%;
-      height: 18px;
-      background: 
-        repeating-linear-gradient(90deg,
-          transparent 0px,
-          transparent 20px,
-          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="16"><path d="M2,16 C2,12 4,10 3,5 C3,2 1,3 1,1" stroke="%234CAF50" fill="none" stroke-width="1.8" transform="rotate(10,3,8)"/></svg>') 20px 26px,
-          transparent 26px,
-          transparent 40px
-        ),
-        repeating-linear-gradient(90deg,
-          transparent 0px,
-          transparent 30px,
-          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="5" height="14"><path d="M2,14 C2,11 3,8 2.5,4 C2.5,2 1,3 1,1" stroke="%234CAF50" fill="none" stroke-width="1.6" transform="rotate(-5,2.5,7)"/></svg>') 30px 35px,
-          transparent 35px,
-          transparent 60px
-        );
-      z-index: 2;
-      pointer-events: none;
-      animation: sway 2.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes sway {
-      0% { background-position-x: 0, 0; }
-      100% { background-position-x: 10px, -5px; }
-    }
-
-    /* === КНОПКИ В ШАПКЕ === */
     .header-left,
     .header-right {
       display: flex;
       align-items: center;
       gap: 12px;
-      z-index: 10;
-      position: relative;
     }
 
     .btn-icon {
       background: transparent;
       border: none;
-      color: #2E7D32;
+      color: #0080ff;
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -231,12 +157,10 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
 
     .btn-icon:hover {
-      background: rgba(76, 175, 80, 0.1);
-      transform: translateY(-1px);
+      background: rgba(0, 128, 255, 0.1);
     }
 
     /* === АВАТАРКА === */
@@ -244,15 +168,10 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      border: 2px solid #4CAF50;
+      border: 2px solid #0080ff;
       object-fit: cover;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
-      transition: transform 0.3s ease;
-    }
-
-    .user-avatar:hover {
-      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 128, 255, 0.2);
     }
 
     /* === АДМИН-КНОПКА === */
@@ -267,19 +186,9 @@
       margin-left: 8px;
       cursor: pointer;
       box-shadow: 0 3px 10px rgba(244, 139, 41, 0.35);
-      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .admin-btn span {
-      font-size: 20px;
-    }
-
-    .admin-btn:hover {
-      background: #e07b20;
-      transform: translateY(-2px);
     }
 
     [data-role="admin"] .admin-btn {
@@ -292,137 +201,60 @@
       padding: 16px;
     }
 
-    /* === КАРТОЧКИ — НЕЖНО-ЗЕЛЁНЫЙ СВЕТЯЩИЙСЯ ФОН === */
+    /* === КАРТОЧКИ — ВЫДЕЛЕНИЕ В РЕЖИМЕ СВЕТА И ТЬМЫ === */
     .card {
-      background: #e8f5e9; /* Нежно-зелёный */
+      background: white;
       border-radius: 16px;
       padding: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 120, 255, 0.12);
       margin-bottom: 24px;
-      transition: all 0.4s ease;
-      box-shadow: 0 4px 16px rgba(67, 160, 71, 0.18); /* Тень + лёгкое свечение */
-      border: 1px solid rgba(165, 214, 167, 0.4);
-    }
-
-    /* === СВЕЧЕНИЕ В СВЕТОЛОЙ ТЕМЕ === */
-    .card,
-    .stat-card,
-    .action-btn,
-    .news-item,
-    .footer-info {
-      box-shadow: 
-        0 4px 16px rgba(67, 160, 71, 0.16),
-        0 0 12px rgba(102, 187, 106, 0.12) inset;
-    }
-
-    /* === ТЁМНАЯ ТЕМА — КАРТОЧКИ === */
-    [data-theme="dark"] .card,
-    [data-theme="dark"] .stat-card,
-    [data-theme="dark"] .action-btn,
-    [data-theme="dark"] .news-item,
-    [data-theme="dark"] .footer-info {
-      background: #1b5e20; /* Тёмно-зелёный */
-      color: #c8e6c9;
-      box-shadow: 
-        0 6px 20px rgba(81, 166, 85, 0.35),
-        0 0 18px rgba(102, 187, 106, 0.25) inset; /* Ярче светится в тёмной теме */
-      border: 1px solid rgba(67, 160, 71, 0.3);
-    }
-
-    [data-theme="dark"] .news-icon {
-      color: #a5d6a7;
-    }
-
-    /* === ПОДСВЕТКА КАРТОЧЕК ПРИ НАВЕДЕНИИ === */
-    .card:hover,
-    .stat-card:hover,
-    .action-btn:hover,
-    .news-item:hover {
-      box-shadow: 
-        0 8px 24px rgba(67, 160, 71, 0.24),
-        0 0 20px rgba(102, 187, 106, 0.18);
-    }
-
-    [data-theme="dark"] .card:hover,
-    [data-theme="dark"] .stat-card:hover,
-    [data-theme="dark"] .action-btn:hover,
-    [data-theme="dark"] .news-item:hover {
-      box-shadow: 
-        0 10px 30px rgba(81, 166, 85, 0.4),
-        0 0 26px rgba(102, 187, 106, 0.3);
-    }
-
-    .highlight {
-      position: relative;
-      border: 2px solid #4CAF50;
-    }
-
-    .subscription-badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: linear-gradient(-45deg, #DAA520, #FFD700);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    h2 {
-      font-size: 20px;
-      margin: 0 0 12px 0;
-      color: #2E7D32;
-      font-weight: 600;
-    }
-
-    p {
-      color: #558b2f;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    [data-theme="dark"] p {
-      color: #a5d6a7;
-    }
-
-    .btn-primary {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
       transition: all 0.3s ease;
     }
 
-    .btn-primary:hover {
-      background: #45a049;
-      transform: translateY(-2px);
+    [data-theme="dark"] .card {
+      background: #0f172a;
+      border: 1px solid #00b8ff;
+      box-shadow: 0 0 0 1px #00b8ff, 0 8px 24px rgba(0, 184, 255, 0.15);
+      color: #e0f7ff;
     }
 
-    /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin: 24px 0;
-    }
-
+    /* === НЕОНОВЫЕ КНОПКИ БЫСТРОГО ДОСТУПА === */
     .action-btn {
-      background: #e8f5e9;
-      border: 1px solid rgba(165, 214, 167, 0.4);
-      color: #2e7d32;
+      background: #f0f8ff;
+      border: 1px solid rgba(0, 120, 255, 0.2);
+      border-radius: 16px;
+      padding: 18px;
+      text-decoration: none;
+      color: #0050a0;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .action-btn:hover {
+      background: #e0f0ff;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0, 120, 255, 0.12);
     }
 
     [data-theme="dark"] .action-btn {
-      color: #c8e6c9;
+      background: #0d1424;
+      border: 1px solid #00ffaa;
+      color: #00ffaa;
+      box-shadow: 0 0 0 1px #00ffaa, 0 4px 12px rgba(0, 255, 170, 0.1);
+    }
+
+    [data-theme="dark"] .action-btn:hover {
+      background: #001833;
+      box-shadow: 0 0 0 2px #00ffaa, 0 8px 20px rgba(0, 255, 170, 0.2);
+      transform: translateY(-4px);
     }
 
     .action-icon {
       font-size: 28px;
       margin-bottom: 8px;
+      display: block;
     }
 
     .action-label {
@@ -430,7 +262,7 @@
       font-weight: 500;
     }
 
-    /* === ДВА СТОЛБИКА: ПОГОДА И КУРСЫ === */
+    /* === ВИДЖЕТЫ: ПОГОДА И КУРСЫ === */
     .dual-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -439,20 +271,31 @@
     }
 
     .stat-card {
-      background: #e8f5e9;
-      border: 1px solid rgba(165, 214, 167, 0.4);
+      background: white;
       border-radius: 16px;
       padding: 20px;
+      border: 1px solid rgba(0, 120, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="dark"] .stat-card {
+      background: #0f172a;
+      border: 1px solid #00b8ff;
+      box-shadow: 0 0 0 1px #00b8ff, 0 4px 16px rgba(0, 184, 255, 0.1);
     }
 
     .stat-title {
       font-size: 16px;
       font-weight: 600;
-      color: #2E7D32;
+      color: #0080ff;
       margin: 0 0 12px;
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    [data-theme="dark"] .stat-title {
+      color: #00b8ff;
     }
 
     .stat-row {
@@ -463,16 +306,20 @@
       font-size: 14px;
     }
 
+    [data-theme="dark"] .stat-row {
+      border-bottom-color: rgba(0, 184, 255, 0.2);
+    }
+
     .stat-row:last-child {
       border-bottom: none;
     }
 
     .stat-label {
-      color: #757575;
+      color: #555;
     }
 
     [data-theme="dark"] .stat-label {
-      color: #a5d6a7;
+      color: #80d0ff;
     }
 
     .stat-value {
@@ -481,11 +328,11 @@
     }
 
     [data-theme="dark"] .stat-value {
-      color: #c8e6c9;
+      color: #e0f7ff;
     }
 
     .stat-change {
-      color: #4CAF50;
+      color: #00b8ff;
       font-size: 12px;
       margin-left: 6px;
     }
@@ -493,13 +340,13 @@
     /* === НОВОСТИ === */
     .section-title {
       font-size: 16px;
-      color: #2E7D32;
+      color: #0080ff;
       margin: 24px 0 12px;
       font-weight: 600;
     }
 
     [data-theme="dark"] .section-title {
-      color: #a5d6a7;
+      color: #00b8ff;
     }
 
     .news-feed {
@@ -509,137 +356,113 @@
     }
 
     .news-item {
-      background: #e8f5e9;
-      border: 1px solid rgba(165, 214, 167, 0.4);
+      background: white;
+      border: 1px solid rgba(0, 120, 255, 0.12);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="dark"] .news-item {
+      background: #0f172a;
+      border: 1px solid #00b8ff;
+      box-shadow: 0 0 0 1px #00b8ff, 0 2px 8px rgba(0, 184, 255, 0.1);
     }
 
     .news-icon {
       font-size: 20px;
-      color: #4CAF50;
+      color: #0080ff;
+    }
+
+    [data-theme="dark"] .news-icon {
+      color: #00b8ff;
     }
 
     .news-title {
       font-size: 15px;
       font-weight: 500;
-      color: #2e7d32;
+      color: #212121;
       margin: 0;
+    }
+
+    [data-theme="dark"] .news-title {
+      color: #e0f7ff;
     }
 
     .news-time {
       font-size: 12px;
-      color: #807d4a;
+      color: #999;
     }
 
     [data-theme="dark"] .news-time {
-      color: #9ccc65;
+      color: #66a0ff;
     }
 
-    .btn-sm {
-      background: #c8e6c9;
-      color: #2e7d32;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .btn-sm:hover {
-      background: #b9f6ca;
-    }
-
-    [data-theme="dark"] .btn-sm {
-      background: #2c7d32;
-      color: #a5d6a7;
-    }
-
-    /* === НИЗ СТРАНИЦЫ === */
+    /* === КНОПКИ ВНИЗУ === */
     .footer-info {
       text-align: center;
       padding: 20px 16px;
       margin-top: 24px;
-      background: #e8f5e9;
+      background: rgba(240, 248, 255, 0.9);
       border-radius: 16px;
+      border: 1px solid rgba(0, 120, 255, 0.1);
+    }
+
+    [data-theme="dark"] .footer-info {
+      background: #0f172a;
+      border: 1px solid #00b8ff;
+      box-shadow: 0 0 0 1px #00b8ff;
     }
 
     .footer-tag {
-      display: block;
       font-size: 14px;
-      color: #2e7d32;
-      margin-bottom: 16px;
+      color: #0080ff;
+      margin-bottom: 12px;
       font-weight: 500;
     }
 
     [data-theme="dark"] .footer-tag {
-      color: #a5d6a7;
-    }
-
-    .footer-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
+      color: #00b8ff;
     }
 
     .footer-btn {
-      background: #c8e6c9;
-      color: #558b2f;
-      border: none;
+      background: #f0f8ff;
+      color: #0080ff;
+      border: 1px solid rgba(0, 120, 255, 0.2);
       padding: 8px 16px;
       border-radius: 10px;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
-      opacity: 0.85;
     }
 
     .footer-btn:hover {
-      background: #a5d6a7;
-      opacity: 1;
-      transform: translateY(-1px);
+      background: #e0f0ff;
     }
 
     [data-theme="dark"] .footer-btn {
-      background: #2c7d32;
-      color: #a5d6a7;
+      background: #001833;
+      color: #00b8ff;
+      border: 1px solid #00b8ff;
     }
 
     [data-theme="dark"] .footer-btn:hover {
-      background: #3d8b3d;
-    }
-
-    /* === FAB === */
-    .fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 24px;
-      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-
-    .fab:hover {
-      transform: scale(1.08);
+      background: #000f22;
+      box-shadow: 0 0 0 2px #00b8ff;
     }
 
     /* === АДАПТИВ === */
-    @media (max-width: 768px) {
-      .dual-stats {
-        grid-template-columns: 1fr;
-      }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
 
-      .footer-buttons {
-        flex-direction: column;
-        align-items: center;
+    @media (max-width: 768px) {
+      .dual-stats, .button-grid {
+        grid-template-columns: 1fr;
       }
 
       .footer-btn {
@@ -647,16 +470,16 @@
         max-width: 240px;
       }
     }
+
+    /* === НЕ УДАЛЯТЬ — JS УЖЕ ЗДЕСЬ === */
   </style>
 </head>
 <body>
 
-  <!-- Овал с ЛОГОТИПОМ -->
+  <!-- Овал с "Лео" -->
   <div class="leo-badge-3d" id="leo-badge">
     <div class="leo-logo">
-      <div class="l-tree"></div>
-      <div class="e">е</div>
-      <div class="o">о</div>
+      <span class="l">Л</span><span class="eo">ео</span>
     </div>
     <div class="page-tag">Главная</div>
   </div>
@@ -675,7 +498,7 @@
       <!-- Аватарка -->
       <div class="admin-container" id="admin-container">
         <img 
-          src="https://ui-avatars.com/api/?name=Иван&background=4CAF50&color=fff&size=128" 
+          src="https://ui-avatars.com/api/?name=Иван&background=0080ff&color=fff&size=128" 
           alt="Аватар" 
           class="user-avatar"
           id="user-avatar"
@@ -693,23 +516,16 @@
         <span class="material-icons" id="theme-icon">dark_mode</span>
       </button>
     </div>
-
-    <!-- Трава в шапке -->
-    <div class="header-grass-line"></div>
-    <div class="grass-blades"></div>
   </div>
 
   <!-- Основной контент -->
   <div class="main-content">
 
     <!-- Приветствие -->
-    <div class="card highlight">
-      <div class="subscription-badge" id="sub-badge">Базовая</div>
-      <h2>🌱 Добро пожаловать в Лео</h2>
+    <div class="card">
+      <h2>👋 Добро пожаловать в Лео</h2>
       <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
-      <button class="btn-primary" onclick="alert('Получить премиум')">
-        Получить премиум
-      </button>
+      <button class="btn-primary" onclick="alert('Получить премиум')">Получить премиум</button>
     </div>
 
     <!-- Быстрые действия -->
@@ -785,21 +601,14 @@
 
   </div>
 
-  <!-- НИЖНЯЯ СЕКЦИЯ -->
+  <!-- НИЗ СТРАНИЦЫ -->
   <div class="footer-info">
     <div class="footer-tag">Лео — персональный помощник</div>
     <div class="footer-buttons">
-      <button class="footer-btn" onclick="alert('💬 Написать в поддержку')">
-        Обратная связь
-      </button>
-      <button class="footer-btn" onclick="alert('❓ Частые вопросы')">
-        FAQ
-      </button>
+      <button class="footer-btn" onclick="alert('💬 Написать в поддержку')">Обратная связь</button>
+      <button class="footer-btn" onclick="alert('❓ Частые вопросы')">FAQ</button>
     </div>
   </div>
-
-  <!-- FAB -->
-  <button class="fab" onclick="alert('💬 GigaChat')">💬</button>
 
   <!-- JS -->
   <script>
@@ -819,22 +628,10 @@
       }
     }
 
-    const userData = {
-      first_name: "Иван",
-      role: "admin"
-    };
-
+    const userData = { role: "admin" };
     document.addEventListener('DOMContentLoaded', () => {
-      const avatar = document.getElementById('user-avatar');
-      const adminBtn = document.getElementById('admin-btn');
-
-      if (window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url) {
-        avatar.src = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
-      }
-
       if (userData.role === 'admin') {
-        adminBtn.style.display = 'flex';
-        adminBtn.onclick = () => alert('🛡 Админ-панель');
+        document.getElementById('admin-btn').style.display = 'flex';
       }
 
       const savedTheme = localStorage.getItem('theme') || 'light';
