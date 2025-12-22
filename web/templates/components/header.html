@@ -1,38 +1,35 @@
 <!-- web/templates/components/header.html -->
-<!-- Контейнер с отступами -->
-<div class="header-container">
-  <!-- Овал с "Лео" -->
-  <div class="leo-badge-3d" id="leo-badge">
-    <div class="leo-logo">
-      <span class="l">Л</span><span class="eo">ео</span>
-    </div>
-    <div class="page-tag" id="page-title">Финансы</div>
+<!-- Овал с "Лео" -->
+<div class="leo-badge-3d" id="leo-badge">
+  <div class="leo-logo">
+    <span class="l">Л</span><span class="eo">ео</span>
+  </div>
+  <div class="page-tag" id="page-title">Финансы</div>
+</div>
+
+<!-- Прозрачная шапка -->
+<div class="full-header" id="main-header">
+  <div class="header-left">
+    <button class="btn-icon" id="menu-toggle" aria-label="Меню">
+      <span class="material-icons">menu</span>
+    </button>
+    <button class="btn-icon" onclick="history.back()" aria-label="Назад">
+      <span class="material-icons">arrow_back</span>
+    </button>
   </div>
 
-  <!-- Шапка -->
-  <div class="full-header" id="main-header">
-    <div class="header-left">
-      <button class="btn-icon" id="menu-toggle" aria-label="Меню">
-        <span class="material-icons">menu</span>
-      </button>
-      <button class="btn-icon" onclick="history.back()" aria-label="Назад">
-        <span class="material-icons">arrow_back</span>
-      </button>
-    </div>
-
-    <div class="header-right">
-      <a href="/cabinet" class="btn-icon" aria-label="Кабинет">
-        <img src="/static/img/tg-user-icon.png" alt="Кабинет" class="tg-icon">
-      </a>
-      <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
-        <span class="material-icons" id="theme-icon">dark_mode</span>
-      </button>
-      {% if current_user and current_user.is_admin %}
-      <a href="/admin" class="btn-icon" aria-label="Админка">
-        <span class="material-icons">shield</span>
-      </a>
-      {% endif %}
-    </div>
+  <div class="header-right">
+    <a href="/cabinet" class="btn-icon" aria-label="Кабинет">
+      <img src="/static/img/tg-user-icon.png" alt="Кабинет" class="tg-icon">
+    </a>
+    <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
+      <span class="material-icons" id="theme-icon">dark_mode</span>
+    </button>
+    {% if current_user and current_user.is_admin %}
+    <a href="/admin" class="btn-icon" aria-label="Админка">
+      <span class="material-icons">shield</span>
+    </a>
+    {% endif %}
   </div>
 </div>
 
@@ -58,20 +55,9 @@
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <style>
-/* === КОНТЕЙНЕР С ОТСТУПАМИ 10px ПО БОКАМ === */
-.header-container {
-  position: fixed;
-  left: 10px;
-  right: 10px;
-  top: 0;
-  z-index: 1000;
-  pointer-events: none;
-  height: 70px;
-}
-
-/* === ОВАЛ С "ЛЕО" — НЕ ПЕРЕКРЫВАЕТ КОНТЕНТ === */
+/* === ОВАЛ С "ЛЕО" — ЦЕНТР, ВЫХОДИТ ВВЕРХ === */
 .leo-badge-3d {
-  position: absolute;
+  position: fixed;
   top: 8px;
   left: 50%;
   transform: translateX(-50%);
@@ -180,9 +166,9 @@
   100% { transform: translateX(-50%) translateY(0); }
 }
 
-/* === ШАПКА — ПРОЗРАЧНАЯ, С ОТСТУПАМИ === */
+/* === ШАПКА — НА ВСЮ ШИРИНУ, С ОТСТУПАМИ 10px ПО БОКАМ === */
 .full-header {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -199,10 +185,9 @@
   padding: 0 16px;
   z-index: 1001;
   transition: all 0.3s ease;
-  pointer-events: auto;
+  /* Отступы через box-sizing и body */
 }
 
-/* === ИСЧЕЗНОВЕНИЕ ШАПКИ === */
 .full-header.hidden {
   opacity: 0;
   transform: translateY(-8px);
@@ -244,7 +229,7 @@
   object-fit: cover;
 }
 
-/* === БУРГЕР-МЕНЮ === */
+/* === БУРГЕР-МЕНЮ — С ОТСТУПАМИ === */
 .sidebar {
   position: fixed;
   top: 0;
@@ -306,20 +291,27 @@
 /* === ОТСТУП ДЛЯ КОНТЕНТА, ЧТОБЫ НЕ НАЛЕЗАЛ ОВАЛ === */
 body {
   margin: 0;
-  padding: 80px 10px 0; /* 80px сверху — под овал */
+  padding: 80px 10px 0; /* 80px сверху, 10px по бокам */
   min-height: 100vh;
   box-sizing: border-box;
-  position: relative;
+}
+
+/* УБИРАЕМ ЛИШНИЕ ПОЛОСЫ */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 </style>
 
 <script>
-// === ПОЛНАЯ ФИКСАЦИЯ СКРЫТИЯ ПРИ СКРОЛЛЕ ===
+// === ГАРАНТИРОВАННОЕ СКРЫТИЕ ПРИ СКРОЛЛЕ ===
 let lastScrollTop = 0;
 const header = document.getElementById('main-header');
 const badge = document.getElementById('leo-badge');
 
-// Убедимся, что элементы есть
+// Отладка: проверим, что элементы загрузились
+console.log('header:', header);
+console.log('badge:', badge);
+
 if (header && badge) {
   window.addEventListener('scroll', () => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -330,12 +322,7 @@ if (header && badge) {
       badge.classList.add('hidden');
     }
     // Прокрутка вверх → показываем
-    else if (scrollTop < lastScrollTop && scrollTop > 0) {
-      header.classList.remove('hidden');
-      badge.classList.remove('hidden');
-    }
-    // На самом верху — точно показываем
-    else if (scrollTop === 0) {
+    else if (scrollTop < lastScrollTop) {
       header.classList.remove('hidden');
       badge.classList.remove('hidden');
     }
@@ -343,7 +330,7 @@ if (header && badge) {
     lastScrollTop = scrollTop;
   });
 } else {
-  console.warn('Элементы шапки не найдены — проверь header.html');
+  console.error('Не найдены элементы шапки — проверь ID');
 }
 
 // === Бургер-меню ===
@@ -374,7 +361,7 @@ function toggleTheme() {
   }
 }
 
-// === Установка названия страницы ===
+// === Название страницы ===
 function setPageTitle(title) {
   const el = document.getElementById('page-title');
   if (el) el.textContent = title;
