@@ -55,7 +55,7 @@
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <style>
-/* === ОВАЛ С ДЕРЕВОМ "ЛЕО" (выпирает вверх) === */
+/* === ОВАЛ С ДЕРЕВОМ "ЛЕО" === */
 .leo-badge-3d {
   position: fixed;
   top: 12px;
@@ -163,7 +163,7 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: rgba(230, 249, 255, 0.7);
+  background: rgba(230, 249, 255, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -180,6 +180,7 @@
 .full-header.hidden {
   opacity: 0;
   transform: translateY(-10px);
+  pointer-events: none; /* чтобы не мешала */
 }
 
 /* === КНОПКИ === */
@@ -272,34 +273,50 @@
 .sidebar-overlay.active {
   display: block;
 }
+
+/* === ОТСТУП СВЕРХУ — чтобы шапка не закрывала контент === */
+body {
+  padding-top: 80px; /* больше, чем высота шапки + овал */
+  margin: 0;
+  min-height: 100vh;
+}
 </style>
 
 <script>
 // === Скрытие шапки при прокрутке вниз ===
 let lastScrollTop = 0;
-const header = document.getElementById('main-header');
 
 window.addEventListener('scroll', () => {
+  const header = document.getElementById('main-header');
+  if (!header) return;
+
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+  // Если прокручиваем вниз и уже прошли 60px
   if (scrollTop > lastScrollTop && scrollTop > 60) {
-    // Прокручиваем вниз → скрываем
     header.classList.add('hidden');
   } else {
-    // Прокручиваем вверх → показываем
+    // Если прокручиваем вверх — показываем
     header.classList.remove('hidden');
   }
+
+  // Обновляем позицию
   lastScrollTop = scrollTop;
 });
 
 // === Бургер-меню ===
 function toggleMenu() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('sidebar-overlay').classList.add('active');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
 }
 
 function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('active');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
 }
 
 // === Смена темы ===
@@ -307,6 +324,7 @@ function toggleTheme() {
   const html = document.documentElement;
   const icon = document.getElementById('theme-icon');
   const isDark = html.getAttribute('data-theme') === 'dark';
+
   if (isDark) {
     html.setAttribute('data-theme', 'light');
     icon.textContent = 'dark_mode';
@@ -318,7 +336,7 @@ function toggleTheme() {
   }
 }
 
-// === Название страницы ===
+// === Установка названия страницы ===
 function setPageTitle(title) {
   const el = document.getElementById('page-title');
   if (el) el.textContent = title;
