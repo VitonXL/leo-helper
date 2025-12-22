@@ -20,7 +20,7 @@
 
   <div class="header-right">
     <a href="/cabinet" class="btn-icon" aria-label="Кабинет">
-      <img src="/static/img/tg-user-icon.png" alt="Кабинет" class="tg-icon">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMzc5ZDg2IiBkPSJNMTcxLjYsNDQ4LjJjLTEuOSwwLTMuOC0wLjctNS40LTEuOGMtNC4yLTMuMi00LjktOS4yLTEuNy0xMy40bDEyLjYtMTYuNWMwLjktMS4yLDEuNS0yLjcsMS43LTQuMWMwLjItMS42LTAuMS0zLjItMS4yLTQuNGwtMjMuOS0yNy44Yy0xLjYtMS45LTQuMy0yLjEtNi4yLTAuNWwtNTIuOSw0NC4xYy01LjIsNC40LTExLjgsMS43LTEzLjEtNC4zTDIwLjIsMTg1LjJjLTEuMy01LjksMi4xLTExLjgsNy45LTEzLjFsMjQ2LjktNTYuOWM1LjgtMS4zLDExLjcsMi4xLDEzLjEsNy45bDE3LjQsNzEuOWMwLjgsMy4zLDMuMiwyLjQsMy4yLTIuNGw3LjctMzQ1LjRjMC4yLTkuMiwyLjEtMTguMyw1LjYtMjYuOGMzLjYtOC43LDkuNC0xNi4yLDE2LjktMjEuOGM3LjUtNS42LDE2LjQtOS41LDI1LjctOS41aDIwMC4yYzE0LjQsMCwyOC4zLDUuNywyOC4zLDUuN3YxNjQuMmMwLDIzLjYtOS4yLDQ1LjgtMjUuNyw2MS40bC0xMC45LDEwLjJjLTE2LjUsMTUtNDMuOSwxNS4yLTU5LjYsMC44TDI3MCw0MDkuM2MtOC41LTE5LjEsMzAuMy0yNy41LDI4LjYtNS41bC0zLjQsMzguNWMwLjIsMC44LDAuMywxLjcsMC4zLDIuNnYxNS43YzAsMC43LTAuMSwxLjQtMC4yLDIuMWMyLjgsMC41LDUuNi44LDguNS44aDEwLjVjMTMuNywwLDI2LjgtMi45LDM4LjYtOC40bDU0LjctMjUuNGMxMS45LTUuNSwyMS42LTE0LjgsMjcuNy0yNi4yYzYuMi0xMS40LDktMjQuMyw4LjQtMzcuN2wtMTYuNy0xODMuOEM0NTIuOSwzNS41LDQzMC44LDI0LDQwNC45LDI0SDEwNi43Yy0xMC41LDAtMjAuOCwzLjEtMjkuNCw4LjhsLTEwLjIsMTIuNWMtOC42LDUuNS0xMy44LDE0LjgtMTMuOCwyNC44VjQyOEM3My41LDQ0Mi41LDgzLjgsNDUyLDk0LjMsNDUySDQwNGMtNi4xLDAsMCwwLDAsMHoiPjwvcGF0aD48L3N2Zz4=" alt="Кабинет" class="tg-icon">
     </a>
     <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
       <span class="material-icons" id="theme-icon">dark_mode</span>
@@ -55,20 +55,27 @@
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <style>
-  /* === УДАЛЯЕМ ВСЕ ОТСТУПЫ ИЗ BODY — ЧТОБЫ НЕ БЫЛО ПОЛОС === */
-  body {
+  /* === УБИРАЕМ ВСЁ, ЧТО МОЖЕТ СОЗДАТЬ ПОЛОСУ === */
+  html, body {
     margin: 0;
     padding: 0;
+    width: 100%;
     min-height: 100vh;
+    overflow-x: hidden;
     box-sizing: border-box;
   }
 
-  /* === ОТСТУПЫ ТОЛЬКО ДЛЯ КОНТЕНТА, НЕ ДЛЯ ШАПКИ === */
-  .content-wrapper {
-    padding: 90px 10px 0; /* 90px сверху — под овал, 10px по бокам */
+  *, *::before, *::after {
+    box-sizing: inherit;
   }
 
-  /* === ОВАЛ С "ЛЕО" — ЦЕНТР, ВЫХОДИТ ВВЕРХ === */
+  /* === ОТСТУП ТОЛЬКО ДЛЯ КОНТЕНТА === */
+  .content-wrapper {
+    padding: 90px 10px 0;
+    min-height: calc(100vh - 90px);
+  }
+
+  /* === ОВАЛ С "ЛЕО" === */
   .leo-badge-3d {
     position: fixed;
     top: 8px;
@@ -94,7 +101,6 @@
     pointer-events: auto;
   }
 
-  /* === ИСЧЕЗНОВЕНИЕ ОВАЛА === */
   .leo-badge-3d.hidden {
     opacity: 0;
     transform: translate(-50%, -10px);
@@ -179,12 +185,12 @@
     100% { transform: translateX(-50%) translateY(0); }
   }
 
-  /* === ШАПКА — ИСЧЕЗАЕТ ПРИ СКРОЛЛЕ === */
+  /* === ШАПКА — С ОТСТУПАМИ ПО БОКАМ === */
   .full-header {
     position: fixed;
     top: 0;
-    left: 10px; /* Сдвинута от левого края */
-    width: calc(100% - 20px); /* 100% минус 10px слева и 10px справа */
+    left: 10px;
+    width: calc(100% - 20px);
     height: 60px;
     background: rgba(230, 249, 255, 0.8);
     backdrop-filter: blur(10px);
@@ -197,10 +203,9 @@
     justify-content: space-between;
     padding: 0 16px;
     z-index: 1001;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
-  /* === ОБЯЗАТЕЛЬНО: opacity: 0 === */
   .full-header.hidden {
     opacity: 0;
     transform: translateY(-8px);
@@ -303,36 +308,32 @@
 </style>
 
 <script>
-  // Ждём полной загрузки DOM
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('main-header');
     const badge = document.getElementById('leo-badge');
     let lastScrollTop = 0;
 
-    console.log('Документ загружен. header:', header, 'badge:', badge);
-
-    if (header && badge) {
-      window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        // Вниз → скрываем
-        if (scrollTop > lastScrollTop && scrollTop > 50) {
-          header.classList.add('hidden');
-          badge.classList.add('hidden');
-        }
-        // Вверх → показываем
-        else if (scrollTop < lastScrollTop) {
-          header.classList.remove('hidden');
-          badge.classList.remove('hidden');
-        }
-
-        lastScrollTop = scrollTop;
-      });
-    } else {
-      console.error('Элементы шапки не найдены — проверь ID');
+    if (!header || !badge) {
+      console.error('header или leo-badge не найден');
+      return;
     }
 
-    // Остальной скрипт (бургер, тема, и т.д.) — остаётся как есть
+    // Скролл → скрываем
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+      if (scrollTop > lastScrollTop && scrollTop > 50) {
+        header.classList.add('hidden');
+        badge.classList.add('hidden');
+      } else if (scrollTop < lastScrollTop) {
+        header.classList.remove('hidden');
+        badge.classList.remove('hidden');
+      }
+
+      lastScrollTop = scrollTop;
+    });
+
+    // Бургер
     window.toggleMenu = () => {
       document.getElementById('sidebar').classList.add('open');
       document.getElementById('sidebar-overlay').classList.add('active');
@@ -343,6 +344,7 @@
       document.getElementById('sidebar-overlay').classList.remove('active');
     };
 
+    // Тема
     window.toggleTheme = () => {
       const html = document.documentElement;
       const icon = document.getElementById('theme-icon');
@@ -359,12 +361,13 @@
       }
     };
 
+    // Название страницы
     window.setPageTitle = (title) => {
       const el = document.getElementById('page-title');
       if (el) el.textContent = title;
     };
 
-    // Инициализация темы
+    // Инициализация
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const icon = document.getElementById('theme-icon');
