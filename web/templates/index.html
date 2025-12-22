@@ -14,7 +14,7 @@
 
   <!-- Встроенные стили -->
   <style>
-    /* === ГЛОБАЛЬНЫЕ НАСТРОЙКИ === */
+    /* === ГЛОБАЛЬНЫЙ СБРОС === */
     * {
       margin: 0;
       padding: 0;
@@ -27,16 +27,13 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: linear-gradient(135deg, #e6f7ff, #d0f0ff, #f0f8ff);
-      background-size: 400% 400%;
-      animation: gradientSky 20s ease infinite;
-      transition: background 0.5s ease;
+      background: #f8fbff; /* Почти белый, с лёгким голубым */
+      transition: background 0.3s ease;
     }
 
-    @keyframes gradientSky {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    [data-theme="dark"] {
+      background: #0a0e17;
+      color: #e0e0e0;
     }
 
     /* === ОВАЛ С "ЛЕО" === */
@@ -45,24 +42,23 @@
       top: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 120px;
-      height: 56px;
-      background: linear-gradient(140deg, #4CAF50, #2E7D32);
+      width: 130px;
+      height: 62px;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
       color: white;
       border-radius: 30px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 10px;
+      padding: 6px 12px;
       box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #FFD700;
       z-index: 1002;
       border: 1.5px solid #FFD700;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 16px;
+      font-weight: 700;
+      font-size: 18px;
     }
 
     @keyframes float {
@@ -75,13 +71,13 @@
       display: flex;
       align-items: center;
       font-weight: 700;
-      font-size: 17px;
+      font-size: 18px;
       letter-spacing: -1px;
     }
 
     .leo-logo .l {
       color: #8B4513;
-      font-size: 20px;
+      font-size: 22px;
       position: relative;
     }
 
@@ -89,30 +85,30 @@
     .leo-logo .l::after {
       content: '';
       position: absolute;
-      width: 6px;
-      height: 7px;
+      width: 7px;
+      height: 8px;
       background: #8B4513;
       bottom: -7px;
       border-radius: 40% 40% 60% 60%;
     }
 
     .leo-logo .l::before {
-      left: 1.5px;
+      left: 2px;
       transform: rotate(30deg);
-      width: 5px;
-      height: 6px;
+      width: 6px;
+      height: 7px;
     }
 
     .leo-logo .l::after {
-      right: 1.5px;
+      right: 2px;
       transform: rotate(-30deg);
-      width: 5px;
-      height: 6px;
+      width: 6px;
+      height: 7px;
     }
 
     .leo-logo .eo {
       color: #FFD700;
-      font-size: 17px;
+      font-size: 18px;
       position: relative;
     }
 
@@ -121,36 +117,36 @@
       position: absolute;
       top: -5px;
       left: -3px;
-      width: 9px;
-      height: 9px;
+      width: 10px;
+      height: 10px;
       background: #4CAF50;
       border-radius: 50%;
       box-shadow: 
-        6px -2px 0 1px #4CAF50,
-        2.5px -5px 0 1px #4CAF50,
-        9px 1px 0 1px #4CAF50;
+        7px -2px 0 1px #4CAF50,
+        3px -5px 0 1px #4CAF50,
+        10px 1px 0 1px #4CAF50;
     }
 
     .page-tag {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
       background: rgba(255, 215, 0, 0.25);
-      padding: 1px 5px;
-      border-radius: 8px;
+      padding: 1px 6px;
+      border-radius: 10px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА === */
+    /* === ПРОЗРАЧНАЯ ШАПКА С ГРАДИЕНТОМ === */
     .full-header {
       position: fixed;
       top: 0;
       left: 10px;
       width: calc(100% - 20px);
       height: 60px;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       border-bottom-left-radius: 16px;
       border-bottom-right-radius: 16px;
@@ -159,30 +155,45 @@
       justify-content: space-between;
       padding: 0 16px;
       z-index: 1001;
-      border-bottom: 4px solid transparent;
-      border-image: url("data:image/svg+xml,%3Csvg width='100' height='10' viewBox='0 0 100 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,5 Q25,0 50,5 T100,5' stroke='%234CAF50' stroke-width='4' fill='none'/%3E%3C/svg%3E") 1 stretch;
+    }
+
+    /* === ТРАВЯНАЯ ЛИНИЯ === */
+    .grass-line {
+      position: fixed;
+      bottom: 58px; /* Под овал, но над шапкой */
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,6 Q10,2 20,6 T40,6 T60,6 T80,6 T100,6' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") repeat-x;
+      z-index: 1001;
+      pointer-events: none;
     }
 
     /* === КНОПКИ В ШАПКЕ === */
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .btn-icon {
-      background: rgba(240, 248, 255, 0.6);
-      border: 1px solid rgba(144, 216, 255, 0.4);
+      background: transparent;
+      border: none;
       color: #2E7D32;
       width: 40px;
       height: 40px;
-      border-radius: 16px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
     }
 
     .btn-icon:hover {
-      background: rgba(230, 245, 255, 0.8);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background: rgba(76, 175, 80, 0.1);
+      transform: translateY(-1px);
     }
 
     /* === АВАТАРКА === */
@@ -216,7 +227,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 0 2px #f0f8ff;
+      box-shadow: 0 0 0 2px #f8fbff;
       cursor: pointer;
       z-index: 2;
     }
@@ -234,26 +245,45 @@
     .main-content {
       margin-top: 90px;
       padding: 16px;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     /* === КАРТОЧКИ === */
     .card {
-      background: rgba(255, 255, 255, 0.94);
-      border-radius: 20px;
+      background: white;
+      border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-      border: 1px solid rgba(178, 255, 89, 0.15);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(178, 255, 89, 0.2);
       margin-bottom: 24px;
-      backdrop-filter: blur(10px);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    [data-theme="dark"] .card {
+      background: #2a2a2a;
+      border: 1px solid #4CAF50;
+      color: #ffffff;
     }
 
     .card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .highlight {
+      position: relative;
+      border: 2px solid #4CAF50;
+    }
+
+    .subscription-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: linear-gradient(-45deg, #DAA520, #FFD700);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
     }
 
     h2 {
@@ -264,116 +294,109 @@
     }
 
     p {
-      color: #555;
+      color: #757575;
       font-size: 15px;
       line-height: 1.6;
     }
 
-    /* === КНОПКИ === */
     .btn-primary {
-      background: linear-gradient(135deg, #4CAF50, #388E3C);
+      background: #4CAF50;
       color: white;
       border: none;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
       transition: all 0.3s ease;
-      font-size: 15px;
     }
 
     .btn-primary:hover {
+      background: #45a049;
       transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(76, 175, 80, 0.4);
     }
 
-    /* === ПОГОДА === */
-    .weather-card {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      padding: 20px;
-      background: rgba(240, 255, 240, 0.6);
-      border-radius: 18px;
-      border: 1px solid rgba(76, 175, 80, 0.2);
-    }
-
-    .weather-icon-big {
-      font-size: 48px;
-    }
-
-    .weather-data {
-      flex: 1;
-    }
-
-    .temp-large {
-      font-size: 28px;
-      font-weight: 700;
-      color: #212121;
-    }
-
-    .weather-desc {
-      font-size: 15px;
-      color: #757575;
-      margin: 6px 0;
-    }
-
-    .weather-more {
-      display: flex;
+    /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
-      font-size: 13px;
-      color: #999;
-      margin-top: 8px;
+      margin: 24px 0;
     }
 
-    .weather-more div {
+    .action-btn {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 4px;
-    }
-
-    /* === КУРСЫ === */
-    .currency-card {
-      background: rgba(255, 255, 255, 0.9);
+      justify-content: center;
+      background: white;
+      border: 1px solid rgba(178, 255, 89, 0.2);
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+      padding: 16px;
+      text-decoration: none;
+      color: #212121;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    .currency-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px dashed rgba(178, 255, 89, 0.2);
+    .action-btn:hover {
+      background: rgba(76, 175, 80, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .action-label {
       font-size: 15px;
-    }
-
-    .currency-item:last-child {
-      border-bottom: none;
-    }
-
-    .currency-name {
-      color: #555;
       font-weight: 500;
     }
 
-    .currency-value {
+    /* === ВИДЖЕТЫ === */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .widget {
+      background: white;
+      border: 1px solid rgba(178, 255, 89, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .widget-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .widget-title {
+      font-size: 14px;
+      color: #757575;
+      margin: 0 0 4px 0;
+    }
+
+    .widget-value {
+      font-size: 18px;
       font-weight: 600;
       color: #212121;
     }
 
-    .currency-change {
-      color: #4CAF50;
-      font-size: 13px;
-      margin-left: 8px;
+    .widget-sub {
+      font-size: 12px;
+      color: #999;
     }
 
     /* === НОВОСТИ === */
     .section-title {
       font-size: 16px;
       color: #2E7D32;
-      margin: 24px 0 16px;
+      margin: 24px 0 12px;
       font-weight: 600;
     }
 
@@ -388,14 +411,14 @@
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      border-left: 4px solid #4CAF50;
+      background: white;
+      border: 1px solid rgba(178, 255, 89, 0.2);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
     .news-icon {
-      font-size: 22px;
+      font-size: 20px;
       color: #4CAF50;
     }
 
@@ -413,44 +436,55 @@
     }
 
     .btn-sm {
-      background: rgba(76, 175, 80, 0.1);
-      color: #2E7D32;
-      border: 1px solid rgba(76, 175, 80, 0.2);
-      padding: 10px 20px;
-      border-radius: 12px;
+      background: #e0e0e0;
+      color: #212121;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
       font-size: 14px;
       cursor: pointer;
       width: 100%;
-      font-weight: 500;
     }
 
     .btn-sm:hover {
-      background: rgba(76, 175, 80, 0.15);
+      background: #d0d0d0;
+    }
+
+    /* === FAB === */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .fab:hover {
+      transform: scale(1.08);
     }
 
     /* === АДАПТИВНОСТЬ === */
     @media (max-width: 768px) {
-      .weather-card {
-        flex-direction: column;
-        text-align: center;
-        gap: 16px;
+      .button-grid,
+      .widget-grid {
+        grid-template-columns: 1fr;
       }
 
-      .currency-item {
-        font-size: 14px;
-        flex-direction: column;
-        gap: 6px;
-        text-align: left;
-      }
-
-      .header-left, .header-right {
-        gap: 8px;
+      .full-header {
+        padding: 0 12px;
       }
 
       .btn-icon {
         width: 36px;
         height: 36px;
-        font-size: 18px;
       }
 
       .user-avatar {
@@ -458,17 +492,8 @@
         height: 36px;
       }
 
-      .full-header {
-        padding: 0 12px;
-      }
-
       .main-content {
         padding: 12px;
-      }
-
-      .card {
-        padding: 20px;
-        border-radius: 16px;
       }
     }
   </style>
@@ -483,6 +508,9 @@
     <div class="page-tag">Главная</div>
   </div>
 
+  <!-- Травяная линия -->
+  <div class="grass-line"></div>
+
   <!-- Прозрачная шапка -->
   <div class="full-header" id="main-header">
     <div class="header-left">
@@ -494,16 +522,16 @@
       </button>
     </div>
     <div class="header-right">
-      <!-- Аватарка + Админка -->
+      <!-- Аватарка -->
       <div class="admin-container" id="admin-container">
         <img 
           src="https://ui-avatars.com/api/?name=Иван&background=4CAF50&color=fff&size=128" 
           alt="Аватар" 
           class="user-avatar"
           id="user-avatar"
-          onclick="alert('Переход в личный кабинет')"
+          onclick="alert('Переход в кабинет')"
         />
-        <div class="admin-badge" id="admin-badge" title="Админ панель">!</div>
+        <div class="admin-badge" id="admin-badge">!</div>
       </div>
       <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
         <span class="material-icons" id="theme-icon">dark_mode</span>
@@ -516,50 +544,64 @@
 
     <!-- Приветствие -->
     <div class="card highlight">
-      <h2>🌱 Добро пожаловать, Иван!</h2>
-      <p>Сегодня — ваш день. Пусть погода, настроение и курсы будут на вашей стороне.</p>
-      <button class="btn-primary" style="margin-top: 16px;" onclick="alert('Управлять подпиской')">
+      <div class="subscription-badge" id="sub-badge">Базовая</div>
+      <h2>🌱 Добро пожаловать в Лео</h2>
+      <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
+      <button class="btn-primary" onclick="alert('Получить премиум')">
         Получить премиум
       </button>
     </div>
 
-    <!-- ПОГОДА -->
-    <div class="card">
-      <h2>🌤 Погода в Москве</h2>
-      <div class="weather-card">
-        <div class="weather-icon-big">🌤</div>
-        <div class="weather-data">
-          <div class="temp-large">+14°C</div>
-          <div class="weather-desc">Облачно, без осадков</div>
-          <div class="weather-more">
-            <div>🌬 Слабый ветер, 3 м/с</div>
-            <div>💧 Влажность: 65%</div>
-            <div>🌅 Восход: 08:24</div>
-          </div>
-        </div>
+    <!-- Быстрые действия -->
+    <div class="section-title">⚡ Быстрые действия</div>
+    <div class="button-grid">
+      <a href="#" class="action-btn">
+        <div class="action-icon">💰</div>
+        <div class="action-label">Финансы</div>
+      </a>
+      <a href="#" class="action-btn">
+        <div class="action-icon">🌦</div>
+        <div class="action-label">Погода</div>
+      </a>
+      <a href="#" class="action-btn">
+        <div class="action-icon">💬</div>
+        <div class="action-label">GigaChat</div>
+      </a>
+      <a href="#" class="action-btn">
+        <div class="action-icon">🎮</div>
+        <div class="action-label">Игры</div>
+      </a>
+    </div>
+
+    <!-- Виджеты -->
+    <div class="widget-grid">
+      <div class="widget">
+        <div class="widget-icon">🌤</div>
+        <div class="widget-title">Погода</div>
+        <div class="widget-value">+12°C</div>
+        <div class="widget-sub">в Москве</div>
+      </div>
+      <div class="widget">
+        <div class="widget-icon">💵</div>
+        <div class="widget-title">Курс USD</div>
+        <div class="widget-value">98.50 ₽</div>
+        <div class="widget-sub">на сегодня</div>
+      </div>
+      <div class="widget">
+        <div class="widget-icon">🤖</div>
+        <div class="widget-title">GigaChat</div>
+        <div class="widget-value">3/10</div>
+        <div class="widget-sub">запросов</div>
+      </div>
+      <div class="widget">
+        <div class="widget-icon">🛎</div>
+        <div class="widget-title">Напоминания</div>
+        <div class="widget-value">2</div>
+        <div class="widget-sub">активных</div>
       </div>
     </div>
 
-    <!-- КУРСЫ -->
-    <div class="card">
-      <h2>💵 Курсы валют</h2>
-      <div class="currency-card">
-        <div class="currency-item">
-          <span class="currency-name">USD → RUB</span>
-          <span class="currency-value">98.50 ₽ <span class="currency-change">+0.25</span></span>
-        </div>
-        <div class="currency-item">
-          <span class="currency-name">EUR → RUB</span>
-          <span class="currency-value">109.80 ₽ <span class="currency-change">+0.18</span></span>
-        </div>
-        <div class="currency-item">
-          <span class="currency-name">CNY → RUB</span>
-          <span class="currency-value">14.12 ₽ <span class="currency-change">+0.05</span></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- НОВОСТИ -->
+    <!-- Новости -->
     <div class="section-title">📰 Новости дня</div>
     <div class="news-feed" id="news-feed">
       <div class="news-item">
@@ -577,9 +619,12 @@
         </div>
       </div>
     </div>
-    <button class="btn-sm" style="margin: 16px 0;" onclick="alert('Ещё новости')">Ещё новости</button>
+    <button class="btn-sm" onclick="alert('Ещё новости')">Ещё новости</button>
 
   </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="alert('💬 GigaChat')">💬</button>
 
   <!-- JS -->
   <script>
@@ -599,7 +644,6 @@
       }
     }
 
-    // Данные пользователя
     const userData = {
       first_name: "Иван",
       role: "admin"
@@ -609,21 +653,18 @@
       const avatar = document.getElementById('user-avatar');
       const adminContainer = document.getElementById('admin-container');
 
-      // Фото из Telegram (если есть)
       if (window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url) {
         avatar.src = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
       }
 
-      // Показ админки
       if (userData.role === 'admin') {
         adminContainer.setAttribute('data-role', 'admin');
         document.getElementById('admin-badge').onclick = (e) => {
           e.stopPropagation();
-          alert('🔐 Админ-панель скоро');
+          alert('🔐 Админ-панель');
         };
       }
 
-      // Тема
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
