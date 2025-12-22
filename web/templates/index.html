@@ -27,22 +27,22 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #f8fbff; /* Нежный бело-голубой фон */
-      transition: background 0.3s ease;
+      background: #f0f9f2; /* Фон страницы — нежный зелёный */
+      transition: background 0.4s ease;
     }
 
     [data-theme="dark"] {
-      background: #0a0e17;
-      color: #e0e0e0;
+      background: #0a1a0f;
+      color: #e0f2f1;
     }
 
-    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" (как зверёк) === */
+    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" — ДЕРЕВО === */
     .leo-badge-3d {
       position: fixed;
       top: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 130px;
+      width: 140px;
       height: 62px;
       background: linear-gradient(135deg, #4CAF50, #2E7D32);
       color: white;
@@ -69,62 +69,63 @@
 
     .leo-logo {
       display: flex;
-      align-items: center;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: -1px;
-    }
-
-    .leo-logo .l {
-      color: #8B4513;
-      font-size: 22px;
+      align-items: flex-end;
+      gap: 4px;
       position: relative;
+      font-size: 18px;
+      line-height: 1;
     }
 
-    .leo-logo .l::before,
-    .leo-logo .l::after {
-      content: '';
-      position: absolute;
-      width: 7px;
-      height: 8px;
+    .l-tree {
+      width: 22px;
+      height: 32px;
       background: #8B4513;
-      bottom: -7px;
-      border-radius: 40% 40% 60% 60%;
-    }
-
-    .leo-logo .l::before {
-      left: 2px;
-      transform: rotate(30deg);
-      width: 6px;
-      height: 7px;
-    }
-
-    .leo-logo .l::after {
-      right: 2px;
-      transform: rotate(-30deg);
-      width: 6px;
-      height: 7px;
-    }
-
-    .leo-logo .eo {
-      color: #FFD700;
-      font-size: 18px;
+      border-radius: 4px 4px 0 0;
       position: relative;
+      overflow: hidden;
     }
 
-    .leo-logo .eo::before {
+    .l-tree::before {
       content: '';
       position: absolute;
-      top: -5px;
-      left: -3px;
-      width: 10px;
-      height: 10px;
+      top: -10px;
+      width: 26px;
+      height: 18px;
       background: #4CAF50;
+      border-radius: 50% 50% 20% 20%;
+      box-shadow: -4px -2px 0 1px #4CAF50, 4px -4px 0 1px #4CAF50, 0 -6px 0 1px #4CAF50;
+    }
+
+    .l-tree::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 10px;
+      background: #3E2723;
       border-radius: 50%;
-      box-shadow: 
-        7px -2px 0 1px #4CAF50,
-        3px -5px 0 1px #4CAF50,
-        10px 1px 0 1px #4CAF50;
+      top: 14px;
+      left: 7px;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    .e {
+      font-size: 20px;
+      font-weight: 700;
+      color: #FFD700;
+      transform: rotate(10deg);
+      position: relative;
+      left: -4px;
+      bottom: -2px;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+    }
+
+    .o {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFD700;
+      position: relative;
+      bottom: 0;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
     }
 
     .page-tag {
@@ -135,9 +136,10 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
+      margin-top: 2px;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА С РАЗМЫТИЕМ === */
+    /* === ПРОЗРАЧНАЯ ШАПКА С ТРАВОЙ === */
     .full-header {
       position: fixed;
       top: 0;
@@ -165,7 +167,7 @@
       position: relative;
     }
 
-    /* === ТРАВЯНАЯ ВОЛНА НА НИЗУ ШАПКИ === */
+    /* === ТРАВЯНАЯ ВОЛНА === */
     .header-grass-line {
       position: absolute;
       bottom: 0;
@@ -176,7 +178,7 @@
       z-index: 1;
     }
 
-    /* === ТОРЧАЩИЕ АНИМИРОВАННЫЕ ТРАВИНКИ === */
+    /* === ТОРЧАЩИЕ ТРАВИНКИ === */
     .grass-blades {
       position: absolute;
       bottom: 2px;
@@ -290,26 +292,63 @@
       padding: 16px;
     }
 
-    /* === КАРТОЧКИ === */
+    /* === КАРТОЧКИ — НЕЖНО-ЗЕЛЁНЫЙ СВЕТЯЩИЙСЯ ФОН === */
     .card {
-      background: white;
+      background: #e8f5e9; /* Нежно-зелёный */
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(178, 255, 89, 0.2);
       margin-bottom: 24px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.4s ease;
+      box-shadow: 0 4px 16px rgba(67, 160, 71, 0.18); /* Тень + лёгкое свечение */
+      border: 1px solid rgba(165, 214, 167, 0.4);
     }
 
-    [data-theme="dark"] .card {
-      background: #2a2a2a;
-      border: 1px solid #4CAF50;
-      color: #ffffff;
+    /* === СВЕЧЕНИЕ В СВЕТОЛОЙ ТЕМЕ === */
+    .card,
+    .stat-card,
+    .action-btn,
+    .news-item,
+    .footer-info {
+      box-shadow: 
+        0 4px 16px rgba(67, 160, 71, 0.16),
+        0 0 12px rgba(102, 187, 106, 0.12) inset;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    /* === ТЁМНАЯ ТЕМА — КАРТОЧКИ === */
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .action-btn,
+    [data-theme="dark"] .news-item,
+    [data-theme="dark"] .footer-info {
+      background: #1b5e20; /* Тёмно-зелёный */
+      color: #c8e6c9;
+      box-shadow: 
+        0 6px 20px rgba(81, 166, 85, 0.35),
+        0 0 18px rgba(102, 187, 106, 0.25) inset; /* Ярче светится в тёмной теме */
+      border: 1px solid rgba(67, 160, 71, 0.3);
+    }
+
+    [data-theme="dark"] .news-icon {
+      color: #a5d6a7;
+    }
+
+    /* === ПОДСВЕТКА КАРТОЧЕК ПРИ НАВЕДЕНИИ === */
+    .card:hover,
+    .stat-card:hover,
+    .action-btn:hover,
+    .news-item:hover {
+      box-shadow: 
+        0 8px 24px rgba(67, 160, 71, 0.24),
+        0 0 20px rgba(102, 187, 106, 0.18);
+    }
+
+    [data-theme="dark"] .card:hover,
+    [data-theme="dark"] .stat-card:hover,
+    [data-theme="dark"] .action-btn:hover,
+    [data-theme="dark"] .news-item:hover {
+      box-shadow: 
+        0 10px 30px rgba(81, 166, 85, 0.4),
+        0 0 26px rgba(102, 187, 106, 0.3);
     }
 
     .highlight {
@@ -337,9 +376,13 @@
     }
 
     p {
-      color: #757575;
+      color: #558b2f;
       font-size: 15px;
       line-height: 1.6;
+    }
+
+    [data-theme="dark"] p {
+      color: #a5d6a7;
     }
 
     .btn-primary {
@@ -368,22 +411,13 @@
     }
 
     .action-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      border: 1px solid rgba(178, 255, 89, 0.2);
-      border-radius: 16px;
-      padding: 16px;
-      text-decoration: none;
-      color: #212121;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      background: #e8f5e9;
+      border: 1px solid rgba(165, 214, 167, 0.4);
+      color: #2e7d32;
     }
 
-    .action-btn:hover {
-      background: rgba(76, 175, 80, 0.05);
-      transform: translateY(-2px);
+    [data-theme="dark"] .action-btn {
+      color: #c8e6c9;
     }
 
     .action-icon {
@@ -405,11 +439,10 @@
     }
 
     .stat-card {
-      background: white;
-      border: 1px solid rgba(178, 255, 89, 0.2);
+      background: #e8f5e9;
+      border: 1px solid rgba(165, 214, 167, 0.4);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
     }
 
     .stat-title {
@@ -438,9 +471,17 @@
       color: #757575;
     }
 
+    [data-theme="dark"] .stat-label {
+      color: #a5d6a7;
+    }
+
     .stat-value {
       font-weight: 500;
       color: #212121;
+    }
+
+    [data-theme="dark"] .stat-value {
+      color: #c8e6c9;
     }
 
     .stat-change {
@@ -457,6 +498,10 @@
       font-weight: 600;
     }
 
+    [data-theme="dark"] .section-title {
+      color: #a5d6a7;
+    }
+
     .news-feed {
       display: flex;
       flex-direction: column;
@@ -464,14 +509,8 @@
     }
 
     .news-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: white;
-      border: 1px solid rgba(178, 255, 89, 0.2);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      background: #e8f5e9;
+      border: 1px solid rgba(165, 214, 167, 0.4);
     }
 
     .news-icon {
@@ -482,62 +521,93 @@
     .news-title {
       font-size: 15px;
       font-weight: 500;
-      color: #212121;
+      color: #2e7d32;
       margin: 0;
     }
 
     .news-time {
       font-size: 12px;
-      color: #999;
-      margin: 4px 0 0;
+      color: #807d4a;
     }
 
-    /* === КНОПКИ ВНИЗУ СТРАНИЦЫ === */
+    [data-theme="dark"] .news-time {
+      color: #9ccc65;
+    }
+
+    .btn-sm {
+      background: #c8e6c9;
+      color: #2e7d32;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-sm:hover {
+      background: #b9f6ca;
+    }
+
+    [data-theme="dark"] .btn-sm {
+      background: #2c7d32;
+      color: #a5d6a7;
+    }
+
+    /* === НИЗ СТРАНИЦЫ === */
     .footer-info {
       text-align: center;
-      padding: 24px 16px;
+      padding: 20px 16px;
       margin-top: 24px;
-      background: rgba(255, 255, 255, 0.7);
+      background: #e8f5e9;
       border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(178, 255, 89, 0.2);
     }
 
-    .year-tag {
-      display: inline-block;
-      background: #4CAF50;
-      color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
+    .footer-tag {
+      display: block;
       font-size: 14px;
-      font-weight: 500;
+      color: #2e7d32;
       margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    [data-theme="dark"] .footer-tag {
+      color: #a5d6a7;
     }
 
     .footer-buttons {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .footer-btn {
-      background: #f0f8ff;
-      color: #2E7D32;
-      border: 1px solid rgba(76, 175, 80, 0.3);
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 14px;
+      background: #c8e6c9;
+      color: #558b2f;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
+      opacity: 0.85;
     }
 
     .footer-btn:hover {
-      background: #e0f0e0;
-      transform: translateY(-2px);
+      background: #a5d6a7;
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    [data-theme="dark"] .footer-btn {
+      background: #2c7d32;
+      color: #a5d6a7;
+    }
+
+    [data-theme="dark"] .footer-btn:hover {
+      background: #3d8b3d;
     }
 
     /* === FAB === */
@@ -574,17 +644,19 @@
 
       .footer-btn {
         width: 80%;
-        max-width: 280px;
+        max-width: 240px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Овал с "Лео" (текст + лапки) -->
+  <!-- Овал с ЛОГОТИПОМ -->
   <div class="leo-badge-3d" id="leo-badge">
     <div class="leo-logo">
-      <span class="l">Л</span><span class="eo">ео</span>
+      <div class="l-tree"></div>
+      <div class="e">е</div>
+      <div class="o">о</div>
     </div>
     <div class="page-tag">Главная</div>
   </div>
@@ -715,13 +787,13 @@
 
   <!-- НИЖНЯЯ СЕКЦИЯ -->
   <div class="footer-info">
-    <div class="year-tag">📅 Год Зелёного Дракона</div>
+    <div class="footer-tag">Лео — персональный помощник</div>
     <div class="footer-buttons">
       <button class="footer-btn" onclick="alert('💬 Написать в поддержку')">
-        💬 Обратная связь
+        Обратная связь
       </button>
       <button class="footer-btn" onclick="alert('❓ Частые вопросы')">
-        ❓ Часто задаваемые вопросы
+        FAQ
       </button>
     </div>
   </div>
