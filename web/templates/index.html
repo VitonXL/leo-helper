@@ -5,17 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Лео — Главная</title>
 
-  <!-- Favicon -->
-  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-
   <!-- Шрифты -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <!-- Стили -->
-  <link rel="stylesheet" href="/static/css/main.css?v=14" />
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
 
-  <!-- Встроенные стили для овала и шапки -->
+  <!-- Встроенные стили -->
   <style>
     /* === ГЛОБАЛЬНЫЙ СБРОС === */
     * {
@@ -27,10 +24,16 @@
     html, body {
       width: 100%;
       min-height: 100vh;
-      overflow-x: hidden; /* 🔥 Убираем полосу */
       font-family: 'Inter', sans-serif;
-      background: #f0fff0;
       color: #212121;
+      overflow-x: hidden;
+      background: #f0fff0;
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="dark"] {
+      background: #0a1e0a;
+      color: #ffffff;
     }
 
     /* === ОВАЛ С "ЛЕО" === */
@@ -50,11 +53,9 @@
       justify-content: center;
       padding: 6px 12px;
       box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #FFD700;
-      font-family: 'Inter', sans-serif;
       text-align: center;
       z-index: 1002;
       border: 1.5px solid #FFD700;
-      transition: all 0.3s ease;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
     }
@@ -133,7 +134,6 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
-      white-space: nowrap;
     }
 
     /* === ПРОЗРАЧНАЯ ШАПКА === */
@@ -154,7 +154,6 @@
       justify-content: space-between;
       padding: 0 16px;
       z-index: 1001;
-      transition: all 0.3s ease;
     }
 
     .header-left,
@@ -175,17 +174,204 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s;
     }
 
     .btn-icon:hover {
       background: rgba(76, 175, 80, 0.1);
     }
 
-    /* === ОТСТУП ДЛЯ КОНТЕНТА === */
+    /* === КОНТЕНТ === */
     .main-content {
-      margin-top: 90px; /* под овал и шапку */
+      margin-top: 90px;
       padding: 0 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(178, 255, 89, 0.2);
+      margin-bottom: 24px;
+    }
+
+    [data-theme="dark"] .card {
+      background: #2a2a2a;
+      border: 1px solid #4CAF50;
+      color: #ffffff;
+    }
+
+    .highlight {
+      position: relative;
+      border: 2px solid #4CAF50;
+    }
+
+    .subscription-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: linear-gradient(-45deg, #DAA520, #FFD700);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 0 0 12px 0;
+      color: #2E7D32;
+    }
+
+    p {
+      color: #757575;
+      font-size: 15px;
+    }
+
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* === СЕТКА === */
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border: 1px solid rgba(178, 255, 89, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+      text-decoration: none;
+      color: #212121;
+    }
+
+    .action-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .action-label {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* === ВИДЖЕТЫ === */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .widget {
+      background: white;
+      border: 1px solid rgba(178, 255, 89, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .widget-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .widget-title {
+      font-size: 14px;
+      color: #757575;
+      margin: 0 0 4px 0;
+    }
+
+    .widget-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212121;
+    }
+
+    .widget-sub {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* === НОВОСТИ === */
+    .section-title {
+      font-size: 16px;
+      color: #2E7D32;
+      margin: 24px 0 12px;
+    }
+
+    .news-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .news-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: white;
+      border: 1px solid rgba(178, 255, 89, 0.2);
+      border-radius: 8px;
+    }
+
+    .news-icon {
+      font-size: 20px;
+    }
+
+    .news-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .news-time {
+      font-size: 12px;
+      color: #999;
+      margin: 4px 0 0 0;
+    }
+
+    .btn-sm {
+      background: #e0e0e0;
+      color: #212121;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* === FAB === */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+      cursor: pointer;
     }
   </style>
 </head>
@@ -202,7 +388,7 @@
   <!-- Прозрачная шапка -->
   <div class="full-header" id="main-header">
     <div class="header-left">
-      <button class="btn-icon" onclick="toggleSidebar()" aria-label="Меню">
+      <button class="btn-icon" aria-label="Меню">
         <span class="material-icons">menu</span>
       </button>
       <button class="btn-icon" onclick="history.back()" aria-label="Назад">
@@ -216,203 +402,95 @@
     </div>
   </div>
 
-  <!-- Сайдбар (оставлен как есть) -->
-  <div class="sidebar" id="sidebar">
-    <div class="logo">
-      <span class="logo-icon">🌱</span>
-      <span class="logo-text">Лео</span>
-    </div>
-    <nav>
-      <a href="#" class="nav-link active" onclick="navigateTo('dashboard'); toggleSidebar()">
-        <span class="material-icons">dashboard</span> Главная
-      </a>
-      <a href="/finance?user_id={{ user.id }}&hash={{ request.query_params.hash }}" class="nav-link" onclick="toggleSidebar()">
-        <span class="material-icons">account_balance_wallet</span> Финансы
-      </a>
-      <a href="#" class="nav-link" onclick="navigateTo('weather'); toggleSidebar()">
-        <span class="material-icons">wb_sunny</span> Погода
-      </a>
-      <a href="#" class="nav-link" onclick="navigateTo('gigachat'); toggleSidebar()">
-        <span class="material-icons">smart_toy</span> GigaChat
-      </a>
-      <a href="#" class="nav-link" onclick="navigateTo('premium'); toggleSidebar()">
-        <span class="material-icons">star</span> Премиум
-      </a>
-      <a href="#" class="nav-link" onclick="navigateTo('support'); toggleSidebar()">
-        <span class="material-icons">help</span> Поддержка
-      </a>
-      {% if user.role == 'admin' %}
-      <a href="#" id="admin-link" class="nav-link" onclick="navigateTo('admin'); toggleSidebar()">
-        <span class="material-icons">admin_panel_settings</span> Админка
-      </a>
-      {% endif %}
-    </nav>
-  </div>
-
-  <!-- Основной контент (оставлен как есть) -->
+  <!-- Основной контент -->
   <div class="main-content">
-    <header>
-      <div class="hamburger" onclick="toggleSidebar()">☰</div>
-      <div>
-        <span id="greeting">Добрый день</span>, 
-        <span id="user-name">{{ user.first_name|default('Пользователь', true) }}</span>
-        <span id="mood-icon">🌤</span>
-      </div>
-      <div class="header-icons">
-        <span class="material-icons" onclick="openNotifications()">notifications</span>
-        <div class="avatar">{{ (user.first_name[0]|upper) if user.first_name else 'U' }}</div>
-      </div>
-    </header>
 
-    <div class="container">
-      <!-- Приветствие -->
-      <div class="card highlight" id="welcome-card">
-        <div class="subscription-badge" id="sub-badge">Базовая</div>
-        <h2>🌱 Добро пожеловать в Лео</h2>
-        <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
-        <button class="btn-primary" onclick="navigateTo('premium')">
-          {{ 'Управлять' if user.is_premium else 'Получить премиум' }}
-        </button>
-      </div>
+    <!-- Приветствие -->
+    <div class="card highlight" id="welcome-card">
+      <div class="subscription-badge" id="sub-badge">Базовая</div>
+      <h2>🌱 Добро пожаловать в Лео</h2>
+      <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
+      <button class="btn-primary" onclick="alert('Премиум')">
+        Получить премиум
+      </button>
+    </div>
 
-      <!-- Быстрые действия -->
-      <div class="section-title">⚡ Быстрые действия</div>
-      <div class="button-grid">
-        <a href="/finance?user_id={{ user.id }}&hash={{ request.query_params.hash }}" class="action-btn">
-          <div class="action-icon">💰</div>
-          <div class="action-label">Финансы</div>
-        </a>
-        <a href="#" class="action-btn" onclick="navigateTo('weather')">
-          <div class="action-icon">🌦</div>
-          <div class="action-label">Погода</div>
-        </a>
-        <a href="#" class="action-btn" onclick="navigateTo('gigachat')">
-          <div class="action-icon">💬</div>
-          <div class="action-label">GigaChat</div>
-        </a>
-        <a href="#" class="action-btn" onclick="navigateTo('games')">
-          <div class="action-icon">🎮</div>
-          <div class="action-label">Игры</div>
-        </a>
-      </div>
+    <!-- Быстрые действия -->
+    <div class="section-title">⚡ Быстрые действия</div>
+    <div class="button-grid">
+      <a href="#" class="action-btn">
+        <div class="action-icon">💰</div>
+        <div class="action-label">Финансы</div>
+      </a>
+      <a href="#" class="action-btn">
+        <div class="action-icon">🌦</div>
+        <div class="action-label">Погода</div>
+      </a>
+      <a href="#" class="action-btn">
+        <div class="action-icon">💬</div>
+        <div class="action-label">GigaChat</div>
+      </a>
+      <a href="#" class="action-btn">
+        <div class="action-icon">🎮</div>
+        <div class="action-label">Игры</div>
+      </a>
+    </div>
 
-      <!-- Виджеты -->
-      <div class="widget-grid">
-        <div class="widget weather-widget">
-          <div class="widget-icon">🌤</div>
-          <div class="widget-title">Погода</div>
-          <div class="widget-value"><span id="current-temp">+12°C</span></div>
-          <div class="widget-sub">в Москве</div>
-        </div>
-        <div class="widget currency-widget">
-          <div class="widget-icon">💵</div>
-          <div class="widget-title">Курс USD</div>
-          <div class="widget-value"><span id="usd-rate">98.50</span> ₽</div>
-          <div class="widget-sub">на сегодня</div>
-        </div>
-        <div class="widget chat-widget">
-          <div class="widget-icon">🤖</div>
-          <div class="widget-title">GigaChat</div>
-          <div class="widget-value">{{ user.gigachat_requests or 0 }}/10</div>
-          <div class="widget-sub">запросов</div>
-        </div>
-        <div class="widget reminder-widget">
-          <div class="widget-icon">🛎</div>
-          <div class="widget-title">Напоминания</div>
-          <div class="widget-value">{{ user.reminders or 2 }}</div>
-          <div class="widget-sub">активных</div>
-        </div>
+    <!-- Виджеты -->
+    <div class="widget-grid">
+      <div class="widget">
+        <div class="widget-icon">🌤</div>
+        <div class="widget-title">Погода</div>
+        <div class="widget-value">+12°C</div>
+        <div class="widget-sub">в Москве</div>
       </div>
-
-      <!-- Новости -->
-      <div class="section-title">📰 Новости дня</div>
-      <div class="news-feed" id="news-feed"></div>
-      <div class="news-footer">
-        <button class="btn-sm" onclick="loadMoreNews()">Ещё новости</button>
+      <div class="widget">
+        <div class="widget-icon">💵</div>
+        <div class="widget-title">Курс USD</div>
+        <div class="widget-value">98.50 ₽</div>
+        <div class="widget-sub">на сегодня</div>
+      </div>
+      <div class="widget">
+        <div class="widget-icon">🤖</div>
+        <div class="widget-title">GigaChat</div>
+        <div class="widget-value">3/10</div>
+        <div class="widget-sub">запросов</div>
+      </div>
+      <div class="widget">
+        <div class="widget-icon">🛎</div>
+        <div class="widget-title">Напоминания</div>
+        <div class="widget-value">2</div>
+        <div class="widget-sub">активных</div>
       </div>
     </div>
+
+    <!-- Новости -->
+    <div class="section-title">📰 Новости дня</div>
+    <div class="news-feed" id="news-feed">
+      <div class="news-item">
+        <div class="news-icon">🌍</div>
+        <div class="news-content">
+          <div class="news-title">Курс доллара превысил 99 рублей</div>
+          <div class="news-time">10 минут назад</div>
+        </div>
+      </div>
+      <div class="news-item">
+        <div class="news-icon">🤖</div>
+        <div class="news-content">
+          <div class="news-title">Sber запустил новую версию GigaChat</div>
+          <div class="news-time">35 минут назад</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-sm" onclick="alert('Ещё новости')">Ещё новости</button>
+
   </div>
 
-  <!-- FAB и Оверлей -->
-  <button class="fab" onclick="navigateTo('gigachat')">💬</button>
-  <div class="overlay" onclick="toggleSidebar()"></div>
+  <!-- FAB -->
+  <button class="fab" onclick="alert('💬 GigaChat')">💬</button>
 
-  <!-- Скрипты -->
-  <script src="/static/js/main.js?v=10"></script>
+  <!-- JS -->
   <script>
-    // Переменные
-    const userData = {
-      id: {{ user.id if user.id else 'null' }},
-      firstName: "{{ user.first_name|default('Пользователь', true) }}",
-      isPremium: {{ "true" if user.is_premium else "false" }},
-      role: "{{ user.role|default('user', true) }}",
-      gigachat_requests: {{ user.gigachat_requests if user.gigachat_requests else 0 }},
-      reminders: {{ user.reminders if user.reminders else 2 }}
-    };
-
-    // Приветствие
-    function updateGreeting() {
-      const hour = new Date().getHours();
-      const map = { 5: "Доброе утро", 12: "Добрый день", 18: "Добрый вечер", 22: "Доброй ночи" };
-      const icons = { 5: "☀️", 12: "🌤", 18: "🌙", 22: "😴" };
-      let g = "Привет", i = "🙂";
-      for (const h in map) if (hour >= h) { g = map[h]; i = icons[h]; }
-      document.getElementById('greeting').textContent = g;
-      document.getElementById('mood-icon').textContent = i;
-    }
-
-    // Подписка
-    const badge = document.getElementById('sub-badge');
-    if (badge) {
-      if (userData.isPremium) {
-        badge.textContent = 'Премиум';
-        badge.classList.add('premium');
-      } else {
-        badge.textContent = 'Базовая';
-      }
-    }
-
-    // Админка
-    if (userData.role === 'admin' && document.getElementById('admin-link')) {
-      document.getElementById('admin-link').style.display = 'flex';
-    }
-
-    // Новости
-    const mockNews = [
-      { icon: "🌍", title: "Курс доллара превысил 99 рублей", time: "10 минут назад" },
-      { icon: "🤖", title: "Sber запустил новую версию GigaChat", time: "35 минут назад" },
-      { icon: "🌤", title: "В Москве ожидается потепление до +14°C", time: "1 час назад" },
-      { icon: "💰", title: "ЦБ РФ объявил о новых мерах поддержки рубля", time: "2 часа назад" },
-      { icon: "📱", title: "Telegram обновил функцию Mini Apps", time: "3 часа назад" },
-      { icon: "⚡", title: "Новый рекорд по скорости интернета в РФ", time: "4 часа назад" }
-    ];
-
-    function renderNews(count = 3) {
-      const container = document.getElementById('news-feed');
-      if (!container) return;
-      container.innerHTML = '';
-      const toShow = mockNews.slice(0, count);
-      toShow.forEach(news => {
-        const item = document.createElement('div');
-        item.className = 'news-item';
-        item.innerHTML = `
-          <div class="news-icon">${news.icon}</div>
-          <div class="news-content">
-            <div class="news-title">${news.title}</div>
-            <div class="news-time">${news.time}</div>
-          </div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    function loadMoreNews() {
-      const currentCount = document.querySelectorAll('.news-item').length;
-      const nextCount = Math.min(currentCount + 3, mockNews.length);
-      renderNews(nextCount);
-    }
-
-    // Смена темы
     function toggleTheme() {
       const html = document.documentElement;
       const icon = document.getElementById('theme-icon');
@@ -429,19 +507,12 @@
       }
     }
 
-    // Инициализация
     document.addEventListener('DOMContentLoaded', () => {
-      updateGreeting();
-      renderNews(3);
-
-      // Тема
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
-      const icon = document.getElementById('theme-icon');
-      if (icon) {
-        icon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
-      }
+      document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
     });
   </script>
+
 </body>
 </html>
