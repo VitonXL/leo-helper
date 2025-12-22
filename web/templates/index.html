@@ -27,16 +27,16 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #fbfdff;
+      background: #f8fbff; /* Нежный бело-голубой фон */
       transition: background 0.3s ease;
     }
 
     [data-theme="dark"] {
-      background: #0a0c12;
+      background: #0a0e17;
       color: #e0e0e0;
     }
 
-    /* === ОВАЛ С ЛОГОТИПОМ === */
+    /* === ОВАЛ С ЛОГОТИПОМ "ЛЕО" (как зверёк) === */
     .leo-badge-3d {
       position: fixed;
       top: 8px;
@@ -45,6 +45,7 @@
       width: 130px;
       height: 62px;
       background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      color: white;
       border-radius: 30px;
       display: flex;
       flex-direction: column;
@@ -56,10 +57,8 @@
       border: 1.5px solid #FFD700;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
-      color: white;
       font-weight: 700;
       font-size: 18px;
-      text-align: center;
     }
 
     @keyframes float {
@@ -68,11 +67,64 @@
       100% { transform: translateX(-50%) translateY(0); }
     }
 
-    /* === ЛОГОТИП ВНУТРИ ОВАЛА === */
-    .logo-img {
-      width: 80px;
-      height: 30px;
-      object-fit: contain;
+    .leo-logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -1px;
+    }
+
+    .leo-logo .l {
+      color: #8B4513;
+      font-size: 22px;
+      position: relative;
+    }
+
+    .leo-logo .l::before,
+    .leo-logo .l::after {
+      content: '';
+      position: absolute;
+      width: 7px;
+      height: 8px;
+      background: #8B4513;
+      bottom: -7px;
+      border-radius: 40% 40% 60% 60%;
+    }
+
+    .leo-logo .l::before {
+      left: 2px;
+      transform: rotate(30deg);
+      width: 6px;
+      height: 7px;
+    }
+
+    .leo-logo .l::after {
+      right: 2px;
+      transform: rotate(-30deg);
+      width: 6px;
+      height: 7px;
+    }
+
+    .leo-logo .eo {
+      color: #FFD700;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .leo-logo .eo::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -3px;
+      width: 10px;
+      height: 10px;
+      background: #4CAF50;
+      border-radius: 50%;
+      box-shadow: 
+        7px -2px 0 1px #4CAF50,
+        3px -5px 0 1px #4CAF50,
+        10px 1px 0 1px #4CAF50;
     }
 
     .page-tag {
@@ -83,17 +135,22 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
-      margin-top: 2px;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА === */
+    /* === ПРОЗРАЧНАЯ ШАПКА С РАЗМЫТИЕМ === */
     .full-header {
       position: fixed;
       top: 0;
       left: 10px;
       width: calc(100% - 20px);
       height: 60px;
-      background: rgba(255, 255, 255, 0.94);
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.96),
+        rgba(255, 255, 255, 0.8),
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.3)
+      );
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -104,13 +161,61 @@
       justify-content: space-between;
       padding: 0 16px;
       z-index: 1002;
+      overflow: hidden;
+      position: relative;
     }
 
+    /* === ТРАВЯНАЯ ВОЛНА НА НИЗУ ШАПКИ === */
+    .header-grass-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,6 Q10,2 20,6 T40,6 T60,6 T80,6 T100,6' fill='none' stroke='%234CAF50' stroke-width='3'/%3E%3C/svg%3E") repeat-x left bottom;
+      z-index: 1;
+    }
+
+    /* === ТОРЧАЩИЕ АНИМИРОВАННЫЕ ТРАВИНКИ === */
+    .grass-blades {
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      height: 18px;
+      background: 
+        repeating-linear-gradient(90deg,
+          transparent 0px,
+          transparent 20px,
+          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="16"><path d="M2,16 C2,12 4,10 3,5 C3,2 1,3 1,1" stroke="%234CAF50" fill="none" stroke-width="1.8" transform="rotate(10,3,8)"/></svg>') 20px 26px,
+          transparent 26px,
+          transparent 40px
+        ),
+        repeating-linear-gradient(90deg,
+          transparent 0px,
+          transparent 30px,
+          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="5" height="14"><path d="M2,14 C2,11 3,8 2.5,4 C2.5,2 1,3 1,1" stroke="%234CAF50" fill="none" stroke-width="1.6" transform="rotate(-5,2.5,7)"/></svg>') 30px 35px,
+          transparent 35px,
+          transparent 60px
+        );
+      z-index: 2;
+      pointer-events: none;
+      animation: sway 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes sway {
+      0% { background-position-x: 0, 0; }
+      100% { background-position-x: 10px, -5px; }
+    }
+
+    /* === КНОПКИ В ШАПКЕ === */
     .header-left,
     .header-right {
       display: flex;
       align-items: center;
       gap: 12px;
+      z-index: 10;
+      position: relative;
     }
 
     .btn-icon {
@@ -124,10 +229,12 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
     .btn-icon:hover {
       background: rgba(76, 175, 80, 0.1);
+      transform: translateY(-1px);
     }
 
     /* === АВАТАРКА === */
@@ -191,12 +298,18 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       border: 1px solid rgba(178, 255, 89, 0.2);
       margin-bottom: 24px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     [data-theme="dark"] .card {
       background: #2a2a2a;
       border: 1px solid #4CAF50;
       color: #ffffff;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
     }
 
     .highlight {
@@ -237,6 +350,13 @@
       border-radius: 8px;
       font-weight: 500;
       cursor: pointer;
+      box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-2px);
     }
 
     /* === БЫСТРЫЕ ДЕЙСТВИЯ === */
@@ -259,6 +379,11 @@
       text-decoration: none;
       color: #212121;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .action-btn:hover {
+      background: rgba(76, 175, 80, 0.05);
+      transform: translateY(-2px);
     }
 
     .action-icon {
@@ -367,15 +492,52 @@
       margin: 4px 0 0;
     }
 
-    .btn-sm {
-      background: #e0e0e0;
-      color: #212121;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
+    /* === КНОПКИ ВНИЗУ СТРАНИЦЫ === */
+    .footer-info {
+      text-align: center;
+      padding: 24px 16px;
+      margin-top: 24px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(178, 255, 89, 0.2);
+    }
+
+    .year-tag {
+      display: inline-block;
+      background: #4CAF50;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
       font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .footer-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-btn {
+      background: #f0f8ff;
+      color: #2E7D32;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .footer-btn:hover {
+      background: #e0f0e0;
+      transform: translateY(-2px);
     }
 
     /* === FAB === */
@@ -392,15 +554,38 @@
       font-size: 24px;
       box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
       cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .fab:hover {
+      transform: scale(1.08);
+    }
+
+    /* === АДАПТИВ === */
+    @media (max-width: 768px) {
+      .dual-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .footer-btn {
+        width: 80%;
+        max-width: 280px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Овал с ЛОГОТИПОМ -->
+  <!-- Овал с "Лео" (текст + лапки) -->
   <div class="leo-badge-3d" id="leo-badge">
-    <!-- Замени src на свой логотип. Подходит: 80x30 px -->
-    <img src="https://via.placeholder.com/80x30/4CAF50/FFFFFF?text=Лео" alt="Логотип" class="logo-img">
+    <div class="leo-logo">
+      <span class="l">Л</span><span class="eo">ео</span>
+    </div>
     <div class="page-tag">Главная</div>
   </div>
 
@@ -422,7 +607,7 @@
           alt="Аватар" 
           class="user-avatar"
           id="user-avatar"
-          onclick="alert('Переход в личный кабинет')"
+          onclick="alert('Переход в кабинет')"
         />
       </div>
 
@@ -436,6 +621,10 @@
         <span class="material-icons" id="theme-icon">dark_mode</span>
       </button>
     </div>
+
+    <!-- Трава в шапке -->
+    <div class="header-grass-line"></div>
+    <div class="grass-blades"></div>
   </div>
 
   <!-- Основной контент -->
@@ -472,7 +661,7 @@
       </a>
     </div>
 
-    <!-- ДВА СТОЛБИКА -->
+    <!-- ПОГОДА И КУРСЫ -->
     <div class="dual-stats">
       <!-- Погода -->
       <div class="stat-card">
@@ -520,8 +709,21 @@
         </div>
       </div>
     </div>
-    <button class="btn-sm">Ещё новости</button>
+    <button class="btn-sm" onclick="alert('Ещё новости')">Ещё новости</button>
 
+  </div>
+
+  <!-- НИЖНЯЯ СЕКЦИЯ -->
+  <div class="footer-info">
+    <div class="year-tag">📅 Год Зелёного Дракона</div>
+    <div class="footer-buttons">
+      <button class="footer-btn" onclick="alert('💬 Написать в поддержку')">
+        💬 Обратная связь
+      </button>
+      <button class="footer-btn" onclick="alert('❓ Частые вопросы')">
+        ❓ Часто задаваемые вопросы
+      </button>
+    </div>
   </div>
 
   <!-- FAB -->
@@ -529,6 +731,22 @@
 
   <!-- JS -->
   <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      const isDark = html.getAttribute('data-theme') === 'dark';
+
+      if (isDark) {
+        html.setAttribute('data-theme', 'light');
+        icon.textContent = 'dark_mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        icon.textContent = 'light_mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
     const userData = {
       first_name: "Иван",
       role: "admin"
@@ -551,21 +769,6 @@
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
     });
-
-    function toggleTheme() {
-      const html = document.documentElement;
-      const icon = document.getElementById('theme-icon');
-      const isDark = html.getAttribute('data-theme') === 'dark';
-
-      if (isDark) {
-        html.setAttribute('data-theme', 'light');
-        icon.textContent = 'dark_mode';
-      } else {
-        html.setAttribute('data-theme', 'dark');
-        icon.textContent = 'light_mode';
-      }
-      localStorage.setItem('theme', html.getAttribute('data-theme'));
-    }
   </script>
 
 </body>
