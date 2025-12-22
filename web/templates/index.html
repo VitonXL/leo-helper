@@ -27,7 +27,7 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #fbfdff; /* Нежный фон — как утреннее небо */
+      background: #fbfdff;
       transition: background 0.3s ease;
     }
 
@@ -36,7 +36,7 @@
       color: #e0e0e0;
     }
 
-    /* === ОВАЛ С "ЛЕО" === */
+    /* === ОВАЛ С ЛОГОТИПОМ ВМЕСТО ТЕКСТА === */
     .leo-badge-3d {
       position: fixed;
       top: 8px;
@@ -44,8 +44,6 @@
       transform: translateX(-50%);
       width: 130px;
       height: 62px;
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
-      color: white;
       border-radius: 30px;
       display: flex;
       flex-direction: column;
@@ -57,8 +55,12 @@
       border: 1.5px solid #FFD700;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
       font-weight: 700;
       font-size: 18px;
+      text-align: center;
+      color: white;
+      overflow: hidden;
     }
 
     @keyframes float {
@@ -67,64 +69,12 @@
       100% { transform: translateX(-50%) translateY(0); }
     }
 
-    .leo-logo {
-      display: flex;
-      align-items: center;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: -1px;
-    }
-
-    .leo-logo .l {
-      color: #8B4513;
-      font-size: 22px;
-      position: relative;
-    }
-
-    .leo-logo .l::before,
-    .leo-logo .l::after {
-      content: '';
-      position: absolute;
-      width: 7px;
-      height: 8px;
-      background: #8B4513;
-      bottom: -7px;
-      border-radius: 40% 40% 60% 60%;
-    }
-
-    .leo-logo .l::before {
-      left: 2px;
-      transform: rotate(30deg);
-      width: 6px;
-      height: 7px;
-    }
-
-    .leo-logo .l::after {
-      right: 2px;
-      transform: rotate(-30deg);
-      width: 6px;
-      height: 7px;
-    }
-
-    .leo-logo .eo {
-      color: #FFD700;
-      font-size: 18px;
-      position: relative;
-    }
-
-    .leo-logo .eo::before {
-      content: '';
-      position: absolute;
-      top: -5px;
-      left: -3px;
-      width: 10px;
-      height: 10px;
-      background: #4CAF50;
-      border-radius: 50%;
-      box-shadow: 
-        7px -2px 0 1px #4CAF50,
-        3px -5px 0 1px #4CAF50,
-        10px 1px 0 1px #4CAF50;
+    /* === ЗАМЕНА ТЕКСТА "ЛЕО" НА ИЗОБРАЖЕНИЕ === */
+    .logo-img {
+      width: 80px;
+      height: 30px;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
     }
 
     .page-tag {
@@ -135,9 +85,10 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
+      margin-top: 2px;
     }
 
-    /* === ПРОЗРАЧНАЯ ШАПКА С ТРАВОЙ СНИЗУ И ТРАВИНКАМИ === */
+    /* === ПРОЗРАЧНАЯ ШАПКА С ТРАВОЙ === */
     .full-header {
       position: fixed;
       top: 0;
@@ -176,36 +127,27 @@
       z-index: 1;
     }
 
-    /* === ТОРЧАЩИЕ ТРАВИНКИ === */
+    /* === ТОРЧАЩИЕ ТРАВИНКИ (теперь точно видны!) === */
     .grass-blades {
       position: absolute;
-      bottom: 4px;
+      bottom: 0;
       left: 0;
       width: 100%;
-      height: 16px;
-      background: 
-        repeating-linear-gradient(90deg,
-          transparent 0px,
-          transparent 20px,
-          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="14"><path d="M2,14 C2,10 4,8 3,4 C3,2 1,3 1,1" stroke="%234CAF50" fill="none" stroke-width="1.8" transform="rotate(10,3,7)"/></svg>') 20px 26px,
-          transparent 26px,
-          transparent 40px
-        ),
-        repeating-linear-gradient(90deg,
-          transparent 0px,
-          transparent 30px,
-          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="5" height="12"><path d="M2,12 C2,9 3,7 2.5,4 C2.5,2 1,3 1,1" stroke="%234CAF50" fill="none" stroke-width="1.6" transform="rotate(-5,2.5,6)"/></svg>') 30px 35px,
-          transparent 35px,
-          transparent 60px
-        );
-      pointer-events: none;
+      height: 22px;
+      background-image: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="20"><path d="M3,20 C3,16 6,12 5,6 C5,3 2,4 1,1" stroke="%234CAF50" fill="none" stroke-width="2" transform="rotate(10,4,10)"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="18"><path d="M2,18 C2,14 4,11 3,6 C3,3 1,4 0.5,1" stroke="%234CAF50" fill="none" stroke-width="1.8" transform="rotate(-8,3,9)"/></svg>');
+      background-repeat: repeat-x;
+      background-position: 0 0, 40px -2px;
+      background-size: 30px 22px, 50px 20px;
       z-index: 2;
-      animation: sway 3s ease-in-out infinite alternate;
+      pointer-events: none;
+      animation: sway 2.5s ease-in-out infinite alternate;
     }
 
     @keyframes sway {
-      0% { background-position-x: 0, 0; }
-      100% { background-position-x: 10px, -5px; }
+      0% { background-position: 0 0, 40px -2px; }
+      100% { background-position: 10px 0, 50px -2px; }
     }
 
     /* === КНОПКИ В ШАПКЕ === */
@@ -253,7 +195,7 @@
       transform: scale(1.1);
     }
 
-    /* === КРАСИВАЯ АДМИН КНОПКА === */
+    /* === АДМИН-КНОПКА === */
     .admin-btn {
       display: none;
       background: #f48b29;
@@ -397,13 +339,21 @@
       font-weight: 500;
     }
 
-    /* === ПОГОДА И КУРСЫ — ВЕРТИКАЛЬНО ДРУГ ПОД ДРУГОМ === */
+    /* === ДВА СТОЛБИКА: ПОГОДА И КУРСЫ РЯДОМ === */
+    .dual-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
     .stat-card {
       background: white;
       border: 1px solid rgba(178, 255, 89, 0.2);
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      height: 100%;
     }
 
     .stat-title {
@@ -528,6 +478,10 @@
 
     /* === АДАПТИВ === */
     @media (max-width: 768px) {
+      .dual-stats {
+        grid-template-columns: 1fr;
+      }
+
       .button-grid {
         grid-template-columns: 1fr;
       }
@@ -549,11 +503,10 @@
 </head>
 <body>
 
-  <!-- Овал с "Лео" -->
+  <!-- Овал с ИЗОБРАЖЕНИЕМ (вместо текста "Лео") -->
   <div class="leo-badge-3d" id="leo-badge">
-    <div class="leo-logo">
-      <span class="l">Л</span><span class="eo">ео</span>
-    </div>
+    <!-- Пример: можно заменить src на реальный URL логотипа -->
+    <img src="https://via.placeholder.com/80x30/4CAF50/FFFFFF?text=Лео" alt="Логотип Лео" class="logo-img" />
     <div class="page-tag">Главная</div>
   </div>
 
@@ -590,7 +543,7 @@
       </button>
     </div>
 
-    <!-- Трава: волна + торчащие травинки -->
+    <!-- Трава в шапке -->
     <div class="header-grass-line"></div>
     <div class="grass-blades"></div>
   </div>
@@ -629,54 +582,59 @@
       </a>
     </div>
 
-    <!-- ПОГОДА -->
-    <div class="stat-card">
-      <div class="stat-title">
-        <i>🌤</i> Погода в Москве
+    <!-- ДВА СТОЛБИКА: ПОГОДА И КУРСЫ -->
+    <div class="dual-stats">
+      
+      <!-- ПОГОДА -->
+      <div class="stat-card">
+        <div class="stat-title">
+          <i>🌤</i> Погода в Москве
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Температура</div>
+          <div class="stat-value">+14°C</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Ощущается как</div>
+          <div class="stat-value">+12°C</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Влажность</div>
+          <div class="stat-value">68%</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Давление</div>
+          <div class="stat-value">746 мм</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Ветер</div>
+          <div class="stat-value">3 м/с <span class="stat-change">СЗ</span></div>
+        </div>
       </div>
-      <div class="stat-row">
-        <div class="stat-label">Температура</div>
-        <div class="stat-value">+14°C</div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">Ощущается как</div>
-        <div class="stat-value">+12°C</div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">Влажность</div>
-        <div class="stat-value">68%</div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">Давление</div>
-        <div class="stat-value">746 мм</div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">Ветер</div>
-        <div class="stat-value">3 м/с <span class="stat-change">СЗ</span></div>
-      </div>
-    </div>
 
-    <!-- КУРСЫ -->
-    <div class="stat-card">
-      <div class="stat-title">
-        <i>💵</i> Курсы валют
+      <!-- КУРСЫ -->
+      <div class="stat-card">
+        <div class="stat-title">
+          <i>💵</i> Курсы валют
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">USD → RUB</div>
+          <div class="stat-value">98.50 ₽ <span class="stat-change">+0.25</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">EUR → RUB</div>
+          <div class="stat-value">109.80 ₽ <span class="stat-change">+0.18</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">CNY → RUB</div>
+          <div class="stat-value">14.12 ₽ <span class="stat-change">+0.05</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">GBP → RUB</div>
+          <div class="stat-value">123.40 ₽ <span class="stat-change">-0.10</span></div>
+        </div>
       </div>
-      <div class="stat-row">
-        <div class="stat-label">USD → RUB</div>
-        <div class="stat-value">98.50 ₽ <span class="stat-change">+0.25</span></div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">EUR → RUB</div>
-        <div class="stat-value">109.80 ₽ <span class="stat-change">+0.18</span></div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">CNY → RUB</div>
-        <div class="stat-value">14.12 ₽ <span class="stat-change">+0.05</span></div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-label">GBP → RUB</div>
-        <div class="stat-value">123.40 ₽ <span class="stat-change">-0.10</span></div>
-      </div>
+
     </div>
 
     <!-- Новости -->
@@ -731,15 +689,18 @@
       const avatar = document.getElementById('user-avatar');
       const adminBtn = document.getElementById('admin-btn');
 
+      // Фото из Telegram
       if (window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url) {
         avatar.src = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
       }
 
+      // Админка
       if (userData.role === 'admin') {
         adminBtn.style.display = 'flex';
         adminBtn.onclick = () => alert('🛡 Доступ к администрированию');
       }
 
+      // Тема
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
