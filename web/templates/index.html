@@ -14,7 +14,7 @@
 
   <!-- Встроенные стили -->
   <style>
-    /* === ГЛОБАЛЬНЫЙ СБРОС === */
+    /* === ГЛОБАЛЬНЫЕ НАСТРОЙКИ === */
     * {
       margin: 0;
       padding: 0;
@@ -27,13 +27,16 @@
       font-family: 'Inter', sans-serif;
       color: #212121;
       overflow-x: hidden;
-      background: #f0fff0;
-      transition: background 0.3s ease;
+      background: linear-gradient(135deg, #e6f7ff, #d0f0ff, #f0f8ff);
+      background-size: 400% 400%;
+      animation: gradientSky 20s ease infinite;
+      transition: background 0.5s ease;
     }
 
-    [data-theme="dark"] {
-      background: #0a1e0a;
-      color: #ffffff;
+    @keyframes gradientSky {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     /* === ОВАЛ С "ЛЕО" === */
@@ -42,22 +45,24 @@
       top: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 130px;
-      height: 62px;
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      width: 120px;
+      height: 56px;
+      background: linear-gradient(140deg, #4CAF50, #2E7D32);
       color: white;
       border-radius: 30px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 12px;
+      padding: 6px 10px;
       box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #FFD700;
-      text-align: center;
       z-index: 1002;
       border: 1.5px solid #FFD700;
       animation: float 3s ease-in-out infinite;
       pointer-events: auto;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
     }
 
     @keyframes float {
@@ -70,13 +75,13 @@
       display: flex;
       align-items: center;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 17px;
       letter-spacing: -1px;
     }
 
     .leo-logo .l {
       color: #8B4513;
-      font-size: 22px;
+      font-size: 20px;
       position: relative;
     }
 
@@ -84,30 +89,30 @@
     .leo-logo .l::after {
       content: '';
       position: absolute;
-      width: 7px;
-      height: 8px;
+      width: 6px;
+      height: 7px;
       background: #8B4513;
       bottom: -7px;
       border-radius: 40% 40% 60% 60%;
     }
 
     .leo-logo .l::before {
-      left: 2px;
+      left: 1.5px;
       transform: rotate(30deg);
-      width: 6px;
-      height: 7px;
+      width: 5px;
+      height: 6px;
     }
 
     .leo-logo .l::after {
-      right: 2px;
+      right: 1.5px;
       transform: rotate(-30deg);
-      width: 6px;
-      height: 7px;
+      width: 5px;
+      height: 6px;
     }
 
     .leo-logo .eo {
       color: #FFD700;
-      font-size: 18px;
+      font-size: 17px;
       position: relative;
     }
 
@@ -116,22 +121,22 @@
       position: absolute;
       top: -5px;
       left: -3px;
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       background: #4CAF50;
       border-radius: 50%;
       box-shadow: 
-        7px -2px 0 1px #4CAF50,
-        3px -5px 0 1px #4CAF50,
-        10px 1px 0 1px #4CAF50;
+        6px -2px 0 1px #4CAF50,
+        2.5px -5px 0 1px #4CAF50,
+        9px 1px 0 1px #4CAF50;
     }
 
     .page-tag {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       background: rgba(255, 215, 0, 0.25);
-      padding: 1px 6px;
-      border-radius: 10px;
+      padding: 1px 5px;
+      border-radius: 8px;
       border: 1px solid rgba(255, 215, 0, 0.4);
       color: white;
     }
@@ -143,7 +148,7 @@
       left: 10px;
       width: calc(100% - 20px);
       height: 60px;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -154,33 +159,33 @@
       justify-content: space-between;
       padding: 0 16px;
       z-index: 1001;
+      border-bottom: 4px solid transparent;
+      border-image: url("data:image/svg+xml,%3Csvg width='100' height='10' viewBox='0 0 100 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,5 Q25,0 50,5 T100,5' stroke='%234CAF50' stroke-width='4' fill='none'/%3E%3C/svg%3E") 1 stretch;
     }
 
-    .header-left,
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    /* === КНОПКИ В ШАПКЕ === */
     .btn-icon {
-      background: transparent;
-      border: none;
+      background: rgba(240, 248, 255, 0.6);
+      border: 1px solid rgba(144, 216, 255, 0.4);
       color: #2E7D32;
       width: 40px;
       height: 40px;
-      border-radius: 50%;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .btn-icon:hover {
-      background: rgba(76, 175, 80, 0.1);
+      background: rgba(230, 245, 255, 0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    /* === АВАТАРКА ПОЛЬЗОВАТЕЛЯ === */
+    /* === АВАТАРКА === */
     .user-avatar {
       width: 40px;
       height: 40px;
@@ -188,15 +193,14 @@
       border: 2px solid #4CAF50;
       object-fit: cover;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+      transition: transform 0.3s ease;
     }
 
     .user-avatar:hover {
-      transform: scale(1.08);
+      transform: scale(1.1);
     }
 
-    /* === КНОПКА АДМИНКИ === */
     .admin-badge {
       display: none;
       position: absolute;
@@ -212,7 +216,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 0 2px #f0fff0;
+      box-shadow: 0 0 0 2px #f0f8ff;
       cursor: pointer;
       z-index: 2;
     }
@@ -226,139 +230,151 @@
       display: flex;
     }
 
-    /* === КОНТЕНТ === */
+    /* === ОСНОВНОЙ КОНТЕНТ === */
     .main-content {
       margin-top: 90px;
-      padding: 0 16px;
+      padding: 16px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
+    /* === КАРТОЧКИ === */
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(178, 255, 89, 0.2);
-      margin-bottom: 24px;
-    }
-
-    [data-theme="dark"] .card {
-      background: #2a2a2a;
-      border: 1px solid #4CAF50;
-      color: #ffffff;
-    }
-
-    .highlight {
-      position: relative;
-      border: 2px solid #4CAF50;
-    }
-
-    .subscription-badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: linear-gradient(-45deg, #DAA520, #FFD700);
-      color: white;
-      padding: 4px 12px;
+      background: rgba(255, 255, 255, 0.94);
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(178, 255, 89, 0.15);
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
     }
 
     h2 {
       font-size: 20px;
       margin: 0 0 12px 0;
       color: #2E7D32;
+      font-weight: 600;
     }
 
     p {
-      color: #757575;
+      color: #555;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* === КНОПКИ === */
+    .btn-primary {
+      background: linear-gradient(135deg, #4CAF50, #388E3C);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
+      transition: all 0.3s ease;
       font-size: 15px;
     }
 
-    .btn-primary {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(76, 175, 80, 0.4);
     }
 
-    /* === СЕТКА === */
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin: 24px 0;
-    }
-
-    .action-btn {
+    /* === ПОГОДА === */
+    .weather-card {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: white;
-      border: 1px solid rgba(178, 255, 89, 0.2);
-      border-radius: 16px;
-      padding: 16px;
-      text-decoration: none;
+      gap: 24px;
+      padding: 20px;
+      background: rgba(240, 255, 240, 0.6);
+      border-radius: 18px;
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .weather-icon-big {
+      font-size: 48px;
+    }
+
+    .weather-data {
+      flex: 1;
+    }
+
+    .temp-large {
+      font-size: 28px;
+      font-weight: 700;
       color: #212121;
     }
 
-    .action-icon {
-      font-size: 28px;
-      margin-bottom: 8px;
+    .weather-desc {
+      font-size: 15px;
+      color: #757575;
+      margin: 6px 0;
     }
 
-    .action-label {
+    .weather-more {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .weather-more div {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* === КУРСЫ === */
+    .currency-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .currency-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px dashed rgba(178, 255, 89, 0.2);
       font-size: 15px;
+    }
+
+    .currency-item:last-child {
+      border-bottom: none;
+    }
+
+    .currency-name {
+      color: #555;
       font-weight: 500;
     }
 
-    /* === ВИДЖЕТЫ === */
-    .widget-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin: 24px 0;
-    }
-
-    .widget {
-      background: white;
-      border: 1px solid rgba(178, 255, 89, 0.2);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .widget-icon {
-      font-size: 24px;
-      margin-bottom: 4px;
-    }
-
-    .widget-title {
-      font-size: 14px;
-      color: #757575;
-      margin: 0 0 4px 0;
-    }
-
-    .widget-value {
-      font-size: 18px;
+    .currency-value {
       font-weight: 600;
       color: #212121;
     }
 
-    .widget-sub {
-      font-size: 12px;
-      color: #999;
+    .currency-change {
+      color: #4CAF50;
+      font-size: 13px;
+      margin-left: 8px;
     }
 
     /* === НОВОСТИ === */
     .section-title {
       font-size: 16px;
       color: #2E7D32;
-      margin: 24px 0 12px;
+      margin: 24px 0 16px;
+      font-weight: 600;
     }
 
     .news-feed {
@@ -372,52 +388,88 @@
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: white;
-      border: 1px solid rgba(178, 255, 89, 0.2);
-      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #4CAF50;
     }
 
     .news-icon {
-      font-size: 20px;
+      font-size: 22px;
+      color: #4CAF50;
     }
 
     .news-title {
       font-size: 15px;
       font-weight: 500;
+      color: #212121;
       margin: 0;
     }
 
     .news-time {
       font-size: 12px;
       color: #999;
-      margin: 4px 0 0 0;
+      margin: 4px 0 0;
     }
 
     .btn-sm {
-      background: #e0e0e0;
-      color: #212121;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
+      background: rgba(76, 175, 80, 0.1);
+      color: #2E7D32;
+      border: 1px solid rgba(76, 175, 80, 0.2);
+      padding: 10px 20px;
+      border-radius: 12px;
       font-size: 14px;
       cursor: pointer;
       width: 100%;
+      font-weight: 500;
     }
 
-    /* === FAB === */
-    .fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 24px;
-      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
-      cursor: pointer;
+    .btn-sm:hover {
+      background: rgba(76, 175, 80, 0.15);
+    }
+
+    /* === АДАПТИВНОСТЬ === */
+    @media (max-width: 768px) {
+      .weather-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+      }
+
+      .currency-item {
+        font-size: 14px;
+        flex-direction: column;
+        gap: 6px;
+        text-align: left;
+      }
+
+      .header-left, .header-right {
+        gap: 8px;
+      }
+
+      .btn-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+      }
+
+      .full-header {
+        padding: 0 12px;
+      }
+
+      .main-content {
+        padding: 12px;
+      }
+
+      .card {
+        padding: 20px;
+        border-radius: 16px;
+      }
     }
   </style>
 </head>
@@ -442,10 +494,10 @@
       </button>
     </div>
     <div class="header-right">
-      <!-- Контейнер аватарки + админка -->
+      <!-- Аватарка + Админка -->
       <div class="admin-container" id="admin-container">
         <img 
-          src="https://ui-avatars.com/api/?name=Иван+Иванов&background=4CAF50&color=fff&size=128" 
+          src="https://ui-avatars.com/api/?name=Иван&background=4CAF50&color=fff&size=128" 
           alt="Аватар" 
           class="user-avatar"
           id="user-avatar"
@@ -463,65 +515,51 @@
   <div class="main-content">
 
     <!-- Приветствие -->
-    <div class="card highlight" id="welcome-card">
-      <div class="subscription-badge" id="sub-badge">Базовая</div>
-      <h2>🌱 Добро пожаловать в Лео</h2>
-      <p>Ваш личный помощник в мире Telegram. Здесь — всё, что нужно.</p>
-      <button class="btn-primary" onclick="alert('Премиум')">
+    <div class="card highlight">
+      <h2>🌱 Добро пожаловать, Иван!</h2>
+      <p>Сегодня — ваш день. Пусть погода, настроение и курсы будут на вашей стороне.</p>
+      <button class="btn-primary" style="margin-top: 16px;" onclick="alert('Управлять подпиской')">
         Получить премиум
       </button>
     </div>
 
-    <!-- Быстрые действия -->
-    <div class="section-title">⚡ Быстрые действия</div>
-    <div class="button-grid">
-      <a href="#" class="action-btn">
-        <div class="action-icon">💰</div>
-        <div class="action-label">Финансы</div>
-      </a>
-      <a href="#" class="action-btn">
-        <div class="action-icon">🌦</div>
-        <div class="action-label">Погода</div>
-      </a>
-      <a href="#" class="action-btn">
-        <div class="action-icon">💬</div>
-        <div class="action-label">GigaChat</div>
-      </a>
-      <a href="#" class="action-btn">
-        <div class="action-icon">🎮</div>
-        <div class="action-label">Игры</div>
-      </a>
-    </div>
-
-    <!-- Виджеты -->
-    <div class="widget-grid">
-      <div class="widget">
-        <div class="widget-icon">🌤</div>
-        <div class="widget-title">Погода</div>
-        <div class="widget-value">+12°C</div>
-        <div class="widget-sub">в Москве</div>
-      </div>
-      <div class="widget">
-        <div class="widget-icon">💵</div>
-        <div class="widget-title">Курс USD</div>
-        <div class="widget-value">98.50 ₽</div>
-        <div class="widget-sub">на сегодня</div>
-      </div>
-      <div class="widget">
-        <div class="widget-icon">🤖</div>
-        <div class="widget-title">GigaChat</div>
-        <div class="widget-value">3/10</div>
-        <div class="widget-sub">запросов</div>
-      </div>
-      <div class="widget">
-        <div class="widget-icon">🛎</div>
-        <div class="widget-title">Напоминания</div>
-        <div class="widget-value">2</div>
-        <div class="widget-sub">активных</div>
+    <!-- ПОГОДА -->
+    <div class="card">
+      <h2>🌤 Погода в Москве</h2>
+      <div class="weather-card">
+        <div class="weather-icon-big">🌤</div>
+        <div class="weather-data">
+          <div class="temp-large">+14°C</div>
+          <div class="weather-desc">Облачно, без осадков</div>
+          <div class="weather-more">
+            <div>🌬 Слабый ветер, 3 м/с</div>
+            <div>💧 Влажность: 65%</div>
+            <div>🌅 Восход: 08:24</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Новости -->
+    <!-- КУРСЫ -->
+    <div class="card">
+      <h2>💵 Курсы валют</h2>
+      <div class="currency-card">
+        <div class="currency-item">
+          <span class="currency-name">USD → RUB</span>
+          <span class="currency-value">98.50 ₽ <span class="currency-change">+0.25</span></span>
+        </div>
+        <div class="currency-item">
+          <span class="currency-name">EUR → RUB</span>
+          <span class="currency-value">109.80 ₽ <span class="currency-change">+0.18</span></span>
+        </div>
+        <div class="currency-item">
+          <span class="currency-name">CNY → RUB</span>
+          <span class="currency-value">14.12 ₽ <span class="currency-change">+0.05</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- НОВОСТИ -->
     <div class="section-title">📰 Новости дня</div>
     <div class="news-feed" id="news-feed">
       <div class="news-item">
@@ -539,12 +577,9 @@
         </div>
       </div>
     </div>
-    <button class="btn-sm" onclick="alert('Ещё новости')">Ещё новости</button>
+    <button class="btn-sm" style="margin: 16px 0;" onclick="alert('Ещё новости')">Ещё новости</button>
 
   </div>
-
-  <!-- FAB -->
-  <button class="fab" onclick="alert('💬 GigaChat')">💬</button>
 
   <!-- JS -->
   <script>
@@ -564,39 +599,31 @@
       }
     }
 
-    // Пример данных пользователя
+    // Данные пользователя
     const userData = {
       first_name: "Иван",
-      username: "ivan_123",
-      role: "admin", // ← поменяй на "user", чтобы скрыть админку
-      photo_url: "https://t.me/i/userpic/320/somephoto.jpg" // ← будет из Telegram
+      role: "admin"
     };
 
-    // Подставляем фото (если есть)
     document.addEventListener('DOMContentLoaded', () => {
       const avatar = document.getElementById('user-avatar');
       const adminContainer = document.getElementById('admin-container');
 
-      // Если в реальном боте — подставляем фото из Telegram
+      // Фото из Telegram (если есть)
       if (window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url) {
         avatar.src = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
-      } else {
-        // Для теста используем ui-avatars
-        avatar.src = `https://ui-avatars.com/api/?name=${userData.first_name}&background=4CAF50&color=fff&size=128`;
       }
 
-      // Показываем админ-бейдж, если роль = admin
+      // Показ админки
       if (userData.role === 'admin') {
         adminContainer.setAttribute('data-role', 'admin');
+        document.getElementById('admin-badge').onclick = (e) => {
+          e.stopPropagation();
+          alert('🔐 Админ-панель скоро');
+        };
       }
 
-      // Клик по бейджу → админка
-      document.getElementById('admin-badge').onclick = (e) => {
-        e.stopPropagation();
-        alert('🔐 Добро пожаловать в админ-панель');
-      };
-
-      // Инициализация темы
+      // Тема
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
