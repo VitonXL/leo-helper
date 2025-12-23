@@ -21,41 +21,37 @@ body {
   font-family: 'Inter', sans-serif;
   background: var(--bg-light);
   color: var(--text-light);
-  transition: background 0.4s ease;
   min-height: 100vh;
 }
 
 [data-theme="dark"] body {
-  background-color: var(--bg-dark);
+  background: var(--bg-dark);
   background-image: 
     linear-gradient(0deg, transparent 24px, rgba(42, 52, 58, 0.1) 25px),
     linear-gradient(90deg, transparent 24px, rgba(42, 52, 58, 0.1) 25px);
   background-size: 25px 25px;
+  background-attachment: fixed;
   color: var(--text-dark);
 }
 
-/* === КАРТОЧКИ === */
-.card {
-  background: var(--card-bg-light);
-  border: 1px solid var(--border-light);
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-  margin-bottom: 24px;
+/* === ЕДИНАЯ ШАПКА === */
+.combined-header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 20px);
+  max-width: 480px;
+  z-index: 1003;
+  transition: transform 0.3s ease-out;
 }
 
-[data-theme="dark"] .card {
-  background: var(--card-bg-dark);
-  border-color: var(--border-dark);
-  box-shadow: 0 0 0 1px rgba(178, 255, 89, 0.15), 0 8px 24px rgba(178, 255, 89, 0.1);
+.combined-header.hidden {
+  transform: translateX(-50%) translateY(-100px);
 }
 
 /* === ОВАЛ С ЛЕО === */
 .leo-badge-3d {
-  position: fixed;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 130px;
   height: 62px;
   background: linear-gradient(135deg, #B2FF59, #4CAF50);
@@ -66,105 +62,131 @@ body {
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 1.5px #DAA520;
-  z-index: 1003;
+  box-shadow: 0 4px 12px rgba(76,175,80,0.3), 0 0 0 1.5px #DAA520;
   border: 1.5px solid #DAA520;
-  animation: float 3s ease-in-out infinite;
   font-weight: 700;
   font-size: 18px;
+  pointer-events: auto;
+  margin-bottom: 4px;
 }
 
-@keyframes float {
-  0% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-1.5px); }
-  100% { transform: translateX(-50%) translateY(0); }
+.page-tag {
+  font-size: 12px;
+  background: rgba(218,165,32,0.25);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(218,165,32,0.4);
+  color: white;
 }
 
-/* === ШАПКА === */
+/* === ШАПКА ПОД ОВАЛОМ === */
 .full-header {
-  position: fixed;
-  top: 72px;
-  left: 10px;
-  width: calc(100% - 20px);
+  width: 100%;
   height: 60px;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255,255,255,0.94);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  z-index: 1002;
-  border: 1px solid rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76,175,80,0.1);
+  pointer-events: auto;
 }
 
 [data-theme="dark"] .full-header {
-  background: rgba(13, 17, 23, 0.92);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(76, 175, 80, 0.2);
-  border-color: rgba(76, 175, 80, 0.1);
+  background: rgba(13,17,23,0.92);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(76,175,80,0.2);
 }
 
-/* === АВАТАРКА (КРУГ) === */
+/* === КНОПКИ === */
+.btn-icon {
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-icon span {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .btn-icon span {
+  color: var(--accent-light);
+}
+
+/* === АВАТАР === */
 .user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid #4CAF50;
+  border: 2px solid var(--accent);
   object-fit: cover;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 [data-theme="dark"] .user-avatar {
-  border-color: #B2FF59;
-  box-shadow: 0 2px 8px rgba(178, 255, 89, 0.2);
+  border-color: var(--accent-light);
 }
 
 /* === АДМИН-КНОПКА === */
 .admin-btn {
+  background: #f48b29;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f48b29;
-  color: white;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  box-shadow: 0 3px 10px rgba(244, 139, 41, 0.35);
-  margin-left: 8px;
 }
 
-.admin-btn:hover {
-  background: #e57e25;
-  transform: translateY(-2px);
-}
-
-/* === ОСНОВНОЙ КОНТЕНТ === */
+/* === КОНТЕНТ === */
 .main-content {
   margin-top: 140px;
   padding: 0 16px;
 }
 
-/* === КНОПКИ === */
-.footer-btn {
-  background: #4CAF50;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
-  display: block;
-  margin: 12px auto;
-  max-width: 220px;
+/* === КАРТОЧКИ === */
+.card {
+  background: var(--card-bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 24px;
 }
 
-.footer-btn:hover {
-  background: #45a049;
+[data-theme="dark"] .card {
+  background: var(--card-bg-dark);
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow-dark);
+  color: var(--text-dark);
+}
+
+/* === TOAST === */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
 }
