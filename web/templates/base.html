@@ -1,0 +1,78 @@
+<!-- web/templates/base.html -->
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Лео — {% block title %}Главная{% endblock %}</title>
+
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+
+  <!-- Статика -->
+  <link rel="stylesheet" href="/static/css/main.css?v=2">
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+
+  <!-- ЕДИНАЯ ШАПКА: ОВАЛ + HEADER -->
+  <div class="combined-header" id="combined-header">
+    <!-- Овал с "Лео" -->
+    <div class="leo-badge-3d">
+      <div>Лео</div>
+      <div class="page-tag">{% block page_tag %}Главная{% endblock %}</div>
+    </div>
+
+    <!-- Прозрачная шапка -->
+    <div class="full-header">
+      <div class="header-left">
+        {% block header_left %}
+          <button class="btn-icon" onclick="history.back()">
+            <span class="material-icons">arrow_back</span>
+          </button>
+        {% endblock %}
+      </div>
+      <div class="header-right">
+        {% block header_right %}
+          <!-- Аватар -->
+          <img 
+            src="{{ user.avatar_url if user and user.avatar_url else '/static/img/avatar-placeholder.png' }}" 
+            alt="Аватар" 
+            class="user-avatar"
+            onclick="alert('Вы — ' + ({{ user.role|tojson }} || 'user'))"
+          />
+
+          <!-- Админ-кнопка → ведёт в /admin -->
+          {% if user and user.role == 'admin' %}
+          <a href="/admin?user_id={{ user.id }}&hash={{ user.hash }}" class="admin-link">
+            <button class="admin-btn">
+              <span class="material-icons" style="color: white;">shield</span>
+            </button>
+          </a>
+          {% endif %}
+
+          <!-- Смена темы -->
+          <button class="btn-icon" onclick="toggleTheme()">
+            <span class="material-icons" id="theme-icon">dark_mode</span>
+          </button>
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="main-content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Toast</div>
+
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>
