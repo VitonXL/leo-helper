@@ -1,85 +1,302 @@
-<!-- web/templates/index.html -->
-{% extends "base.html" %}
-{% set title = "Главная" %}
-{% set page_tag = "Главная" %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="light" data-theme-preset="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Лео — Главная</title>
 
-{% block content %}
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<div class="card">
-  <h2><span id="greeting">Загрузка...</span></h2>
-  <p>Лео — ваш личный помощник в мире Telegram. Умные функции и забота о комфорте.</p>
-  <button class="btn-primary" onclick="buyPremium()">Оформить премиум</button>
-</div>
+  <style>
+    /* БАЗОВЫЕ ПЕРЕМЕННЫЕ ТЕМЫ */
+    :root {
+      --bg: #f8fbf8;
+      --fg: #212121;
+      --card: #ffffff;
+      --border: rgba(76, 175, 80, 0.12);
+      --accent: #4CAF50;
+      --muted: #757575;
+      --shadow: 0 6px 20px rgba(0,0,0,0.06);
+      --green: #4CAF50;
+      --green-dark: #2e7d32;
+    }
+    [data-theme="dark"] {
+      --bg: #0d1117;
+      --fg: #e0f7ff;
+      --card: #121821;
+      --border: rgba(178, 255, 89, 0.25);
+      --accent: #B2FF59;
+      --muted: #80c755;
+      --shadow: 0 6px 20px rgba(0,0,0,0.4);
+      --green: #B2FF59;
+      --green-dark: #8ee07a;
+    }
 
-<!-- Быстрые действия -->
-<div class="section-title">⚡ Быстрые действия</div>
-<div class="button-grid">
-  <a href="/finance" class="action-btn">
-    <div class="action-icon">💰</div>
-    <div class="action-label">Финансы</div>
-  </a>
-  <a href="#" class="action-btn">
-    <div class="action-icon">🌦</div>
-    <div class="action-label">Погода</div>
-  </a>
-  <a href="#" class="action-btn">
-    <div class="action-icon">💬</div>
-    <div class="action-label">GigaChat</div>
-  </a>
-  <a href="#" class="action-btn">
-    <div class="action-icon">🎮</div>
-    <div class="action-label">Игры</div>
-  </a>
-</div>
+    * { margin:0; padding:0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
 
-<!-- ПОГОДА И КУРСЫ -->
-<div class="dual-stats">
-  <div class="stat-card">
-    <div class="stat-title"><i>🌤</i> Погода в Москве</div>
-    <div class="stat-row"><div class="stat-label">Темп.</div><div class="stat-value">+14°C</div></div>
-    <div class="stat-row"><div class="stat-label">Влажн.</div><div class="stat-value">68%</div></div>
-    <div class="stat-row"><div class="stat-label">Ветер</div><div class="stat-value">3 м/с</div></div>
+    /* Прозрачная шапка (можно оставить как есть, но адаптируем) */
+    .full-header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 64px;
+      display:flex; align-items:center; justify-content: space-between;
+      padding: 0 16px;
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.75);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      z-index: 1000;
+    }
+    [data-theme="dark"] .full-header {
+      background: rgba(13,17,23,0.92);
+      border-bottom: 1px solid rgba(76, 175, 80, 0.25);
+    }
+
+    .header-left, .header-right { display:flex; align-items:center; gap:12px; }
+
+    .btn-icon {
+      width:40px; height:40px; border-radius:50%;
+      border: none; display:grid; place-items:center;
+      background: transparent; cursor: pointer; color: var(--accent);
+      transition: transform 0.2s ease;
+    }
+    .btn-icon:hover { transform: translateY(-1px); }
+
+    .user-avatar { width:40px; height:40px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; }
+
+    .leo-badge-3d {
+      position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
+      width: 130px; height: 62px; border-radius: 30px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, #B2FF59, #4CAF50);
+      color:white; font-weight:700; z-index:1003;
+      border:1.5px solid #DAA520; animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float { 0% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-1.5px);} 100% { transform: translateX(-50%) translateY(0); } }
+
+    .main-content { padding: 96px 16px 40px; max-width: 1000px; margin: 0 auto; }
+
+    .card { background: var(--card); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+
+    .section-title { font-size: 16px; color: var(--accent); font-weight: 600; margin: 24px 0 12px; }
+
+    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .action-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-decoration:none; padding:18px; border-radius:12px;
+      background: var(--card); color: var(--fg);
+      border:1px solid rgba(76, 175, 80, 0.25);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .action-btn:hover { transform: translateY(-4px); background: #e8f5e9; }
+    [data-theme="dark"] .action-btn { background: #0e1a10; color: #B2FF59; border-color: #B2FF59; }
+    .action-icon { font-size: 24px; }
+
+    .stat-card { background: var(--card); border-radius:16px; padding:20px; border:1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+
+    .stat-title { font-size:16px; font-weight:600; color: var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .stat-row { display:flex; justify-content: space-between; padding:8px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); font-size:14px; }
+    [data-theme="dark"] .stat-row { border-bottom-color: rgba(178,255,89,0.1); }
+    .stat-value { font-weight:500; }
+
+    .news-feed { display:flex; flex-direction:column; gap:12px; }
+    .news-item { background: var(--card); border:1px solid rgba(178,255,89,0.25); padding:12px; border-radius:8px; display:flex; gap:12px; align-items:center; }
+
+    .footer-info { text-align:center; padding: 20px 16px; border-top:1px solid rgba(0,0,0,0.06); margin-top: 24px; background: rgba(248,255,248,0.9); }
+
+    [data-theme="dark"] .footer-info { background: #121821; color: #e0f7ff; border-top:1px solid rgba(178,255,89,0.2); }
+
+    .footer-btn { background: var(--card); color: var(--accent); border:1px solid rgba(76, 175, 80, 0.25); padding:8px 16px; border-radius:8px; font-weight:600; cursor:pointer; margin:6px; }
+    [data-theme="dark"] .footer-btn { background: #0e1a10; color: var(--green); border:1px solid var(--green); }
+
+    @media (max-width: 768px) {
+      .button-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="leo-badge-3d" id="leo-badge" aria-label="Лео">
+    <div class="leo-logo" style="font-weight:700;">
+      <span class="l" style="color:#4CAF50; font-size:22px; line-height:1;">Л</span><span class="eo" style="color:#DAA520; font-size:18px;">ео</span>
+    </div>
+    <div class="page-tag" style="font-size:12px; color:white; background: rgba(0,0,0,.15); padding:2px 6px; border-radius:6px; margin-top:6px;">Главная</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-title"><i>💵</i> Курсы валют</div>
-    <div class="stat-row"><div class="stat-label">USD → RUB</div><div class="stat-value">98.50 ₽</div></div>
-    <div class="stat-row"><div class="stat-label">EUR → RUB</div><div class="stat-value">109.80 ₽</div></div>
-  </div>
-</div>
 
-<!-- Новости -->
-<div class="section-title">📰 Новости дня</div>
-<div class="news-feed">
-  <div class="news-item">
-    <div class="news-icon">🌍</div>
-    <div class="news-content">
-      <div class="news-title">Курс доллара превысил 99 рублей</div>
-      <div class="news-time">10 минут назад</div>
+  <div class="full-header" id="main-header" aria-label="Шапка сайта">
+    <div class="header-left">
+      <button class="btn-icon" aria-label="Меню"><span class="material-icons">menu</span></button>
+      <button class="btn-icon" onclick="history.back()" aria-label="Назад"><span class="material-icons">arrow_back</span></button>
+    </div>
+    <div class="header-right">
+      <img id="user-avatar" src="https://ui-avatars.com/api/?name=Иван&background=4CAF50&color=fff&size=128" alt="Аватар" class="user-avatar" />
+      <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
+        <span class="material-icons" id="theme-icon">dark_mode</span>
+      </button>
     </div>
   </div>
-</div>
-<button class="btn-sm" onclick="alert('Открыть')">Открыть ленту</button>
 
-{% endblock %}
+  <main class="main-content">
+    <section class="card" aria-label="Приветствие">
+      <h2><span id="greeting-icon">👋</span> <span id="greeting-text">Загрузка...</span></h2>
+      <p>Лео — ваш личный помощник в мире Telegram. Умные функции и забота о комфорте.</p>
+      <button class="btn-primary" onclick="alert('💳 Оформление премиум-подписки')">Оформить премиум</button>
+    </section>
 
-{% block scripts %}
-<script>
-  function updateGreeting() {
-    const hour = new Date().getHours();
-    const greetings = {
-      morning: 'Доброе утро! 🌤',
-      day: 'Добрый день! ☀️',
-      evening: 'Добрый вечер! 🌆',
-      night: 'Привет ночным! 🌙'
-    };
-    const text = hour >= 6 && hour < 12 ? greetings.morning :
-                 hour >= 12 && hour < 18 ? greetings.day :
-                 hour >= 18 && hour < 23 ? greetings.evening : greetings.night;
-    document.getElementById('greeting').textContent = text;
-  }
+    <h3 class="section-title" style="margin-top:8px;">⚡ Быстрые действия</h3>
+    <div class="button-grid" aria-label="Быстрые действия">
+      <a href="#" class="action-btn" role="button" aria-label="Финансы">
+        <div class="action-icon">💰</div>
+        <div class="action-label">Финансы</div>
+      </a>
+      <a href="#" class="action-btn" role="button" aria-label="Погода">
+        <div class="action-icon">🌦</div>
+        <div class="action-label">Погода</div>
+      </a>
+      <a href="#" class="action-btn" role="button" aria-label="GigaChat">
+        <div class="action-icon">💬</div>
+        <div class="action-label">GigaChat</div>
+      </a>
+      <a href="#" class="action-btn" role="button" aria-label="Игры">
+        <div class="action-icon">🎮</div>
+        <div class="action-label">Игры</div>
+      </a>
+    </div>
 
-  function buyPremium() {
-    window.location.href = '/premium?user_id={{ user.id }}&hash={{ user.hash }}';
-  }
-</script>
-{% endblock %}
+    <div class="dual-stats" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:24px 0;">
+      <!-- Погода -->
+      <section class="stat-card" aria-label="Погода">
+        <div class="stat-title"><span>🌤</span> Погода в Москве</div>
+        <div class="stat-row">
+          <div class="stat-label">Температура</div>
+          <div class="stat-value">+14°C</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Влажность</div>
+          <div class="stat-value">68%</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Ветер</div>
+          <div class="stat-value">3 м/с</div>
+        </div>
+      </section>
+
+      <!-- Курсы -->
+      <section class="stat-card" aria-label="Курсы валют">
+        <div class="stat-title"><span>💵</span> Курсы валют</div>
+        <div class="stat-row">
+          <div class="stat-label">USD → RUB</div>
+          <div class="stat-value">98.50 ₽</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">EUR → RUB</div>
+          <div class="stat-value">109.80 ₽</div>
+        </div>
+      </section>
+    </div>
+
+    <h3 class="section-title" style="margin-top:12px;">📰 Новости дня</h3>
+    <div class="news-feed" aria-label="Новости">
+      <div class="news-item">
+        <div class="news-icon" aria-hidden="true">🌍</div>
+        <div class="news-content">
+          <div class="news-title" style="font-weight:600;">Курс доллара превысил 99 рублей</div>
+          <div class="news-time">10 минут назад</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-sm" onclick="alert('Открыть ленту')">Открыть ленту</button>
+  </main>
+
+  <footer class="footer-info" aria-label="Нижняя часть">
+    <div class="footer-tag" style="margin-bottom:6px;">Лео — персональный помощник</div>
+    <div class="footer-buttons" style="display:flex; justify-content:center; flex-wrap:wrap;">
+      <button class="footer-btn" onclick="sendMessage('Пользователь нажал: Обратная связь')">Написать в бота</button>
+      <button class="footer-btn" onclick="alert('❓ Частые вопросы')">FAQ</button>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      // Обновим стиль шапки и иконку
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      icon.textContent = next === 'dark' ? 'light_mode' : 'dark_mode';
+      // Обновим CSS переменные через data-theme
+      // (у нас уже через [data-theme] меняются переменные)
+    }
+
+    function updateGreeting() {
+      const now = new Date();
+      const hour = now.getHours();
+      const greetingText = document.getElementById('greeting-text');
+      const greetingIcon = document.getElementById('greeting-icon');
+      if (hour >= 6 && hour < 12) {
+        greetingText.textContent = 'Доброе утро!';
+        greetingIcon.textContent = '🌤';
+      } else if (hour >= 12 && hour < 18) {
+        greetingText.textContent = 'Добрый день!';
+        greetingIcon.textContent = '☀️';
+      } else if (hour >= 18 && hour < 23) {
+        greetingText.textContent = 'Добрый вечер!';
+        greetingIcon.textContent = '🌆';
+      } else {
+        greetingText.textContent = 'Привет ночным!';
+        greetingIcon.textContent = '🌙';
+      }
+    }
+
+    function sendMessage(text) {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.sendData(text);
+      } else {
+        alert('🔹 [Отладка] Сообщение: ' + text);
+      }
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+      updateGreeting();
+
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+
+      // показать admin-кнопку условно (пример)
+      const userData = { role: "admin" };
+      if (userData.role === 'admin') {
+        // здесь можно показать админ-кнопку
+      }
+
+      // Telegram инициализация (если доступно)
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.ready();
+        tg.expand();
+        const user = tg.initDataUnsafe?.user;
+        if (user?.photo_url) {
+          document.getElementById('user-avatar').src = user.photo_url;
+        } else {
+          const name = user?.first_name || 'User';
+          document.getElementById('user-avatar').src =
+            `https://ui-avatars.com/api/?name=${name}&background=4CAF50&color=fff`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
