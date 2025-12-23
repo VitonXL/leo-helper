@@ -14,37 +14,40 @@
   <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
 
   <!-- Статика -->
-  <link rel="stylesheet" href="/static/css/main.css?v=4">
+  <link rel="stylesheet" href="/static/css/main.css?v=5">
   <script src="/static/js/main.js" defer></script>
 </head>
 <body>
 
-  <!-- ЕДИНАЯ ШАПКА: ОВАЛ + HEADER -->
-  <div class="combined-header" id="combined-header">
+  <!-- ЕДИНАЯ ШАПКА -->
+  <div class="app-header" id="app-header">
     
-    <!-- Овал с "Лео" — строго по центру сверху -->
-    <div class="leo-badge-3d centered-badge">
-      <div>Лео</div>
-      <div class="page-tag">{% block page_tag %}Главная{% endblock %}</div>
-    </div>
+    <!-- Внутренний контейнер -->
+    <div class="header-container">
 
-    <!-- Прозрачная шапка с кнопками -->
-    <div class="full-header">
-      <!-- Левая часть: Меню и Назад -->
+      <!-- Левый блок: меню и назад -->
       <div class="header-left">
-        <button class="btn-icon menu-btn" onclick="Toast.info('Меню')">
+        <button class="btn-icon" onclick="Toast.info('Меню')" title="Меню">
           <span class="material-icons">menu</span>
         </button>
-        <button class="btn-icon back-btn" onclick="history.back()">
+        <button class="btn-icon" onclick="history.back()" title="Назад">
           <span class="material-icons">arrow_back</span>
         </button>
       </div>
 
-      <!-- Правая часть: Админ, Аватар, Тема -->
+      <!-- Центр: овал с Лео -->
+      <div class="header-center">
+        <div class="leo-badge-3d">
+          <div>Лео</div>
+          <div class="page-tag">{% block page_tag %}Главная{% endblock %}</div>
+        </div>
+      </div>
+
+      <!-- Правый блок: админ, аватар, тема -->
       <div class="header-right">
         <!-- Админ-кнопка -->
         {% if user and user.role == 'admin' %}
-        <a href="/admin?user_id={{ user.id }}&hash={{ user.hash }}" class="admin-link">
+        <a href="/admin?user_id={{ user.id }}&hash={{ user.hash }}" class="admin-link" title="Админ-панель">
           <button class="admin-btn">
             <span class="material-icons">shield_person</span>
           </button>
@@ -56,14 +59,16 @@
           src="{{ user.avatar_url if user and user.avatar_url else '/static/img/avatar-placeholder.png' }}" 
           alt="Аватар" 
           class="user-avatar"
+          title="Нажмите, чтобы узнать роль"
           onclick="Toast.info('Вы — ' + ({{ user.role|tojson }} || 'user'))"
         />
 
         <!-- Смена темы -->
-        <button class="btn-icon" onclick="toggleTheme()">
+        <button class="btn-icon" onclick="toggleTheme()" title="Сменить тему">
           <span class="material-icons" id="theme-icon">dark_mode</span>
         </button>
       </div>
+
     </div>
   </div>
 
