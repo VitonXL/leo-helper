@@ -4,7 +4,8 @@ import yaml
 import json
 from datetime import datetime
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, HTTPException, FileResponse
+from fastapi import FastAPI, HTTPException
+from starlette.responses import FileResponse  # ✅ Правильный импорт
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter
 from loguru import logger
