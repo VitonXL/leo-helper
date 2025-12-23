@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Лео — Админка</title>
+
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+
+  <!-- Telegram SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    /* === ГЛОБАЛЬНЫЙ СБРОС === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fbf8;
+      color: #212121;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    [data-theme="dark"] body {
+      background: #0d1117;
+      background-image: linear-gradient(0deg, transparent 24px, rgba(42,52,58,0.1) 25px), linear-gradient(90deg, transparent 24px, rgba(42,52,58,0.1) 25px);
+      background-size: 25px 25px;
+      background-attachment: fixed;
+      color: #e0f7ff;
+    }
+
+    /* === ОВАЛ С ЛЕО === */
+    .leo-badge-3d {
+      position: fixed;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 62px;
+      background: linear-gradient(135deg, #B2FF59, #4CAF50);
+      color: white;
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      box-shadow: 0 4px 12px rgba(76,175,80,0.3), 0 0 0 1.5px #DAA520;
+      z-index: 1003;
+      border: 1.5px solid #DAA520;
+      font-weight: 700;
+      font-size: 18px;
+      pointer-events: none;
+    }
+    .leo-badge-3d .page-tag {
+      font-size: 12px;
+      background: rgba(218,165,32,0.25);
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(218,165,32,0.4);
+      color: white;
+    }
+
+    /* === ШАПКА === */
+    .full-header {
+      position: fixed;
+      top: 72px;
+      left: 10px;
+      width: calc(100% - 20px);
+      height: 60px;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 0 0 16px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1002;
+      border: 1px solid rgba(76,175,80,0.1);
+      transition: transform 0.3s ease-out;
+    }
+    .full-header.hidden {
+      transform: translateY(-100%);
+    }
+    [data-theme="dark"] .full-header {
+      background: rgba(13,17,23,0.92);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(76,175,80,0.2);
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .btn-icon span {
+      color: #4CAF50;
+    }
+    [data-theme="dark"] .btn-icon span {
+      color: #B2FF59;
+    }
+
+    /* === АВАТАР === */
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #4CAF50;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    [data-theme="dark"] .user-avatar {
+      border-color: #B2FF59;
+    }
+
+    /* === АДМИН-КНОПКА === */
+    .admin-btn {
+      background: #f48b29;
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      cursor: pointer;
+      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* === ОСНОВНОЙ КОНТЕНТ === */
+    .main-content {
+      margin-top: 140px;
+      padding: 0 16px;
+    }
+
+    /* === КАРТОЧКИ === */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+    }
+    [data-theme="dark"] .card {
+      background: #121821;
+      color: #e0f7ff;
+    }
+    .card h2, .card h3 {
+      font-size: 18px;
+      color: #4CAF50;
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    [data-theme="dark"] .card h2, [data-theme="dark"] .card h3 {
+      color: #B2FF59;
+    }
+
+    /* === СТАТИСТИКА === */
+    .stat-item {
+      background: rgba(76,175,80,0.06);
+      border: 1px solid rgba(76,175,80,0.12);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #757575;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #4CAF50;
+    }
+    [data-theme="dark"] .stat-value {
+      color: #B2FF59;
+    }
+
+    /* === ТАБЛИЦЫ === */
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    .user-table th, .user-table td {
+      padding: 10px;
+      border-bottom: 1px dashed rgba(0,0,0,0.06);
+      text-align: left;
+    }
+    .user-table th {
+      color: #757575;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+    [data-theme="dark"] .user-table th {
+      color: #b2ff59cc;
+    }
+    .user-table tr:hover {
+      background: rgba(76,175,80,0.06);
+    }
+
+    /* === КНОПКИ === */
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+
+    .status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+    }
+    .status.premium {
+      background: linear-gradient(-45deg, #DAA520, #FFD700);
+      color: #1a1a1a;
+    }
+    .status.admin {
+      background: #f48b29;
+      color: white;
+    }
+    .status.user {
+      background: rgba(76,175,80,0.15);
+      color: #212121;
+    }
+
+    /* === АДАПТИВ === */
+    @media (max-width: 480px) {
+      .user-table {
+        font-size: 13px;
+      }
+      .user-table th, .user-table td {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Овал с "Лео" -->
+  <div class="leo-badge-3d">
+    <div>Лео</div>
+    <div class="page-tag">Админ</div>
+  </div>
+
+  <!-- Шапка -->
+  <div class="full-header" id="main-header">
+    <div class="header-left">
+      <button class="btn-icon" onclick="history.back()" aria-label="Назад">
+        <span class="material-icons">arrow_back</span>
+      </button>
+    </div>
+    <div class="header-right">
+      <!-- Аватар -->
+      <img 
+        src="https://ui-avatars.com/api/?name=A&background=f48b29&color=fff" 
+        alt="Аватар" 
+        class="user-avatar"
+        onclick="alert('Вы — админ')"
+      />
+      <!-- Админ-кнопка -->
+      <button class="admin-btn">
+        <span class="material-icons" style="color:white">shield</span>
+      </button>
+      <!-- Тема -->
+      <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
+        <span class="material-icons" id="theme-icon">dark_mode</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Контент -->
+  <div class="main-content">
+
+    <div class="card">
+      <h2><span class="material-icons">admin_panel_settings</span> Админ-панель</h2>
+      <p>Добро пожаловать, админ. Управление системой и пользователями.</p>
+    </div>
+
+    <!-- Статистика -->
+    <div class="card">
+      <h3><span class="material-icons">insights</span> Статистика</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 16px 0;">
+        <div class="stat-item">
+          <div class="stat-label">Пользователи</div>
+          <div class="stat-value">128</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Активные</div>
+          <div class="stat-value">89</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Премиум</div>
+          <div class="stat-value" style="color: #DAA520;">24</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Новых</div>
+          <div class="stat-value">17</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Топ функций -->
+    <div class="card">
+      <h3><span class="material-icons">trending_up</span> Топ функций</h3>
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Функция</th>
+            <th>Запросы</th>
+            <th>Рост</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GigaChat</td><td>1.2k</td><td style="color: #4CAF50;">+12%</td></tr>
+          <tr><td>Финансы</td><td>843</td><td style="color: #4CAF50;">+7%</td></tr>
+          <tr><td>Погода</td><td>621</td><td style="color: #4CAF50;">+3%</td></tr>
+          <tr><td>Игры</td><td>304</td><td style="color: #f44336;">-2%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Управление -->
+    <div class="card">
+      <h3><span class="material-icons">settings</span> Управление</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0;">
+        <button class="btn-primary" style="flex: 1; min-width: 120px;" onclick="alert('Обновление...')">
+          <span class="material-icons" style="font-size:18px">refresh</span> Обновить
+        </button>
+        <button class="btn-primary" style="flex: 1; min-width: 120px;" onclick="alert('Патч из users.yml')">
+          <span class="material-icons" style="font-size:18px">update</span> Патч
+        </button>
+        <button class="btn-primary" style="flex: 1; min-width: 120px;" onclick="alert('Сброс счётчиков')">
+          <span class="material-icons" style="font-size:18px">restart_alt</span> Сброс
+        </button>
+      </div>
+    </div>
+
+    <!-- Поддержка -->
+    <div class="card">
+      <h3><span class="material-icons">help</span> Техподдержка</h3>
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Сообщение</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>@vitron</td><td>Не работает GigaChat</td><td><div class="status">Новое</div></td></tr>
+          <tr><td>@user_123</td><td>Ошибка оплаты</td><td><div class="status">В обработке</div></td></tr>
+        </tbody>
+      </table>
+      <button class="btn-primary" style="width:100%; margin-top:12px;" onclick="alert('Отмечено')">
+        Отметить прочитанными
+      </button>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').textContent = isDark ? 'dark_mode' : 'light_mode';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Скрытие шапки при скролле
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const current = window.scrollY;
+      const header = document.getElementById('main-header');
+      if (current > 100 && current > lastScroll) {
+        header.classList.add('hidden');
+      } else if (current < lastScroll) {
+        header.classList.remove('hidden');
+      }
+      lastScroll = current;
+    });
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.ready();
+      }
+    });
+  </script>
+
+</body>
+</html>
