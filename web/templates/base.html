@@ -1,0 +1,167 @@
+<!-- web/templates/base.html -->
+<!DOCTYPE html>
+<html lang="ru" data-theme="{{ theme }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Лео — {{ title }}</title>
+
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+
+  <!-- Телеграм SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Главный CSS -->
+  <link rel="stylesheet" href="/static/css/main.css">
+
+  <!-- Переопределение стилей на странице -->
+  {% block styles %}{% endblock %}
+</head>
+<body>
+
+  <!-- Telegram Badge -->
+  <div class="tg-badge" style="display: none;">
+    <span class="material-icons">send</span>
+    Запущено в Telegram
+  </div>
+
+  <!-- Овал с "Лео" -->
+  <div class="leo-badge-3d" id="leo-badge">
+    <div class="leo-logo">
+      <span class="l">Л</span><span class="eo">ео</span>
+    </div>
+    <div class="page-tag">{{ page_tag }}</div>
+  </div>
+
+  <!-- Шапка -->
+  <div class="full-header" id="main-header">
+    <div class="header-left">
+      {% block header_left %}
+      <button class="btn-icon" onclick="history.back()" aria-label="Назад">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      {% endblock %}
+    </div>
+    <div class="header-right">
+      {% block header_right %}
+      <div class="admin-container" id="admin-container">
+        <img 
+          src="{{ user.avatar_url }}" 
+          alt="Аватар" 
+          class="user-avatar"
+          id="user-avatar"
+          onclick="window.location.href='/cabinet?user_id={{ user.id }}&hash={{ user.hash }}'"
+        />
+      </div>
+      <button class="admin-btn" id="admin-btn" style="display: {{ 'flex' if user.role == 'admin' else 'none' }};">
+        <span class="material-icons">shield</span>
+      </button>
+      <button class="btn-icon" onclick="toggleTheme()" aria-label="Тема">
+        <span class="material-icons" id="theme-icon">dark_mode</span>
+      </button>
+      {% endblock %}
+    </div>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="main-content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Футер -->
+  <div class="footer-info">
+    <div class="footer-tag">Лео — персональный помощник</div>
+    <div class="footer-buttons">
+      <button class="footer-btn" onclick="sendMessage('Нажал: Обратная связь')">
+        Написать в бота
+      </button>
+      <button class="footer-btn" onclick="alert('FAQ')">FAQ</button>
+    </div>
+  </div>
+
+  <!-- Общий JS -->
+  <script src="/static/js/main.js"></script>
+
+  <!-- JS страницы -->
+  {% block scripts %}{% endblock %}
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      const isDark = html.getAttribute('data-theme') === 'dark';
+
+      if (isDark) {
+        html.setAttribute('data-theme', 'light');
+        icon.textContent = 'dark_mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        icon.textContent = 'light_mode';
+        localStorage.setItem('theme', 'dark');
+      }
+
+      const user_id = new URLSearchParams(window.location.search).get('user_id');
+      const hash = new URLSearchParams(window.location.search).get('hash');
+      if (user_id && hash) {
+        fetch('/api/set-theme', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: parseInt(user_id), theme: html.getAttribute('data-theme'), hash })
+        }).catch(console.warn);
+      }
+    }
+
+    function updateGreeting() {
+      const now = new Date();
+      const hour = now.getHours();
+      const greetingText = document.getElementById('greeting-text');
+      const greetingIcon = document.getElementById('greeting-icon');
+
+      if (hour >= 6 && hour < 12) {
+        greetingText.textContent = 'Доброе утро!';
+        greetingIcon.textContent = '🌤';
+      } else if (hour >= 12 && hour < 18) {
+        greetingText.textContent = 'Добрый день!';
+        greetingIcon.textContent = '☀️';
+      } else if (hour >= 18 && hour < 23) {
+        greetingText.textContent = 'Добрый вечер!';
+        greetingIcon.textContent = '🌆';
+      } else {
+        greetingText.textContent = 'Привет ночным!';
+        greetingIcon.textContent = '🌙';
+      }
+    }
+
+    function sendMessage(text) {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.sendData(text);
+      } else {
+        alert('🔹 [Отладка] Сообщение: ' + text);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.ready();
+        tg.expand();
+        document.body.setAttribute('telegram', 'active');
+      }
+
+      updateGreeting();
+
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+    });
+  </script>
+
+</body>
+</html>
