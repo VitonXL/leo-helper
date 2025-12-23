@@ -1,4 +1,3 @@
-/* web/static/css/main.css */
 :root {
   --bg-light: #f8fbf8;
   --bg-dark: #0d1117;
@@ -34,7 +33,6 @@ body {
   color: var(--text-dark);
 }
 
-/* === ЕДИНАЯ ШАПКА === */
 .combined-header {
   position: fixed;
   top: 0;
@@ -50,7 +48,6 @@ body {
   transform: translateX(-50%) translateY(-100px);
 }
 
-/* === ОВАЛ С ЛЕО === */
 .leo-badge-3d {
   width: 130px;
   height: 62px;
@@ -79,7 +76,6 @@ body {
   color: white;
 }
 
-/* === ШАПКА ПОД ОВАЛОМ === */
 .full-header {
   width: 100%;
   height: 60px;
@@ -101,7 +97,6 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(76,175,80,0.2);
 }
 
-/* === КНОПКИ === */
 .btn-icon {
   background: transparent;
   border: none;
@@ -122,7 +117,6 @@ body {
   color: var(--accent-light);
 }
 
-/* === АВАТАР === */
 .user-avatar {
   width: 40px;
   height: 40px;
@@ -135,7 +129,6 @@ body {
   border-color: var(--accent-light);
 }
 
-/* === АДМИН-КНОПКА === */
 .admin-btn {
   background: #f48b29;
   border: none;
@@ -148,13 +141,11 @@ body {
   justify-content: center;
 }
 
-/* === КОНТЕНТ === */
 .main-content {
   margin-top: 140px;
   padding: 0 16px;
 }
 
-/* === КАРТОЧКИ === */
 .card {
   background: var(--card-bg-light);
   border: 1px solid var(--border-light);
@@ -171,7 +162,6 @@ body {
   color: var(--text-dark);
 }
 
-/* === TOAST === */
 #toast {
   position: fixed;
   bottom: 20px;
@@ -189,4 +179,217 @@ body {
 
 #toast.show {
   opacity: 1;
+}
+
+/* === ДОПОЛНИТЕЛЬНЫЕ СТИЛИ, КОТОРЫЕ БЫЛИ В index.html === */
+
+.section-title {
+  font-size: 16px;
+  color: #4CAF50;
+  margin: 24px 0 12px;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .section-title {
+  color: #B2FF59;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.action-btn {
+  background: #f8fff8;
+  border: 1px solid rgba(76,175,80,0.2);
+  border-radius: 16px;
+  padding: 18px;
+  text-decoration: none;
+  color: #2E7D32;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.action-btn:hover {
+  background: #e8f5e9;
+  transform: translateY(-4px);
+}
+
+[data-theme="dark"] .action-btn {
+  background: #0e1a10;
+  color: #B2FF59;
+  box-shadow: 0 0 0 1px #B2FF59, 0 4px 12px rgba(178, 255, 89, 0.1);
+}
+
+.action-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+  color: #4CAF50;
+}
+
+[data-theme="dark"] .action-icon {
+  color: #B2FF59;
+}
+
+.action-label {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.dual-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] .stat-card {
+  background: #121821;
+  box-shadow: 0 0 0 1px rgba(178,255,89,0.1), 0 4px 16px rgba(178,255,89,0.08);
+}
+
+.stat-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4CAF50;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(0,0,0,0.06);
+  font-size: 14px;
+}
+
+.stat-label {
+  color: #757575;
+}
+
+.stat-value {
+  font-weight: 500;
+  color: #212121;
+}
+
+.stat-change {
+  color: #4CAF50;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.news-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.news-item {
+  background: white;
+  border: 1px solid rgba(178, 255, 89, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.news-icon {
+  font-size: 20px;
+  color: #4CAF50;
+}
+
+.news-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #212121;
+  margin: 0;
+}
+
+.news-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.footer-info {
+  text-align: center;
+  padding: 20px 16px;
+  margin-top: 24px;
+  background: rgba(248, 255, 248, 0.9);
+  border: 1px solid rgba(178, 255, 89, 0.2);
+}
+
+.footer-tag {
+  font-size: 14px;
+  color: #4CAF50;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.footer-btn {
+  background: #f8fff8;
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
+  transition: all 0.3s ease;
+  margin-top: 12px;
+}
+
+.btn-sm {
+  background: #c8e6c9;
+  color: #2e7d32;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .dual-stats, .button-grid {
+    grid-template-columns: 1fr;
+  }
+  .full-header {
+    padding: 0 12px;
+  }
+  .btn-icon, .user-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .main-content {
+    padding: 12px;
+  }
+  .card, .stat-card {
+    padding: 20px;
+  }
 }
