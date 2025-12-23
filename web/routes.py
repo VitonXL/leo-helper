@@ -1,3 +1,5 @@
+# web/routes.py (обновлённый)
+
 from fastapi import APIRouter, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -11,18 +13,58 @@ router = APIRouter()
 templates = Jinja2Templates(directory="web/templates")
 
 
+# === ✅ ОБНОВЛЁННЫЙ МАРШРУТ / ===
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    user_id = request.query_params.get("user_id")
+    hash_param = request.query_params.get("hash")
+
+    # Попробуем загрузить пользователя, если есть user_id и hash
+    if user_id and hash_param:
+        try:
+            user_id = int(user_id)
+            if verify_cabinet_link(user_id, hash_param):
+                user_data = await get_user_data(user_id)
+                if user_data:
+                    theme = request.cookies.get("theme", user_data.get("theme", "light"))
+                    return templates.TemplateResponse(
+                        "index.html",
+                        {"request": request, "user": user_data, "theme": theme}
+                    )
+            # Если hash не прошёл проверку — игнорируем и показываем гостевую версию
+        except (ValueError, Exception):
+            pass  # Считаем гостем
+
+    # ⚠️ Гостевой режим — минимальный user
+    user_data = {
+        "id": None,
+        "first_name": "Гость",
+        "avatar_url": "/static/img/avatar-placeholder.png",
+        "role": "guest",
+        "is_premium": False,
+        "theme": "light",
+        "hash": ""
+    }
     theme = request.cookies.get("theme", "light")
-    return templates.TemplateResponse("index.html", {"request": request, "theme": theme})
+
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "user": user_data, "theme": theme}
+    )
 
 
+# Остальные маршруты — без изменений
 @router.get("/premium", response_class=HTMLResponse)
 async def premium_page(request: Request):
     user_id = request.query_params.get("user_id", "123456")
+    user_data = {
+        "id": user_id,
+        "avatar_url": f"https://ui-avatars.com/api/?name={user_id}&background=4CAF50&color=fff",
+        "theme": request.cookies.get("theme", "light")
+    }
     return templates.TemplateResponse(
         "premium.html",
-        {"request": request, "user": {"id": user_id}}
+        {"request": request, "user": user_data}
     )
 
 
@@ -34,19 +76,25 @@ async def handle_webapp(
 ):
     parsed_user = urllib.parse.parse_qs(user)
     data_check_string = "&".join([f"{k}={v[0]}" for k, v in parsed_user.items()])
-    
+
     if not verify_webapp_data(os.getenv("BOT_TOKEN"), data_check_string, hash):
         return HTMLResponse("❌ Подпись неверна!", status_code=401)
 
     user_data = eval(parsed_user["user"][0])
-    theme = parsed_user.get("theme_params", ["{}"])[0]
+    theme_str = parsed_user.get("theme_params", ["{}"])[0]
+    try:
+        theme_params = eval(theme_str)  # Или json.loads, если передаётся JSON
+    except:
+        theme_params = {}
+
+    theme = "dark" if theme_params.get("bg_color", "#ffffff").lower() in ["#000000", "#1a1a1a"] else "light"
 
     return templates.TemplateResponse(
         "dashboard.html",
         {
             "request": request,
             "user": user_data,
-            "theme": "dark" if theme.get("bg_color", "#ffffff").lower() in ["#000000", "#1a1a1a"] else "light",
+            "theme": theme,
             "is_premium": False,
             "premium_expires": None
         }
@@ -64,7 +112,7 @@ async def cabinet(request: Request):
     try:
         user_id = int(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user_id")  # ✅ Исправлено: = вместо :
+        raise HTTPException(status_code=400, detail="Invalid user_id")
 
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
@@ -82,7 +130,6 @@ async def cabinet(request: Request):
             "theme": "light"
         }
 
-    # Получаем статистику и рефералов
     pool = await get_db_pool()
     stats = await get_user_stats(pool, user_id)
     referrals_count = await get_referral_stats(pool, user_id)
@@ -106,7 +153,6 @@ async def cabinet(request: Request):
     )
 
 
-# ✅ НОВЫЙ РОУТ: /finance
 @router.get("/finance", response_class=HTMLResponse)
 async def finance_page(request: Request):
     user_id = request.query_params.get("user_id")
@@ -118,7 +164,7 @@ async def finance_page(request: Request):
     try:
         user_id = int(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user_id")  # ✅ Исправлено
+        raise HTTPException(status_code=400, detail="Invalid user_id")
 
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
@@ -158,7 +204,7 @@ async def admin_page(request: Request):
     try:
         user_id = int(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user_id")  # ✅ Исправлено
+        raise HTTPException(status_code=400, detail="Invalid user_id")
 
     if not verify_cabinet_link(user_id, hash_param):
         raise HTTPException(status_code=403, detail="Invalid signature")
