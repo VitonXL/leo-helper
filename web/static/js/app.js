@@ -2,7 +2,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ JS загружен");
 
-    // Приветствие
     function updateGreeting() {
         const now = new Date();
         const hour = now.getHours();
@@ -26,14 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateGreeting();
 
-    // Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) {
         tg.ready();
         tg.expand();
     }
 
-    // Toast
     window.Toast = {
         show(message) {
             const toast = document.getElementById('toast');
