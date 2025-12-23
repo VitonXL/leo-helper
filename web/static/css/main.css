@@ -36,13 +36,13 @@ body {
   color: var(--text-dark);
 }
 
-/* === ГЛАВНАЯ ШАПКА === */
+/* === ГЛАВНАЯ ШАПКА — ПОЛНОСТЬЮ АДАПТИВНАЯ === */
 .app-header {
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 32px); /* Ширина с отступами 16px с каждой стороны */
+  width: calc(100% - 32px);
   max-width: 480px;
   z-index: 1003;
   display: flex;
@@ -50,12 +50,31 @@ body {
   align-items: center;
 }
 
+/* Адаптив: на узких экранах — ширина с отступами */
+@media (max-width: 480px) {
+  .app-header {
+    width: calc(100% - 32px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* На широких — не больше 480px, но плавно растягивается */
+.app-header {
+  transition: width 0.2s ease;
+}
+
 .app-header.hidden {
   transform: translate(-50%, -100%);
 }
 
-/* === ОВАЛ С ЛЕО — строго по центру, НЕ заезжает === */
+/* === ОВАЛ С ЛЕО — строго по центру, поверх шапки === */
 .leo-badge-3d.centered {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
   width: 110px;
   height: 52px;
   background: linear-gradient(135deg, #B2FF59, #4CAF50);
@@ -70,11 +89,6 @@ body {
   border: 1.5px solid #DAA520;
   font-weight: 700;
   font-size: 16px;
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
 }
 
 .page-tag {
@@ -108,21 +122,21 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(76, 175, 80, 0.2);
 }
 
-/* === КНОПКИ СЛЕВА === */
+/* === ЛЕВЫЙ БЛОК === */
 .header-left {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* === КНОПКИ СПРАВА === */
+/* === ПРАВЫЙ БЛОК === */
 .header-right {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* === ОБЩИЕ СТИЛИ КНОПОК === */
+/* === КНОПКИ === */
 .btn-icon {
   background: transparent;
   border: none;
@@ -192,12 +206,11 @@ body {
   font-size: 18px;
 }
 
-/* === ОТСТУП КОНТЕНТА ОТ ШАПКИ === */
+/* === ОТСТУП ОТ ШАПКИ ДО КОНТЕНТА === */
 .main-content {
-  margin-top: 90px; /* Увеличил отступ, чтобы НЕ заезжало */
+  margin-top: 90px;
   padding: 0 16px;
   min-height: calc(100vh - 90px);
-  z-index: 1;
 }
 
 /* === КАРТОЧКИ === */
