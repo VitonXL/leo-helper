@@ -1,81 +1,46 @@
 <!-- web/templates/base.html -->
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Лео — {% block title %}Главная{% endblock %}</title>
-
-  <!-- Шрифты -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <!-- Favicon -->
-  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-
-  <!-- Статика -->
-  <link rel="stylesheet" href="/static/css/main.css?v=9">
-  <script src="/static/js/main.js" defer></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>{{ title or "LEO Aide" }}</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=9">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-
-  <!-- ЕДИНАЯ ШАПКА -->
-  <div class="app-header" id="app-header">
-    
-    <!-- Овал с Лео — строго по центру сверху -->
-    <div class="leo-badge-3d centered">
-      <div>Лео</div>
-      <div class="page-tag">{% block page_tag %}Главная{% endblock %}</div>
+    <div class="app-header" id="app-header">
+        <div class="leo-badge-3d centered">
+            LEO
+            <div class="page-tag">{{ page_tag or "HOME" }}</div>
+        </div>
+        <div class="header-panel">
+            <div class="header-left">
+                <button class="btn-icon">
+                    <span class="material-icons">menu</span>
+                </button>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon">
+                    <span class="material-icons">notifications</span>
+                </button>
+                <button class="admin-btn">
+                    <span class="material-icons">settings</span>
+                </button>
+                <img src="/static/img/avatar-placeholder.png" alt="User" class="user-avatar">
+            </div>
+        </div>
     </div>
 
-    <!-- Основная панель с кнопками -->
-    <div class="header-panel">
-      <!-- Лево: меню + назад -->
-      <div class="header-left">
-        <button class="btn-icon" onclick="Toast.info('Меню')" title="Меню">
-          <span class="material-icons">menu</span>
-        </button>
-        <button class="btn-icon" onclick="history.back()" title="Назад">
-          <span class="material-icons">arrow_back</span>
-        </button>
-      </div>
-
-      <!-- Право: админ, аватар, тема -->
-      <div class="header-right">
-        <!-- Админ-кнопка -->
-        {% if user and user.role == 'admin' %}
-        <a href="/admin?user_id={{ user.id }}&hash={{ user.hash }}" class="admin-link" title="Админ-панель">
-          <button class="admin-btn">
-            <span class="material-icons">shield_person</span>
-          </button>
-        </a>
-        {% endif %}
-
-        <!-- Аватар -->
-        <img 
-          src="{{ user.avatar_url if user and user.avatar_url else '/static/img/avatar-placeholder.png' }}" 
-          alt="Аватар" 
-          class="user-avatar"
-          onclick="Toast.info('Вы — ' + ({{ user.role|tojson }} || 'user'))"
-        />
-
-        <!-- Смена темы -->
-        <button class="btn-icon" onclick="toggleTheme()" title="Сменить тему">
-          <span class="material-icons" id="theme-icon">dark_mode</span>
-        </button>
-      </div>
+    <div class="main-content">
+        {% block content %}{% endblock %}
     </div>
-  </div>
 
-  <!-- Основной контент -->
-  <div class="main-content">
-    {% block content %}{% endblock %}
-  </div>
+    <div id="toast">Сообщение</div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast">Toast</div>
-
-  {% block scripts %}{% endblock %}
-
+    {% block scripts %}
+    <script src="/static/js/app.js"></script>
+    {% endblock %}
 </body>
 </html>
