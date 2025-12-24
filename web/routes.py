@@ -1,5 +1,3 @@
-# web/routes.py (обновлённый)
-
 from fastapi import APIRouter, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -9,10 +7,13 @@ from .utils import verify_webapp_data, verify_cabinet_link
 from .api import get_user_data
 from database import get_db_pool, get_user_stats, get_referral_stats
 
-router = APIRouter()
-# ✅ Исправлен путь: не "web/templates", а "templates" (т.к. файл в web/)
-templates = Jinja2Templates(directory="templates")
+# ✅ Исправлено: Путь к шаблонам теперь правильно указывает на web/templates
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
+router = APIRouter()
+
+# Для отладки — можно временно оставить
+print(f"✅ Шаблоны загружаются из: {templates.env.loader.searchpath}")
 
 # === ✅ ОБНОВЛЁННЫЙ МАРШРУТ / ===
 @router.get("/", response_class=HTMLResponse)
@@ -53,7 +54,6 @@ async def home(request: Request):
         {"request": request, "user": user_data, "theme": theme}
     )
 
-
 # Остальные маршруты — без изменений
 @router.get("/premium", response_class=HTMLResponse)
 async def premium_page(request: Request):
@@ -67,7 +67,6 @@ async def premium_page(request: Request):
         "premium.html",
         {"request": request, "user": user_data}
     )
-
 
 @router.post("/webapp", response_class=HTMLResponse)
 async def handle_webapp(
@@ -100,7 +99,6 @@ async def handle_webapp(
             "premium_expires": None
         }
     )
-
 
 @router.get("/cabinet", response_class=HTMLResponse)
 async def cabinet(request: Request):
@@ -153,7 +151,6 @@ async def cabinet(request: Request):
         }
     )
 
-
 @router.get("/finance", response_class=HTMLResponse)
 async def finance_page(request: Request):
     user_id = request.query_params.get("user_id")
@@ -192,7 +189,6 @@ async def finance_page(request: Request):
             "theme": theme
         }
     )
-
 
 @router.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
