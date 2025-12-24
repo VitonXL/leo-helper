@@ -111,8 +111,10 @@ async def toggle_overuse():
     logger.info("Режим перегрузки GigaChat активирован")
     return {"status": "success", "message": "Режим перегрузки включён"}
 
-# --- Монтируем статику СРАЗУ ---
-app.mount("/static", StaticFiles(directory="web/static"), name="static")
+# ✅ Исправлено: Путь к статике теперь относительный
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+print(f"✅ Статика доступна из: {static_dir}")
 
 # --- Роуты ---
 app.include_router(admin_api)
