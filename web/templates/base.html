@@ -4,38 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Лео Помощник</title>
-    <link rel="stylesheet" href="/static/css/main.css?v=14">
+    <link rel="stylesheet" href="/static/css/main.css?v=15">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Шапка: на всю ширину, прозрачная -->
+    <!-- Шапка с прозрачностью и анимацией -->
     <header id="combined-header">
         <div class="header-container">
-            <!-- Левая часть: меню + логотип -->
             <div class="header-left">
                 <button class="btn-icon" id="menu-btn">
                     <span class="material-icons">menu</span>
                 </button>
                 <div class="logo">
-                    <img src="/static/favicon.ico" alt="Лео" width="28" height="28">
+                    <img src="/static/favicon.ico" alt="Лео">
                     <span>Лео</span>
                 </div>
             </div>
-
-            <!-- Правая часть: тема, админка, аватар -->
             <div class="header-right">
                 <button class="btn-icon" id="theme-toggle">
                     <span class="material-icons" id="theme-icon">dark_mode</span>
                 </button>
-
                 {% if user and user.role == "admin" and user.id and user.hash %}
-                <a href="/admin?user_id={{ user.id }}&hash={{ user.hash }}" class="btn-icon" title="Админ-панель">
+                <a href="/admin?user_id={{ user.id }}&hash={{ user.hash }}" class="btn-icon">
                     <span class="material-icons">admin_panel_settings</span>
                 </a>
                 {% endif %}
-
                 <img src="{{ user.get('avatar_url', '/static/img/avatar-placeholder.png') }}" alt="User" class="user-avatar">
             </div>
         </div>
