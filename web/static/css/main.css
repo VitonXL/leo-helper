@@ -1,156 +1,173 @@
-/* web/static/css/main.css — безопасная, адаптивная версия */
-
+/* === ЦВЕТА И ПЕРЕМЕННЫЕ === */
 :root {
-  --bg-light: #f8fbf8;
+  --bg-primary: #f8fbf8;
+  --bg-secondary: #ffffff;
+  --bg-hover: #e8f5e9;
   --bg-dark: #0d1117;
-  --card-bg-light: #ffffff;
-  --card-bg-dark: #121821;
-  --text-light: #212121;
+  --bg-dark-secondary: #121821;
+  --bg-dark-hover: #161f2b;
+  --text-primary: #212121;
+  --text-secondary: #757575;
   --text-dark: #e0f7ff;
+  --border-light: rgba(76, 175, 80, 0.12);
+  --border-dark: rgba(178, 255, 89, 0.16);
   --accent: #4CAF50;
   --accent-light: #B2FF59;
   --gold: #DAA520;
-  --border-light: rgba(76, 175, 80, 0.12);
-  --border-dark: rgba(178, 255, 89, 0.16);
-  --shadow-light: 0 6px 20px rgba(0, 0, 0, 0.06);
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-dark: 0 0 0 1px rgba(178, 255, 89, 0.15);
-  --transition: 0.3s ease;
+  --transition: all 0.3s ease;
 }
 
-body {
+/* === ТЕМА: Тёмная === */
+[data-theme="dark"] {
+  --bg-primary: var(--bg-dark);
+  --bg-secondary: var(--bg-dark-secondary);
+  --bg-hover: var(--bg-dark-hover);
+  --text-primary: var(--text-dark);
+  --text-secondary: #88c0d0;
+  --border: var(--border-dark);
+  --accent: #B2FF59;
+}
+
+/* === ОБЩИЕ СТИЛИ === */
+* {
+  box-sizing: border-box;
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: var(--bg-light);
-  color: var(--text-light);
-  min-height: 100vh;
   padding: 0;
 }
 
-[data-theme="dark"] body {
-  background: var(--bg-dark);
-  background-image: 
-    linear-gradient(0deg, transparent 24px, rgba(42, 52, 58, 0.1) 25px),
-    linear-gradient(90deg, transparent 24px, rgba(42, 52, 58, 0.1) 25px);
-  background-size: 25px 25px;
-  background-attachment: fixed;
-  color: var(--text-dark);
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  line-height: 1.6;
 }
 
-/* === ГЛАВНАЯ ШАПКА — АДАПТИВНАЯ, БЕЗОПАСНАЯ === */
-.app-header {
-  position: fixed;
+/* === ШАПКА С АНИМАЦИЕЙ === */
+#combined-header {
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
-  margin: 0 auto;
-  max-width: 600px;
-  width: 100%;
-  z-index: 1003;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-
-/* === ОВАЛ С ЛЕО — по центру шапки === */
-.leo-badge-3d.centered {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  width: 110px;
-  height: 52px;
-  background: linear-gradient(135deg, #B2FF59, #4CAF50);
-  color: white;
-  border-radius: 26px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
-  box-shadow: 0 4px 12px rgba(76,175,80,0.3), 0 0 0 1.5px #DAA520;
-  border: 1.5px solid #DAA520;
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.page-tag {
-  font-size: 11px;
-  background: rgba(218,165,32,0.25);
-  padding: 1px 6px;
-  border-radius: 8px;
-  border: 1px solid rgba(218,165,32,0.4);
-  color: white;
-}
-
-/* === ПАНЕЛЬ С КНОПКАМИ === */
-.header-panel {
-  width: 100%;
-  max-width: 568px;
-  height: 60px;
+  z-index: 1000;
+  background: var(--bg-secondary);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(76, 175, 80, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  border-bottom: 1px solid var(--border-light);
+  transition: transform var(--transition);
+  transform: translateY(0);
+}
+
+[data-theme="dark"] #combined-header {
+  background: rgba(13, 17, 23, 0.94);
+  border-color: var(--border-dark);
+}
+
+#combined-header.hidden {
+  transform: translateY(-100%);
+}
+
+/* === КОНТЕЙНЕР ШАПКИ === */
+.header-container {
+  max-width: 600px;
+  margin: 0 auto;
   padding: 0 16px;
-  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
 }
 
-[data-theme="dark"] .header-panel {
-  background: rgba(13, 17, 23, 0.92);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(76, 175, 80, 0.2);
-}
-
-/* === ЛЕВЫЙ / ПРАВЫЙ БЛОК === */
-.header-left,
-.header-right {
+/* === ЛЕВАЯ ЧАСТЬ ШАПКИ === */
+.header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-/* === КНОПКИ === */
-.btn-icon {
-  background: transparent;
-  border: none;
+.header-left .btn-icon {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-icon:hover {
-  background: rgba(76, 175, 80, 0.1);
-}
-
-[data-theme="dark"] .btn-icon:hover {
-  background: rgba(178, 255, 89, 0.1);
-}
-
-.btn-icon span {
   color: var(--accent);
+}
+
+.header-left .btn-icon:hover {
+  background: var(--bg-hover);
+}
+
+.header-left .btn-icon span {
   font-size: 20px;
 }
 
-[data-theme="dark"] .btn-icon span {
+/* === ЛОГОТИП === */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1.2em;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.logo img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+/* === ПРАВАЯ ЧАСТЬ ШАПКИ === */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-right .btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  transition: var(--transition);
+}
+
+[data-theme="dark"] .header-right .btn-icon {
+  background: var(--bg-dark-secondary);
+  border-color: var(--border-dark);
   color: var(--accent-light);
+}
+
+.header-right .btn-icon:hover {
+  background: var(--bg-hover);
+  transform: scale(1.05);
+}
+
+.header-right .btn-icon:active {
+  transform: scale(0.98);
 }
 
 /* === АВАТАР === */
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 2px solid var(--accent);
   object-fit: cover;
@@ -162,219 +179,7 @@ body {
   box-shadow: 0 0 0 2px #0d1117;
 }
 
-/* === АДМИН-КНОПКА === */
-.admin-btn {
-  background: #f48b29;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 8px rgba(244, 139, 41, 0.3);
-  transition: transform 0.2s ease;
-}
-
-.admin-btn:hover {
-  transform: scale(1.08);
-}
-
-.admin-btn .material-icons {
-  color: white;
-  font-size: 18px;
-}
-
-/* === ОТСТУП ОТ ШАПКИ === */
-.main-content {
-  margin-top: 90px;
-  padding: 0 16px;
-  min-height: calc(100vh - 90px);
-}
-
-/* === КАРТОЧКИ === */
-.card {
-  background: var(--card-bg-light);
-  border: 1px solid var(--border-light);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: var(--shadow-light);
-  margin-bottom: 24px;
-}
-
-[data-theme="dark"] .card {
-  background: var(--card-bg-dark);
-  border-color: var(--border-dark);
-  box-shadow: var(--shadow-dark);
-  color: var(--text-dark);
-}
-
-/* === TOAST === */
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  z-index: 2000;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-  font-size: 14px;
-}
-
-#toast.show {
-  opacity: 1;
-}
-
-/* === СЕКЦИИ === */
-.section-title {
-  font-size: 16px;
-  color: var(--accent);
-  margin: 24px 0 12px;
-  font-weight: 600;
-}
-
-[data-theme="dark"] .section-title {
-  color: var(--accent-light);
-}
-
-.button-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin: 16px 0;
-}
-
-.action-btn {
-  background: #f8fff8;
-  border: 1px solid rgba(76,175,80,0.2);
-  border-radius: 16px;
-  padding: 18px;
-  text-decoration: none;
-  color: #2E7D32;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.action-btn:hover {
-  background: #e8f5e9;
-  transform: translateY(-4px);
-}
-
-[data-theme="dark"] .action-btn {
-  background: #0e1a10;
-  color: var(--accent-light);
-  box-shadow: 0 0 0 1px var(--accent-light), 0 4px 12px rgba(178, 255, 89, 0.1);
-}
-
-.action-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-  display: block;
-  color: var(--accent);
-}
-
-[data-theme="dark"] .action-icon {
-  color: var(--accent-light);
-}
-
-.action-label {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-/* === СТАТИСТИКА === */
-.dual-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 24px 0;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-}
-
-[data-theme="dark"] .stat-card {
-  background: #121821;
-  box-shadow: 0 0 0 1px rgba(178,255,89,0.1), 0 4px 16px rgba(178,255,89,0.08);
-}
-
-.stat-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--accent);
-  margin: 0 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px dashed rgba(0,0,0,0.06);
-  font-size: 14px;
-}
-
-.stat-label {
-  color: #757575;
-}
-
-.stat-value {
-  font-weight: 500;
-  color: #212121;
-}
-
-.stat-change {
-  color: var(--accent);
-  font-size: 12px;
-  margin-left: 6px;
-}
-
-/* === НОВОСТИ === */
-.news-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.news-item {
-  background: white;
-  border: 1px solid rgba(178, 255, 89, 0.2);
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.news-icon {
-  font-size: 20px;
-  color: var(--accent);
-}
-
-.news-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #212121;
-  margin: 0;
-}
-
-.news-time {
-  font-size: 12px;
-  color: #999;
-}
-
-/* === КНОПКИ === */
+/* === КНОПКИ И ЭЛЕМЕНТЫ === */
 .btn-primary {
   background: var(--accent);
   color: white;
@@ -384,7 +189,7 @@ body {
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
-  transition: all 0.3s ease;
+  transition: var(--transition);
   margin-top: 12px;
   display: inline-block;
   text-align: center;
@@ -407,6 +212,192 @@ body {
   margin-top: 12px;
 }
 
+/* === КАРТОЧКИ === */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+[data-theme="dark"] .card {
+  background: var(--bg-dark-secondary);
+  border-color: var(--border-dark);
+  color: var(--text-primary);
+}
+
+/* === ГРИД БЫСТРЫХ ДЕЙСТВИЙ === */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.action-btn {
+  text-decoration: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  transition: var(--transition);
+}
+
+.action-btn:hover {
+  background: var(--bg-hover);
+  transform: translateY(-4px);
+}
+
+[data-theme="dark"] .action-btn {
+  background: var(--bg-dark-secondary);
+  border-color: var(--border-dark);
+  color: var(--accent-light);
+}
+
+.action-icon {
+  font-size: 28px;
+}
+
+.action-label {
+  font-size: 15px;
+}
+
+/* === СТАТИСТИКА (ПОГОДА, КУРСЫ) === */
+.dual-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .stat-card {
+  background: var(--bg-dark-secondary);
+  border-color: var(--border-dark);
+}
+
+.stat-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border-light);
+  font-size: 14px;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.stat-change {
+  color: var(--accent);
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* === НОВОСТИ === */
+.section-title {
+  font-size: 16px;
+  color: var(--accent);
+  margin: 24px 0 12px;
+  font-weight: 600;
+}
+
+.news-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.news-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .news-item {
+  background: var(--bg-dark-secondary);
+  border-color: var(--border-dark);
+}
+
+.news-icon {
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.news-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.news-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* === TOAST УВЕДОМЛЕНИЯ === */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+#toast.show {
+  opacity: 1;
+}
+
+/* === ГЛАВНЫЙ КОНТЕНТ === */
+.main-content {
+  margin-top: 60px;
+  padding: 0 16px;
+  min-height: calc(100vh - 60px);
+}
+
 /* === МЕДИА-ЗАПРОСЫ === */
 @media (max-width: 768px) {
   .dual-stats,
@@ -414,23 +405,38 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .btn-icon,
-  .user-avatar,
-  .admin-btn {
+  .header-container {
+    padding: 0 12px;
+  }
+
+  .header-left .btn-icon,
+  .header-right .btn-icon {
     width: 36px;
     height: 36px;
   }
 
-  .btn-icon span {
-    font-size: 18px;
+  .logo span {
+    font-size: 1.1em;
   }
 
   .main-content {
-    padding: 12px;
+    padding: 0 12px;
   }
 
   .card,
   .stat-card {
     padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-left .btn-icon span,
+  .header-right .btn-icon span {
+    font-size: 18px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
   }
 }
