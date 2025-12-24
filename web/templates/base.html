@@ -429,27 +429,34 @@
     {% endraw %}
 </head>
 <body>
-    <header id="combined-header">
-        <div class="header-container" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100%; max-width: 600px; margin: 0 auto; padding: 0 16px; height: 60px; gap: 12px; background: transparent !important;"
-            <div class="header-left">
-                <div class="app-icon-wrapper">
-                    <img src="/static/favicon.ico" alt="Лео" class="app-icon">
-                </div>
-                <button class="btn-icon" id="menu-btn">
-                    <span class="material-icons">menu</span>
-                </button>
-            </div>
-            <div class="page-title">
-                {{ page_title | default("Главная") }}
-            </div>
-            <div class="header-right">
-                <button class="btn-icon" id="theme-toggle">
-                    <span class="material-icons" id="theme-icon">dark_mode</span>
-                </button>
-                <img src="{{ user.get('avatar_url', '/static/img/avatar-placeholder.png') }}" alt="User" class="user-avatar">
-            </div>
-        </div>
-    </header>
+    <header id="combined-header" style="position: sticky !important; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(76, 175, 80, 0.12); transition: transform 0.3s ease;">
+  <div class="header-container" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100%; max-width: 600px; margin: 0 auto; padding: 0 16px; height: 60px; gap: 12px;">
+    
+    <!-- ЛЕВАЯ ЧАСТЬ: иконка + меню -->
+    <div class="header-left" style="display: flex !important; align-items: center !important; gap: 8px !important; flex-shrink: 0 !important;">
+      <div class="app-icon-wrapper" style="width: 36px !important; height: 36px !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;">
+        <img src="/static/favicon.ico" alt="Лео" class="app-icon" style="width: 100% !important; height: 100% !important; object-fit: cover;">
+      </div>
+      <button class="btn-icon" id="menu-btn" style="width: 40px !important; height: 40px !important; border-radius: 50% !important; background: transparent !important; border: none !important; color: #4CAF50 !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important;">
+        <span class="material-icons" style="font-size: 20px !important;">menu</span>
+      </button>
+    </div>
+
+    <!-- ЦЕНТР: название страницы -->
+    <div class="page-title" style="flex: 1 !important; text-align: center !important; font-weight: 600 !important; font-size: 1.1em !important; color: #212121 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">
+      {{ page_title | default("Главная") }}
+    </div>
+
+    <!-- ПРАВАЯ ЧАСТЬ: тема + аватар -->
+    <div class="header-right" style="display: flex !important; align-items: center !important; gap: 8px !important; flex-shrink: 0 !important;">
+      <button class="btn-icon" id="theme-toggle" style="width: 40px !important; height: 40px !important; border-radius: 50% !important; background: #fff !important; border: 1px solid rgba(76, 175, 80, 0.12) !important; color: #4CAF50 !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important;">
+        <span class="material-icons" id="theme-icon" style="font-size: 20px !important;">dark_mode</span>
+      </button>
+      <img src="{{ user.get('avatar_url', '/static/img/avatar-placeholder.png') }}" alt="User" class="user-avatar" style="width: 36px !important; height: 36px !important; border-radius: 50% !important; border: 2px solid #4CAF50 !important; object-fit: cover !important; box-shadow: 0 0 0 2px #ffffff !important;">
+    </div>
+
+  </div>
+</header>
 
     <div class="main-content">
         {% block content %}{% endblock %}
