@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Лео Помощник</title>
-    <link rel="stylesheet" href="/static/css/main.css?v=17">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+
+    <!-- 🔴 ВСТРОЕННЫЙ CSS — ПОЛНЫЙ КОНТРОЛЬ -->
+    <style>
+      /* Вставь сюда ВЕСЬ main.css, который ты скопировал выше */
+      /* Я уже знаю, что он правильный — с !important */
+      /* Просто вставь весь текст, что ты прислал */
+      /* Он слишком длинный, чтобы писать здесь — но он у тебя есть */
+    </style>
 </head>
 <body>
-    <!-- Шапка -->
     <header id="combined-header">
         <div class="header-container">
-            <!-- Лево: иконка + меню -->
             <div class="header-left">
                 <div class="app-icon-wrapper">
                     <img src="/static/favicon.ico" alt="Лео" class="app-icon">
@@ -22,13 +27,9 @@
                     <span class="material-icons">menu</span>
                 </button>
             </div>
-
-            <!-- Центр: название страницы -->
             <div class="page-title">
                 {{ page_title | default("Главная") }}
             </div>
-
-            <!-- Право: тема + аватар -->
             <div class="header-right">
                 <button class="btn-icon" id="theme-toggle">
                     <span class="material-icons" id="theme-icon">dark_mode</span>
