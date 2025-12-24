@@ -1,20 +1,17 @@
-// === СМЕНА ТЕМЫ ===
+// === Смена темы ===
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
   const newTheme = isDark ? 'light' : 'dark';
   
   html.setAttribute('data-theme', newTheme);
-  const themeIcon = document.getElementById('theme-icon');
-  if (themeIcon) {
-    themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
-  }
-
+  document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
+  
   localStorage.setItem('theme', newTheme);
   document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
 }
 
-// === СКРЫТИЕ ШАПКИ ПРИ СКРОЛЛЕ ===
+// === Скрытие шапки ===
 let lastScroll = 0;
 const header = document.getElementById('combined-header');
 if (header) {
@@ -29,32 +26,31 @@ if (header) {
   });
 }
 
-// === TOAST ===
+// === Toast ===
 window.Toast = {
-  show: (msg, type = 'info') => {
+  show: (msg) => {
     const toast = document.getElementById('toast');
-    if (!toast) return;
     toast.textContent = msg;
-    toast.className = `toast show ${type}`;
-    setTimeout(() => { toast.className = 'toast'; }, 3000);
+    toast.className = 'show';
+    setTimeout(() => { toast.className = ''; }, 3000);
   },
-  info: (msg) => Toast.show(msg, 'info'),
-  success: (msg) => Toast.show(msg, 'success'),
-  warning: (msg) => Toast.show(msg, 'warning'),
-  error: (msg) => Toast.show(msg, 'error')
+  info: (msg) => Toast.show(msg),
+  success: (msg) => Toast.show(msg),
+  warning: (msg) => Toast.show(msg),
+  error: (msg) => Toast.show(msg)
 };
 
-// === ИНИЦИАЛИЗАЦИЯ ===
+// === Инициализация ===
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = 
     document.cookie.match(/theme=([^;]+)/)?.[1] || 
     localStorage.getItem('theme') || 
     'light';
-
+  
   document.documentElement.setAttribute('data-theme', savedTheme);
-  const themeIcon = document.getElementById('theme-icon');
-  if (themeIcon) {
-    themeIcon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
   }
 
   if (window.Telegram?.WebApp) {
