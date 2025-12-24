@@ -5,30 +5,28 @@ import json
 from datetime import datetime
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException
-from starlette.responses import FileResponse
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter
 from loguru import logger
 
 # Добавляем путь
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"🚀 ENV PORT: {os.getenv('PORT')}")
+print(f"🚀 ENV PORT: {os.getenv('PORT', '8080')}")
 print(f"🚀 ARGS: {' '.join(sys.argv)}")
 print("🔍 sys.path обновлён для импортов")
 
 app = FastAPI(title="Лео Помощник — UI")
 
-# --- Создаём папки ---
+# --- Папки ---
 DATA_DIR = "data"
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
+os.makedirs(DATA_DIR, exist_ok=True)
 
 USERS_YML = "users.yml"
 USAGE_JSON = os.path.join(DATA_DIR, "usage.json")
 
 if not os.path.exists(USAGE_JSON):
     with open(USAGE_JSON, "w", encoding="utf-8") as f:
-        json.dump({"gigachat": {"total": 0, "limit": 100, "users": {}}, "last_reset": str(datetime.now())}, f)
+        json.dump({"gigachat": {"total": 0, "limit": 100, "users": {}}, "last_reset": str(datetime.now())}, f, ensure_ascii=False, indent=2)
 
 # --- Загрузка данных ---
 def load_usage():
@@ -111,17 +109,21 @@ async def toggle_overuse():
     logger.info("Режим перегрузки GigaChat активирован")
     return {"status": "success", "message": "Режим перегрузки включён"}
 
-# ✅ Исправлено: Путь к статике теперь относительный
+# --- Статика ---
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 print(f"✅ Статика доступна из: {static_dir}")
+print(f"✅ DATABASE_URL: {os.getenv('DATABASE_URL', 'not set')}")
 
 # --- Роуты ---
 app.include_router(admin_api)
 
-# ✅ Подключаем основные роуты
-from .routes import router as web_router
-app.include_router(web_router)
+# Подключаем основные роуты
+try:
+    from .routes import router as web_router
+    app.include_router(web_router)
+except Exception as e:
+    logger.error(f"Ошибка импорта routes: {e}")
 
 @app.get("/health")
 async def health():
