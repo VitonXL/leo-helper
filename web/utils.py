@@ -27,10 +27,7 @@ def verify_webapp_data(token: str, data_check_string: str, hash: str) -> bool:
 
 async def verify_cabinet_link(user_id: int, hash: str, required_role: str = None) -> bool:
     """
-    Проверяет подлинность ссылки на личный кабинет.
-    При необходимости — проверяет, имеет ли пользователь нужную роль.
-    
-    Используется в /cabinet, /admin и других защищённых роутах.
+    Проверяет подлинность ссылки на личный кабинет с помощью HMAC.
     
     :param user_id: ID пользователя из URL
     :param hash: Хеш из URL
@@ -41,7 +38,10 @@ async def verify_cabinet_link(user_id: int, hash: str, required_role: str = None
     if not secret:
         raise ValueError("AUTH_SECRET не задан в переменных окружения")
     
-    expected_hash = hashlib.md5(f"{user_id}{secret}".encode()).hexdigest()
+    # Формируем сообщение так же, как в bot/utils.py
+    message = f"user_id={user_id}"
+    expected_hash = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
+    
     if hash.lower() != expected_hash.lower():
         return False
 
