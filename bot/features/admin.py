@@ -318,20 +318,4 @@ def setup_admin_handlers(app):
         group=40
     )
 
-    async def cmd_promote(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
-    if len(context.args) != 2:
-        await update.message.reply_text("Использование: /promote <user_id> <moderator|admin>")
-        return
-    target_id = int(context.args[0])
-    role = context.args[1]
-    if role not in ['moderator', 'admin']:
-        await update.message.reply_text("Роль: moderator или admin")
-        return
-    await set_user_role(pool, target_id, role)
-    await update.message.reply_text(f"✅ {role} выдан {target_id}")
-
-def setup_admin_handlers(app):
-    app.add_handler(CommandHandler("admin", cmd_admin), group=40)
-    app.add_handler(CommandHandler("promote", cmd_promote), group=40)
-    # ... остальные
+    
