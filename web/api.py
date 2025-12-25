@@ -331,25 +331,34 @@ async def reply_support(
         if not ticket:
             raise HTTPException(status_code=404, detail="Тикет не найден")
 
-    # Получаем бота
+      # Пытаемся получить бот из bot.instance
+    bot = None
     try:
-        if global_bot is None:
-            raise RuntimeError("❌ Бот не инициализирован в bot.instance")
-        bot = global_bot
-        logger.info("✅ Бот получен из bot.instance")
+        from bot.instance import bot as global_bot
+        if global_bot is not None:
+            bot = global_bot
+            logger.info("✅ Бот получен из bot.instance")
+    except ImportError:
+        logger.warning("⚠️ Модуль bot.instance не найден — будем использовать временный бот")
     except Exception as e:
-        logger.error(f"❌ Не удалось получить бота: {e}")
-        # Резерв: создаём временный бот
+        logger.error(f"❌ Ошибка импорта bot.instance: {e}")
+
+    # Если бот не из instance — создаём временный
+    if bot is None:
+        token = os.getenv("BOT_TOKEN")
+        if not token:
+            logger.error("❌ BOT_TOKEN не задан в переменных окружения")
+            raise HTTPException(status_code=500, detail="BOT_TOKEN не задан")
+
         try:
-            token = os.getenv("BOT_TOKEN")
-            if not token:
-                raise ValueError("❌ BOT_TOKEN не задан")
-            bot = Application.builder().token(token).build().bot
-            await bot.initialize()
+            from telegram.ext import Application
+            application = Application.builder().token(token).build()
+            bot = application.bot
+            await bot.initialize()  # ← ВАЖНО: инициализация
             logger.info("🤖 Временный бот инициализирован для ответа")
-        except Exception as e2:
-            logger.error(f"❌ Не удалось инициализировать временного бота: {e2}")
-            raise HTTPException(status_code=500, detail="Сервис бота недоступен")
+        except Exception as e:
+            logger.error(f"❌ Не удалось создать временного бота: {e}")
+            raise HTTPException(status_code=500, detail="Не удалось инициализировать бота")
 
     # Отправляем ответ
     try:
