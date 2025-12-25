@@ -357,3 +357,10 @@ async def favicon():
 async def startup_event():
     logger.info("🟢 Веб-сервер запущен")
     logger.info("✨ Доступные роуты: /, /cabinet, /finance, /admin, /tickets, /api/admin/stats")
+    
+    # Создаём таблицу support_tickets при старте
+    try:
+        await ensure_support_table_exists()
+        logger.info("✅ Таблица support_tickets проверена/создана")
+    except Exception as e:
+        logger.error(f"❌ Ошибка при создании таблицы support_tickets: {e}")
