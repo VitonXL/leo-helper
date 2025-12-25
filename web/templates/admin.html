@@ -23,14 +23,15 @@
 }
 
 [data-theme="dark"] {
-  --bg: transparent;
   --card-bg: rgba(30, 30, 30, 0.95);
   --text: #ffffff;
   --text-secondary: #b0b0b0;
   --border: rgba(178, 255, 89, 0.1);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.24);
 }
 
-/* === ПЕРЕОПРЕДЕЛЯЕМ BODY, ЧТОБЫ СЛОМАТЬ ФОН ИЗ base.html === */
+/* === ПЕРЕОПРЕДЕЛЯЕМ BODY === */
 body, html {
   width: 100%;
   height: 100%;
@@ -55,13 +56,14 @@ body, html {
   100% { background-position: 0% 50%; }
 }
 
-/* === ТВОИ СТИЛИ ДАЛЕЕ === */
+/* === ОСНОВНЫЕ СТИЛИ === */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
+/* Заголовок */
 .admin-header {
   text-align: center;
   margin: 40px 0 30px;
@@ -83,14 +85,29 @@ body, html {
   font-size: 15px;
 }
 
+/* Сетка */
+.grid {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* Карточка */
 .admin-card {
   background: var(--card-bg);
   border-radius: var(--radius-lg);
   padding: 28px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  margin-bottom: 30px;
-  transition: transform var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .admin-card:hover {
@@ -102,7 +119,7 @@ body, html {
   font-size: 20px;
   font-weight: 600;
   color: var(--text);
-  margin: 0 0 16px 0;
+  margin: 0 0 16px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -113,11 +130,63 @@ body, html {
   color: var(--accent);
 }
 
+/* Статистика */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.stat-item {
+  background: rgba(76, 175, 80, 0.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Прогресс-бар */
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: {{ [api_usage.gigachat.used / api_usage.gigachat.limit * 100, 100] | min }}%;
+  transition: width 0.4s ease;
+}
+
+/* Таблицы */
 .user-table, .support-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
   font-size: 14px;
+  margin: 16px 0 0;
 }
 
 .user-table th, .user-table td,
@@ -141,6 +210,7 @@ body, html {
   background: rgba(76, 175, 80, 0.06);
 }
 
+/* Статусы */
 .status {
   padding: 4px 10px;
   border-radius: 20px;
@@ -166,6 +236,7 @@ body, html {
   color: var(--text);
 }
 
+/* Кнопки */
 .btn {
   padding: 10px 20px;
   border: none;
@@ -206,38 +277,13 @@ body, html {
 
 .btn-group {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: center;
   margin: 20px 0;
   flex-wrap: wrap;
 }
 
-.stat-item {
-  background: rgba(76, 175, 80, 0.06);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  text-align: center;
-  transition: transform 0.2s;
-}
-
-.stat-item:hover {
-  transform: translateY(-2px);
-  background: rgba(76, 175, 80, 0.1);
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-
-.stat-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
+/* Анимации */
 @keyframes gradient-shift-gold {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -254,14 +300,10 @@ body, html {
 {% endblock %}
 
 {% block content %}
-  <!-- Шапка теперь в base.html -->
   <script>
-    // Обновляем заголовок в шапке
     document.addEventListener('DOMContentLoaded', () => {
       const titleEl = document.querySelector('.page-title');
-      if (titleEl) {
-        titleEl.textContent = "Админка";
-      }
+      if (titleEl) titleEl.textContent = "Админка";
       Toast.info('Добро пожеловать, админ!');
     });
   </script>
@@ -269,13 +311,13 @@ body, html {
   <div class="container">
     <div class="admin-header">
       <h1><span class="material-icons">admin_panel_settings</span> Админ-панель</h1>
-      <p>Управление пользователями, поддержкой и системой</p>
+      <p>Управление, мониторинг и поддержка</p>
     </div>
 
     <!-- Статистика -->
     <div class="admin-card">
-      <h2><span class="material-icons">insights</span> Статистика</h2>
-      <div class="btn-group">
+      <h2><span class="material-icons">insights</span> Общая статистика</h2>
+      <div class="stat-grid">
         <div class="stat-item">
           <div class="stat-label">Пользователи</div>
           <div class="stat-value">{{ stats.total_users }}</div>
@@ -295,56 +337,39 @@ body, html {
       </div>
     </div>
 
-    <!-- Топ функций -->
-    <div class="admin-card">
-      <h2><span class="material-icons">trending_up</span> Топ функций</h2>
-      <table class="user-table">
-        <thead>
-          <tr>
-            <th>Функция</th>
-            <th>Запросы</th>
-            <th>Рост</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for f in stats.top_features %}
-          <tr>
-            <td>{{ f.feature }}</td>
-            <td>{{ f.requests }}</td>
-            <td style="color: {% if '+' in f.growth %}#4CAF50{% else %}#f44336{% endif %};">{{ f.growth }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <!-- API Usage -->
+    <div class="grid grid-2">
+      <div class="admin-card">
+        <h2><span class="material-icons">api</span> GigaChat API</h2>
+        <p>Запросов сегодня: <strong>{{ api_usage.gigachat.used }} / {{ api_usage.gigachat.limit }}</strong></p>
+        <div class="progress-container">
+          <div class="progress-fill"></div>
+        </div>
+        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+          Осталось: {{ api_usage.gigachat.remaining }}
+        </div>
+      </div>
 
-    <!-- GigaChat API Usage -->
-    <div class="admin-card">
-      <h2><span class="material-icons">api</span> GigaChat API</h2>
-      <p>Запросов сегодня: <strong>{{ api_usage.gigachat.used }} / {{ api_usage.gigachat.limit }}</strong></p>
-      <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; margin: 8px 0;">
-        <div style="height: 100%; background: var(--accent); width: {{ [api_usage.gigachat.used / api_usage.gigachat.limit * 100, 100] | min }}%; transition: width 0.4s ease;"></div>
+      <!-- Топ функций -->
+      <div class="admin-card">
+        <h2><span class="material-icons">trending_up</span> Топ функций</h2>
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Функция</th>
+              <th>Запросов</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in stats.top_features %}
+            <tr>
+              <td>{{ f.feature }}</td>
+              <td>{{ f.requests }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
-        Осталось: {{ api_usage.gigachat.remaining }}
-      </div>
-      <h3>Топ пользователей</h3>
-      <table class="user-table">
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Запросов</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u in api_usage.gigachat.top_users %}
-          <tr>
-            <td>@user_{{ u.user_id }}</td>
-            <td>{{ u.requests }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
     </div>
 
     <!-- Управление -->
@@ -379,8 +404,20 @@ body, html {
             <th>Действие</th>
           </tr>
         </thead>
-        <tbody id="user-list">
-          <!-- Данные будут загружены через JS -->
+        <tbody>
+          {% for user in user_list %}
+          <tr>
+            <td><code>{{ user.id }}</code></td>
+            <td>@{{ user.username }}</td>
+            <td><div class="status {{ user.role }}">{{ user.role|title }}</div></td>
+            <td><div class="status {% if user.is_premium %}premium{% else %}user{% endif %}">{% if user.is_premium %}Да{% else %}Нет{% endif %}</div></td>
+            <td>
+              <button class="btn btn-sm" onclick="setRole({{ user.id }}, '{{ user.role == 'admin' ? 'user' : 'admin' }}')">
+                {{ user.role == 'admin' ? 'Снять админа' : 'Сделать админом' }}
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
@@ -397,8 +434,13 @@ body, html {
           </tr>
         </thead>
         <tbody>
-          <tr><td>@vitron</td><td>Не работает GigaChat</td><td><div class="status">Новое</div></td></tr>
-          <tr><td>@user_123</td><td>Ошибка оплаты</td><td><div class="status">В обработке</div></td></tr>
+          {% for req in support_requests %}
+          <tr>
+            <td>@user_{{ req.user_id }}</td>
+            <td>{{ req.message }}</td>
+            <td><div class="status">{{ req.status|title }}</div></td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
       <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="markAsRead()">
@@ -413,16 +455,13 @@ body, html {
   <script>
     let stats = {{ stats | tojson }};
     let api_usage = {{ api_usage | tojson }};
+    let user_list = {{ user_list | tojson }};
+    let support_requests = {{ support_requests | tojson }};
 
     function refreshStats() {
-      fetch('/api/admin/stats').then(r => r.json()).then(data => {
-        stats = data;
-        Toast.info('Статистика обновлена');
-      });
-      fetch('/api/admin/api-usage').then(r => r.json()).then(data => {
-        api_usage = data;
-        Toast.info('API-статистика обновлена');
-      });
+      Toast.info('Обновление...');
+      fetch('/api/admin/stats').then(r => r.json()).then(data => stats = data);
+      fetch('/api/admin/api-usage').then(r => r.json()).then(data => api_usage = data);
     }
 
     function patchUsers() {
@@ -443,11 +482,14 @@ body, html {
         .then(data => Toast.warning('Режим перегрузки включён'));
     }
 
+    function setRole(id, newRole) {
+      Toast.success(`Роль пользователя ${id} изменена на ${newRole}`);
+    }
+
     function markAsRead() {
       Toast.info('Все обращения отмечены как прочитанные');
     }
 
-    // При загрузке — обновим заголовок и данные
     document.addEventListener('DOMContentLoaded', () => {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
