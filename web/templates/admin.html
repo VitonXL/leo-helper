@@ -1,31 +1,116 @@
-<!-- web/templates/admin.html -->
 {% extends "base.html" %}
+
 {% block title %}Админ — Лео{% endblock %}
+
 {% block styles %}
 <style>
-.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin: 24px 0; }
-.ticket-item { border: 1px solid var(--border-light); padding: 12px; margin-bottom: 12px; border-radius: 8px; }
+/* Только то, что нужно для админки */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin: 24px 0;
+}
+
+.api-section {
+  margin: 24px 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--border-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+/* Используем стили из base.html: card, stat-card, section-title */
 </style>
 {% endblock %}
-{% block content %}
-<div class="card">
-  <div class="section-title"><span class="material-icons">insights</span> Статистика</div>
-  <div class="admin-grid" id="stats-container">Загрузка...</div>
-</div>
 
-<div class="card">
-  <div class="section-title"><span class="material-icons">help</span> Техподдержка</div>
-  <div id="tickets-container">Загрузка тикетов...</div>
-</div>
+{% block content %}
+  <!-- НЕТ h1, НЕТ дубля шапки -->
+  <!-- page_title из base.html покажет "Админ" -->
+
+  <!-- Статистика — используем готовые .card -->
+  <div class="card">
+    <div class="section-title">
+      <span class="material-icons">insights</span> Статистика
+    </div>
+    <div class="admin-grid" id="stats-container">
+      Загрузка...
+    </div>
+  </div>
+
+  <!-- API -->
+  <div class="card">
+    <div class="section-title">
+      <span class="material-icons">api</span> GigaChat API
+    </div>
+    <div style="font-size: 14px; color: var(--text-secondary);">
+      Использовано: <strong id="api-used">0</strong> / <span id="api-limit">100</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="api-progress-fill"></div>
+    </div>
+    <div style="margin-top: 12px;">
+      <input type="number" id="new-api-limit" placeholder="Новый лимит" style="padding: 8px; width: 200px;">
+      <button class="btn-primary" style="padding: 8px 16px; margin-left: 8px;" onclick="updateApiLimit()">
+        Обновить
+      </button>
+    </div>
+  </div>
+
+  <!-- Поддержка -->
+  <div class="card">
+    <div class="section-title">
+      <span class="material-icons">help</span> Техподдержка
+    </div>
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Пользователь</th>
+          <th>Сообщение</th>
+          <th>Действие</th>
+        </tr>
+      </thead>
+      <tbody id="support-requests">
+        <!-- заполняется через JS -->
+      </tbody>
+    </table>
+  </div>
 {% endblock %}
+
 {% block scripts %}
-{{ super() }}
-<script src="/static/js/admin.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadStats();
-  await loadTickets();
-  changeViewMode('cards');
-});
-</script>
+  {{ super() }}
+  <script src="/static/js/admin.js"></script>
+  <script>
+    // Инициализация API
+    function updateApiDisplay() {
+      const used = statsData.api_usage?.gigachat?.used || 0;
+      const limit = statsData.api_usage?.gigachat?.limit || 100;
+      const percent = Math.min(100, (used / limit) * 100);
+
+      document.getElementById('api-used').textContent = used;
+      document.getElementById('api-limit').textContent = limit;
+      document.getElementById('api-progress-fill').style.width = percent + '%';
+      document.getElementById('new-api-limit').value = limit;
+    }
+
+    window.updateStatsDisplay = function() {
+      originalUpdateStatsDisplay();
+      updateApiDisplay();
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(updateApiDisplay, 800);
+    });
+  </script>
 {% endblock %}
