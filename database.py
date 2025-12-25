@@ -47,7 +47,12 @@ async def init_db(pool):
                 language TEXT DEFAULT 'ru'
             );
         ''')
-
+        
+        await conn.execute("""
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
+    UPDATE users SET role = 'user' WHERE role IS NULL;
+    ALTER TABLE users ADD CONSTRAINT role_check CHECK (role IN ('user', 'premium', 'moderator', 'admin'));
+        """)
         # --- Таблица напоминаний ---
         await conn.execute('''
             CREATE TABLE IF NOT EXISTS reminders (
