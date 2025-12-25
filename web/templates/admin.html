@@ -1,155 +1,27 @@
- {% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Админ — Лео Помощник{% endblock %}
+{% block title %}Админ — Лео{% endblock %}
 
 {% block styles %}
 <style>
-/* === ГРАДИЕНТЫ И ПЕРЕМЕННЫЕ — ТВОЙ СТИЛЬ === */
-:root {
-  --bg: transparent;
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --text: #212121;
-  --text-secondary: #757575;
-  --border: rgba(178, 255, 89, 0.2);
-  --accent: #4CAF50;
-  --accent-light: #B2FF59;
-  --gold: linear-gradient(-45deg, #DAA520, #FFD700, #F4C430, #C5B358, #DAA520);
-  --gold-soft: linear-gradient(-45deg, #D4A017, #E6C229, #F4C430, #D4A017);
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --shadow: 0 6px 20px rgba(76, 175, 80, 0.08);
-  --shadow-hover: 0 12px 28px rgba(76, 175, 80, 0.16), 0 16px 40px rgba(0, 0, 0, 0.12);
-  --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-[data-theme="dark"] {
-  --card-bg: rgba(30, 30, 30, 0.95);
-  --text: #ffffff;
-  --text-secondary: #b0b0b0;
-  --border: rgba(178, 255, 89, 0.1);
-  --shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
-  --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.24);
-}
-
-/* === ФОН — КАК В ТВОЁМ СТИЛЕ === */
-body, html {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  background: linear-gradient(135deg, #f0fff0, #d9f7d9, #e6ffeb) !important;
-  background-size: 400% 400% !important;
-  animation: gradient-shift 15s ease infinite !important;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-[data-theme="dark"] body {
-  background: linear-gradient(135deg, #0a1e0a, #0c240c, #0d2a0d) !important;
-}
-
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* === ОСНОВНОЙ КОНТЕЙНЕР === */
-.admin-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px 80px;
-}
-
-/* === СТАТИСТИКА: ГРИД КАРТОЧЕК === */
-.stats-grid {
+/* Только то, что нужно для админки */
+.admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
-  margin-bottom: 32px;
+  margin: 24px 0;
 }
 
-.stat-card {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  transition: transform var(--transition), box-shadow var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 4px;
-  background: var(--accent);
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-}
-
-.stat-card h3 {
-  margin: 8px 0 4px;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.stat-card p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
-  margin: 0 0 8px;
-}
-
-/* === API УПРАВЛЕНИЕ === */
 .api-section {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-
-.api-section h2 {
-  margin: 0 0 20px;
-  font-size: 18px;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.api-usage {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
+  margin: 24px 0;
 }
 
 .progress-bar {
   width: 100%;
-  height: 10px;
-  background: #e0e0e0;
-  border-radius: 5px;
+  height: 8px;
+  background: var(--border-light);
+  border-radius: 4px;
   overflow: hidden;
-  margin: 8px 0 16px;
 }
 
 .progress-fill {
@@ -159,382 +31,86 @@ body, html {
   transition: width 0.4s ease;
 }
 
-.api-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.api-limit-input {
-  flex: 1;
-  min-width: 120px;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  background: var(--card-bg);
-  color: var(--text);
-}
-
-.api-update-btn {
-  padding: 10px 20px;
-  background: var(--gold);
-  background-size: 200% 200%;
-  animation: gradient-shift-gold 3s ease infinite;
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* === ТЕХПОДДЕРЖКА === */
-.support-section {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-
-.support-section h2 {
-  margin: 0 0 20px;
-  font-size: 18px;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.support-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.support-table th,
-.support-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.support-table th {
-  background: rgba(76, 175, 80, 0.08);
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 12px;
-  text-transform: uppercase;
-}
-
-.support-table tr:hover {
-  background: rgba(76, 175, 80, 0.06);
-}
-
-/* === УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ === */
-.user-control {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-
-.user-control h2 {
-  margin: 0 0 20px;
-  font-size: 18px;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  background: var(--card-bg);
-  color: var(--text);
-  margin-bottom: 16px;
-}
-
-.found-user {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--accent);
-  margin: 8px 0;
-}
-
-.user-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-}
-
-.btn-action {
-  padding: 10px 18px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.btn-premium {
-  background: var(--gold);
-  background-size: 200% 200%;
-  animation: gradient-shift-gold 3s ease infinite;
-  color: white;
-}
-
-.btn-revoke {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-block {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-inspect {
-  background: #6c757d;
-  color: white;
-}
-
-/* === ТАБЛИЦА ПОЛЬЗОВАТЕЛЕЙ === */
-.users-table-container {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-}
-
-.users-table-container h2 {
-  margin: 0 0 20px;
-  font-size: 18px;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.users-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
-  font-size: 14px;
-}
-
-.users-table th,
-.users-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.users-table th {
-  background: rgba(76, 175, 80, 0.08);
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 12px;
-  text-transform: uppercase;
-}
-
-.users-table tr:hover {
-  background: rgba(76, 175, 80, 0.06);
-}
-
-.view-selector {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 16px;
-}
-
-.view-selector select {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  background: var(--card-bg);
-  color: var(--text);
-}
-
-#stats-container {
-  margin-bottom: 32px;
-}
-
-#stats-container canvas {
-  max-height: 300px;
-}
-
-/* === АНИМАЦИИ === */
-@keyframes gradient-shift-gold {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+/* Используем стили из base.html: card, stat-card, section-title */
 </style>
-{{ super() }}
 {% endblock %}
 
 {% block content %}
-  <script>
-    // Обновляем только нужное
-    document.addEventListener('DOMContentLoaded', () => {
-      Toast.info('Добро пожеловать, админ!');
-      // Шапка обновляется в base.html — не трогаем
-    });
-  </script>
+  <!-- НЕТ h1, НЕТ дубля шапки -->
+  <!-- page_title из base.html покажет "Админ" -->
 
-  <div class="admin-container">
-    <!-- Статистика -->
-    <div class="stats-grid" id="stats-container">
-      <div class="text-center text-muted">Загрузка статистики...</div>
+  <!-- Статистика — используем готовые .card -->
+  <div class="card">
+    <div class="section-title">
+      <span class="material-icons">insights</span> Статистика
     </div>
+    <div class="admin-grid" id="stats-container">
+      Загрузка...
+    </div>
+  </div>
 
-    <!-- Вид отображения -->
-    <div class="view-selector">
-      <select id="view-mode" onchange="changeViewMode(this.value)">
-        <option value="cards">Карточки</option>
-        <option value="table">Таблица</option>
-        <option value="chart">Активность по дням</option>
-        <option value="bars">Топ команд</option>
-      </select>
+  <!-- API -->
+  <div class="card">
+    <div class="section-title">
+      <span class="material-icons">api</span> GigaChat API
     </div>
+    <div style="font-size: 14px; color: var(--text-secondary);">
+      Использовано: <strong id="api-used">0</strong> / <span id="api-limit">100</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="api-progress-fill"></div>
+    </div>
+    <div style="margin-top: 12px;">
+      <input type="number" id="new-api-limit" placeholder="Новый лимит" style="padding: 8px; width: 200px;">
+      <button class="btn-primary" style="padding: 8px 16px; margin-left: 8px;" onclick="updateApiLimit()">
+        Обновить
+      </button>
+    </div>
+  </div>
 
-    <!-- API: GigaChat -->
-    <div class="api-section">
-      <h2><span class="material-icons">memory</span> GigaChat API</h2>
-      <div class="api-usage">
-        <span>Использовано: <strong id="api-used">0</strong> / <span id="api-limit">100</span></span>
-        <span>Осталось: <strong id="api-remaining">100</strong></span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="api-progress-fill"></div>
-      </div>
-      <div class="api-actions">
-        <input type="number" class="api-limit-input" id="new-api-limit" placeholder="Новый лимит" min="1">
-        <button class="api-update-btn" onclick="updateApiLimit()">Обновить лимит</button>
-      </div>
+  <!-- Поддержка -->
+  <div class="card">
+    <div class="section-title">
+      <span class="material-icons">help</span> Техподдержка
     </div>
-
-    <!-- Поддержка -->
-    <div class="support-section">
-      <h2><span class="material-icons">contact_support</span> Техподдержка</h2>
-      <table class="support-table">
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Сообщение</th>
-            <th>Дата</th>
-            <th>Действие</th>
-          </tr>
-        </thead>
-        <tbody id="support-requests">
-          <!-- Заполняется через JS -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Управление пользователем -->
-    <div class="user-control">
-      <h2><span class="material-icons">person_search</span> Управление пользователем</h2>
-      <input type="text" class="search-input" id="search-user" placeholder="Введите ID, @username или имя" oninput="searchUser()">
-      <div id="found-user" class="found-user" style="display: none;"></div>
-      <div id="user-actions" class="user-actions" style="display: none;">
-        <button class="btn-action btn-premium" onclick="grantPremium()">Выдать премиум</button>
-        <button class="btn-action btn-revoke" onclick="revokePremium()">Снять премиум</button>
-        <button class="btn-action btn-block" onclick="blockUser()">Заблокировать</button>
-        <button class="btn-action btn-inspect" onclick="inspectUser(window.currentFoundUser?.id)">Инспектировать</button>
-      </div>
-    </div>
-
-    <!-- Все пользователи -->
-    <div class="users-table-container">
-      <h2><span class="material-icons">people</span> Все пользователи</h2>
-      <table class="users-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Имя</th>
-            <th>Юзернейм</th>
-            <th>Роль</th>
-            <th>Язык</th>
-            <th>Премиум до</th>
-            <th>Был в сети</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody id="users-table-body">
-          <!-- Заполняется через JS -->
-        </tbody>
-      </table>
-    </div>
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Пользователь</th>
+          <th>Сообщение</th>
+          <th>Действие</th>
+        </tr>
+      </thead>
+      <tbody id="support-requests">
+        <!-- заполняется через JS -->
+      </tbody>
+    </table>
   </div>
 {% endblock %}
 
 {% block scripts %}
   {{ super() }}
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Твой admin.js -->
   <script src="/static/js/admin.js"></script>
-
-  <!-- Инициализация API -->
   <script>
+    // Инициализация API
     function updateApiDisplay() {
       const used = statsData.api_usage?.gigachat?.used || 0;
       const limit = statsData.api_usage?.gigachat?.limit || 100;
-      const remaining = Math.max(0, limit - used);
       const percent = Math.min(100, (used / limit) * 100);
 
       document.getElementById('api-used').textContent = used;
       document.getElementById('api-limit').textContent = limit;
-      document.getElementById('api-remaining').textContent = remaining;
       document.getElementById('api-progress-fill').style.width = percent + '%';
       document.getElementById('new-api-limit').value = limit;
     }
 
-    async function updateApiLimit() {
-      const newLimit = parseInt(document.getElementById('new-api-limit').value);
-      if (!newLimit || newLimit <= 0) return Toast.error('Введите корректное число');
-
-      try {
-        await fetch('/api/admin/update-api-limit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ limit: newLimit })
-        });
-        Toast.success(`Лимит обновлён: ${newLimit}`);
-        await loadStats();
-        updateApiDisplay();
-      } catch (e) {
-        Toast.error('Ошибка');
-      }
-    }
-
-    // Переопределим обновление статистики
-    const originalUpdateStatsDisplay = window.updateStatsDisplay;
     window.updateStatsDisplay = function() {
       originalUpdateStatsDisplay();
       updateApiDisplay();
     };
 
-    // Инициализация
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(updateApiDisplay, 1000);
+      setTimeout(updateApiDisplay, 800);
     });
   </script>
 {% endblock %}
