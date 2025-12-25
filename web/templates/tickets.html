@@ -1,103 +1,62 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>{{ page_title }} — Лео Помощник</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-        .ticket-card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            margin-bottom: 1rem;
-            transition: box-shadow 0.2s;
-        }
-        .ticket-card:hover {
-            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-        }
-        .ticket-header {
-            border-bottom: 1px solid #f0f0f0;
-            padding: 0.75rem 1rem;
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .ticket-body {
-            padding: 1rem;
-            font-size: 0.95rem;
-            color: #495057;
-        }
-        .status-pill {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 50px;
-        }
-        .status-open { background: #d1ecf1; color: #0c5460; }
-        .status-in_progress { background: #fff3cd; color: #856404; }
-        .status-resolved { background: #d4edda; color: #155724; }
-        .reply-btn { font-size: 0.85rem; padding: 0.25rem 0.5rem; }
-        .modal-body { max-height: 70vh; overflow-y: auto; }
-        .template-item {
-            cursor: pointer;
-            padding: 0.5rem;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            transition: background 0.1s;
-        }
-        .template-item:hover {
-            background: #f8f9fa;
-        }
-        .footer {
-            margin-top: 3rem;
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.85rem;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
 
-<div class="container py-4">
-    <h2 class="mb-4 d-flex align-items-center">
-        <i class="bi bi-headset me-2 text-primary"></i>
+<div class="card">
+    <h2 style="color: var(--accent); font-weight: 600; margin-bottom: 16px;">
+        <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">headset_mic</span>
         Техподдержка
     </h2>
+    <p style="color: var(--text-secondary); margin-bottom: 24px;">
+        Отвечайте на запросы пользователей. Только для модераторов и админов.
+    </p>
 
     {% if tickets|length == 0 %}
-        <div class="text-center text-muted my-5">
-            <i class="bi bi-inbox text-secondary" style="font-size: 3rem;"></i>
-            <p class="mt-3">Нет открытых тикетов</p>
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+            <span class="material-icons" style="font-size: 48px; opacity: 0.5;">inbox</span>
+            <p style="margin-top: 12px;">Нет открытых тикетов</p>
         </div>
     {% else %}
-        <div class="row">
+        <div style="display: grid; gap: 16px;">
             {% for ticket in tickets %}
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="ticket-card">
-                    <div class="ticket-header">
-                        <span><strong>{{ ticket.first_name }}</strong> (@{{ ticket.username }})</span>
-                        <span class="status-pill status-{{ ticket.status }}">
-                            {% if ticket.status == "open" %}Новый{% elif ticket.status == "in_progress" %}В работе{% else %}Закрыт{% endif %}
-                        </span>
+            <div class="card" style="padding: 16px; border-left: 4px solid var(--accent); background: var(--bg-secondary);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <strong style="color: var(--text-primary);">{{ ticket.first_name }}</strong>
+                        {% if ticket.username %}
+                            <span style="color: var(--text-secondary); margin-left: 8px;">@{{ ticket.username }}</span>
+                        {% endif %}
                     </div>
-                    <div class="ticket-body">
-                        <small class="text-muted d-block mb-2">ID: {{ ticket.ticket_id }} | {{ ticket.created_at }}</small>
-                        <p class="mb-3">{{ ticket.message }}</p>
-                        <button class="btn btn-sm btn-outline-primary reply-btn" 
-                                data-ticket-id="{{ ticket.ticket_id }}"
-                                data-user-id="{{ ticket.user_id }}"
-                                data-bs-toggle="modal" 
-                                data-bs-target="#replyModal">
-                            Ответить
-                        </button>
-                    </div>
+                    <span class="btn-sm" style="background: var(--accent-light); color: #006400; width: auto; padding: 4px 12px; font-size: 12px;">
+                        {{ ticket.created_at }}
+                    </span>
+                </div>
+
+                <p style="color: var(--text-primary); margin: 8px 0; font-size: 14px; line-height: 1.5;">
+                    {{ ticket.message }}
+                </p>
+
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <span class="
+                        {% if ticket.status == 'open' %} 
+                            btn-sm" style="background: #e8f5e9; color: #2e7d32; 
+                        {% elif ticket.status == 'in_progress' %} 
+                            btn-sm" style="background: #fff8e1; color: #f57f17; 
+                        {% else %} 
+                            btn-sm" style="background: #e8f5e9; color: #2e7d32; 
+                        {% endif %}
+                        width: auto; padding: 6px 12px; font-size: 12px;">
+                        {% if ticket.status == 'open' %}Новый{% elif ticket.status == 'in_progress' %}В работе{% else %}Закрыт{% endif %}
+                    </span>
+
+                    <button 
+                        class="btn-sm" 
+                        style="background: var(--accent); color: white; width: auto;"
+                        data-ticket-id="{{ ticket.ticket_id }}"
+                        data-user-id="{{ ticket.user_id }}"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#replyModal">
+                        Ответить
+                    </button>
                 </div>
             </div>
             {% endfor %}
@@ -107,41 +66,45 @@
 
 <!-- Модальное окно для ответа -->
 <div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ответить пользователю</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-light);">
+                <h5 class="modal-title" style="color: var(--text-primary);">Ответить пользователю</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="currentTicketId"/>
                 <div class="mb-3">
-                    <label class="form-label">Шаблоны ответов</label>
-                    <div id="templates-container"></div>
+                    <label class="form-label" style="color: var(--text-primary);">Шаблоны ответов</label>
+                    <div id="templates-container" style="display: grid; gap: 8px; margin-top: 8px;"></div>
                 </div>
                 <div class="mb-3">
-                    <label for="replyText" class="form-label">Текст ответа</label>
-                    <textarea class="form-control" id="replyText" rows="4" placeholder="Введите ответ..."></textarea>
+                    <label for="replyText" class="form-label" style="color: var(--text-primary);">Текст ответа</label>
+                    <textarea 
+                        class="form-control" 
+                        id="replyText" 
+                        rows="4" 
+                        placeholder="Введите ответ..." 
+                        style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px; padding: 12px; resize: vertical;"></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-primary" id="sendReplyBtn">Отправить</button>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-light);">
+                <button type="button" class="btn-sm" data-bs-dismiss="modal" style="background: #e0e0e0; color: #333; width: auto;">Отмена</button>
+                <button type="button" class="btn-primary" id="sendReplyBtn" style="width: auto; padding: 8px 16px;">Отправить</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="footer">
-    <p>© 2025 Лео Помощник. Только для модераторов и админов.</p>
-</div>
+{% endblock %}
 
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const userId = "{{ user_id }}";
     const hash = "{{ hash }}";
 
-    // Загружаем шаблоны
+    // Загружаем шаблоны ответов
     async function loadTemplates() {
         try {
             const res = await fetch(`/api/admin/reply-templates?user_id=${userId}&hash=${hash}`);
@@ -149,19 +112,20 @@
             const container = document.getElementById("templates-container");
 
             data.templates.forEach(tpl => {
-                const div = document.createElement("div");
-                div.className = "template-item";
-                div.innerHTML = `<strong>${tpl.title}</strong>: ${tpl.text}`;
-                div.onclick = () => document.getElementById("replyText").value = tpl.text;
-                container.appendChild(div);
+                const btn = document.createElement("button");
+                btn.className = "btn-sm";
+                btn.style = "width: 100%; text-align: left; background: var(--bg-hover); border: 1px solid var(--border-light);";
+                btn.innerHTML = `<strong style="color: var(--accent);">${tpl.title}</strong>: ${tpl.text}`;
+                btn.onclick = () => document.getElementById("replyText").value = tpl.text;
+                container.appendChild(btn);
             });
         } catch (e) {
             console.error("Ошибка загрузки шаблонов:", e);
-            alert("Не удалось загрузить шаблоны ответов");
+            Toast.error("Не удалось загрузить шаблоны");
         }
     }
 
-    // Обработка кнопки "Ответить"
+    // Обработка открытия модалки
     document.addEventListener("DOMContentLoaded", () => {
         loadTemplates();
 
@@ -179,7 +143,7 @@
             const replyText = document.getElementById("replyText").value.trim();
 
             if (!replyText) {
-                alert("Введите текст ответа");
+                Toast.warning("Введите текст ответа");
                 return;
             }
 
@@ -195,14 +159,14 @@
                 });
 
                 if (res.ok) {
-                    alert("✅ Ответ отправлен, тикет закрыт");
-                    location.reload();
+                    Toast.success("Ответ отправлен, тикет закрыт");
+                    setTimeout(() => location.reload(), 1000);
                 } else {
                     const data = await res.json();
-                    alert("❌ Ошибка: " + (data.detail || "Неизвестная ошибка"));
+                    Toast.error(data.detail || "Ошибка отправки");
                 }
             } catch (e) {
-                alert("❌ Ошибка сети: " + e.message);
+                Toast.error("Ошибка сети");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = "Отправить";
@@ -210,5 +174,4 @@
         });
     });
 </script>
-</body>
-</html>
+{% endblock %}
