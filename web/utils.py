@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import os
 from typing import Optional
+from database import get_db_pool, get_user_role
 
 
 def verify_webapp_data(token: str, data_check_string: str, hash: str) -> bool:
@@ -24,18 +25,37 @@ def verify_webapp_data(token: str, data_check_string: str, hash: str) -> bool:
     return computed_hash == hash
 
 
-def verify_cabinet_link(user_id: int, hash: str) -> bool:
+async def verify_cabinet_link(user_id: int, hash: str, required_role: str = None) -> bool:
     """
     Проверяет подлинность ссылки на личный кабинет.
-    Используется, когда пользователь переходит по ссылке из бота.
+    При необходимости — проверяет, имеет ли пользователь нужную роль.
+    
+    Используется в /cabinet, /admin и других защищённых роутах.
     
     :param user_id: ID пользователя из URL
     :param hash: Хеш из URL
-    :return: True, если хеш верный
+    :param required_role: Опциональная роль: 'admin', 'moderator' и т.д.
+    :return: True, если хеш верный и роль (если указана) разрешена
     """
     secret = os.getenv("AUTH_SECRET")
     if not secret:
         raise ValueError("AUTH_SECRET не задан в переменных окружения")
     
     expected_hash = hashlib.md5(f"{user_id}{secret}".encode()).hexdigest()
-    return hash.lower() == expected_hash.lower()
+    if hash.lower() != expected_hash.lower():
+        return False
+
+    # Если роль не требуется — доступ разрешён
+    if not required_role:
+        return True
+
+    # Проверяем роль пользователя
+    pool = await get_db_pool()
+    user_role = await get_user_role(pool, user_id)
+
+    if required_role == "admin":
+        return user_role == "admin"
+    elif required_role == "moderator":
+        return user_role in ["moderator", "admin"]
+    else:
+        return False
