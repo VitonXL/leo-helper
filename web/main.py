@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Request, APIRouter
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from loguru import logger
+from database import get_db_pool
 
 # Добавляем путь
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -325,6 +326,18 @@ async def tickets_page(request: Request):
 # --- Подключаем остальные роуты ---
 app.include_router(admin_api)
 
+# --- Подключаем утилиты ---
+from web.utils import verify_cabinet_link
+
+# --- Подключаем API ---
+try:
+    from .api import router as api_router
+    app.include_router(api_router)
+    logger.info("✅ API-роуты подключены: /api/admin/...")
+except Exception as e:
+    logger.error(f"❌ Ошибка импорта API: {e}")
+
+# --- Подключаем веб-роуты (если есть) ---
 try:
     from .routes import router as web_router
     app.include_router(web_router)
