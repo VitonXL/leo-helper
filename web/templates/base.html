@@ -397,7 +397,11 @@
                 <button class="btn-icon" id="theme-toggle">
                     <span class="material-icons" id="theme-icon">dark_mode</span>
                 </button>
+                {% if user %}
                 <img src="{{ user.get('avatar_url', '/static/img/avatar-placeholder.png') }}" alt="User" class="user-avatar">
+                {% else %}
+                <img src="/static/img/avatar-placeholder.png" alt="Гость" class="user-avatar">
+                {% endif %}
             </div>
 
         </div>
