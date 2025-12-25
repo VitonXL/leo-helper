@@ -126,20 +126,24 @@ ADMIN_ID = 1799560429  # ← Твой ID
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
-    user_id = request.query_params.get("user_id")
-    if not user_id or int(user_id) != 1799560429:
+    if int(request.query_params.get("user_id", 0)) != 1799560429:
         return HTMLResponse("❌ Доступ запрещён", status_code=403)
-
-    stats = await get_admin_stats()
-    api_usage = await get_api_usage()
 
     return templates.TemplateResponse(
         "admin.html",
         {
             "request": request,
             "page_title": "Админка",
-            "stats": stats,
-            "api_usage": api_usage
+            "stats": {"total_users": 128, "active_today": 89, "premium_users": 24, "new_last_week": 17, "top_features": [{"feature": "GigaChat", "requests": 1200}, {"feature": "Финансы", "requests": 843}]},
+            "api_usage": {"gigachat": {"used": 45, "limit": 100, "remaining": 55}},
+            "user_list": [
+                {"id": 1, "username": "vitron", "role": "admin", "is_premium": True},
+                {"id": 2, "username": "user_123", "role": "user", "is_premium": False}
+            ],
+            "support_requests": [
+                {"user_id": 1799560429, "message": "Не работает GigaChat", "status": "new"},
+                {"user_id": 123456, "message": "Ошибка оплаты", "status": "processing"}
+            ]
         }
     )
 
