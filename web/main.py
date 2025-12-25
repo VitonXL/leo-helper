@@ -1,3 +1,4 @@
+# web/main.py
 import sys
 import os
 import yaml
@@ -212,12 +213,25 @@ print(f"✅ Статика доступна из: {static_dir}")
 # --- Jinja2 для HTML-шаблонов ---
 templates = Jinja2Templates(directory=templates_dir)
 
-# --- Маршрут для админки ---
-ADMIN_ID = 1799560429
+# --- Подключаем утилиты ---
+from web.utils import verify_cabinet_link  # ✅ Импортируем проверку
 
+# --- Маршрут для админки ---
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
-    if int(request.query_params.get("user_id", 0)) != ADMIN_ID:
+    user_id_str = request.query_params.get("user_id")
+    hash = request.query_params.get("hash")
+    
+    if not user_id_str or not hash:
+        return HTMLResponse("❌ Не хватает данных для входа", status_code=403)
+    
+    try:
+        user_id = int(user_id_str)
+    except (ValueError, TypeError):
+        return HTMLResponse("❌ Неверный user_id", status_code=403)
+    
+    # Проверяем: валидный ли хеш и есть ли роль admin
+    if not await verify_cabinet_link(user_id, hash, required_role="admin"):
         return HTMLResponse("❌ Доступ запрещён", status_code=403)
 
     usage = load_usage()
@@ -239,7 +253,7 @@ async def admin_page(request: Request):
                     "id": u.get("id"),
                     "first_name": u.get("first_name", "Пользователь"),
                     "username": u.get("username", ""),
-                    "role": "admin" if u.get("id") == ADMIN_ID else "premium" if u.get("premium") else "user",
+                    "role": "admin" if u.get("id") == 1799560429 else "premium" if u.get("premium") else "user",
                     "language": u.get("language", "ru"),
                     "premium_expires": u.get("premium_expires"),
                     "last_seen": u.get("last_seen", datetime.now().isoformat())
