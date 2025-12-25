@@ -231,7 +231,7 @@ async def admin_page(request: Request):
         "admin.html",
         {
             "request": request,
-            "page_title": "Админ",
+            "page_title": "Админ-панель",
             "stats": await get_admin_stats(),
             "api_usage": await get_api_usage(),
             "user_list": [
