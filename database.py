@@ -49,27 +49,41 @@ async def init_db(pool):
         ''')
         # --- Безопасное обновление CHECK-ограничения для role ---
         await conn.execute("""
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
-    UPDATE users SET role = 'user' WHERE role IS NULL;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
+            UPDATE users SET role = 'user' WHERE role IS NULL;
+            ALTER TABLE users DROP CONSTRAINT IF EXISTS role_check;
+            ALTER TABLE users ADD CONSTRAINT role_check 
+            CHECK (role IN ('user', 'premium', 'moderator', 'admin'));
+        """)
 
-    -- Удаляем старое ограничение, если существует
-    ALTER TABLE users DROP CONSTRAINT IF EXISTS role_check;
-
-    -- Создаём новое с поддержкой moderator
-    ALTER TABLE users ADD CONSTRAINT role_check 
-    CHECK (role IN ('user', 'premium', 'moderator', 'admin'));
-""")
         # --- Таблица напоминаний ---
         await conn.execute('''
             CREATE TABLE IF NOT EXISTS reminders (
                 id SERIAL PRIMARY KEY,
-                user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-                message TEXT,
-                trigger_time TIMESTAMPTZ,
-                is_active BOOLEAN DEFAULT TRUE,
-                created_at TIMESTAMPTZ DEFAULT NOW()
+                user_id BIGINT NOT NULL,
+                text TEXT NOT NULL,
+                time TIMESTAMPTZ NOT NULL,
+                created_at TIMESTAMPTZ DEFAULT NOW(),
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             );
         ''')
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_reminders_time ON reminders (time);')
+
+        # --- Таблица подписок ---
+        await conn.execute('''
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                name TEXT NOT NULL,
+                amount DECIMAL(10, 2) NOT NULL,
+                currency TEXT DEFAULT '₽',
+                billing_cycle INTERVAL NOT NULL,
+                next_payment TIMESTAMPTZ NOT NULL,
+                created_at TIMESTAMPTZ DEFAULT NOW(),
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            );
+        ''')
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_subscriptions_next ON subscriptions (next_payment);')
 
         # --- Таблица рефералов ---
         await conn.execute('''
@@ -139,7 +153,7 @@ async def init_db(pool):
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_finance_type ON finance_operations(type);')
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_finance_date ON finance_operations(created_at);')
 
-        # --- Миграции — расширения ---
+        # --- Миграции — расширения (только добавление колонок) ---
         migrations = [
             ('theme', "TEXT DEFAULT 'light'"),
             ('language', "TEXT DEFAULT 'ru'"),
@@ -147,6 +161,7 @@ async def init_db(pool):
             ('is_bot', 'BOOLEAN'),
             ('last_seen', 'TIMESTAMPTZ DEFAULT NOW()'),
             ('premium_expires', 'TIMESTAMPTZ'),
+            ('city', 'TEXT'),
         ]
 
         for column, type_def in migrations:
@@ -218,14 +233,15 @@ async def is_premium_or_admin(pool, user_id: int) -> bool:
 async def get_user_settings(pool, user_id: int) -> dict:
     async with pool.acquire() as conn:
         row = await conn.fetchrow('''
-            SELECT theme, language FROM users WHERE id = $1
+            SELECT theme, language, premium_expires FROM users WHERE id = $1
         ''', user_id)
         if row:
             return {
                 "theme": row["theme"] or "light",
-                "language": row["language"] or "ru"
+                "language": row["language"] or "ru",
+                "premium_expires": row["premium_expires"]
             }
-        return {"theme": "light", "language": "ru"}
+        return {"theme": "light", "language": "ru", "premium_expires": None}
 
 
 async def update_user_theme(pool, user_id: int, theme: str):
@@ -293,7 +309,7 @@ async def add_finance_operation(pool, user_id: int, amount: float, type: str, ca
     logger.info(f"💰 {type.capitalize()}: {amount} ₽ для пользователя {user_id}")
 
 
-# ✅ Вставь в database.py
+# --- Статистика доходов и расходов ---
 async def get_user_stats(pool, user_id: int):
     async with pool.acquire() as conn:
         row = await conn.fetchrow('''
@@ -391,36 +407,3 @@ async def get_db_pool():
     if _db_pool is None:
         _db_pool = await create_db_pool()
     return _db_pool
-
-# В список migrations добавь:
-('city', "TEXT"),
-('reminders', """ 
-    CREATE TABLE IF NOT EXISTS reminders (
-        id SERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL,
-        text TEXT NOT NULL,
-        time TIMESTAMPTZ NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-    );
-    CREATE INDEX IF NOT EXISTS idx_reminders_time ON reminders (time);
-"""),  # ✅ Добавляем таблицу и индекс для быстрого поиска по времени
-
-('reminders', """ 
-    CREATE TABLE IF NOT EXISTS reminders ( ... );
-    CREATE INDEX IF NOT EXISTS idx_reminders_time ON reminders (time);
-"""),
-('subscriptions', """
-    CREATE TABLE IF NOT EXISTS subscriptions (
-        id SERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL,
-        name TEXT NOT NULL,
-        amount DECIMAL(10, 2) NOT NULL,
-        currency TEXT DEFAULT '₽',
-        billing_cycle INTERVAL NOT NULL,  -- период: 1 month, 30 days и т.д.
-        next_payment TIMESTAMPTZ NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-    );
-    CREATE INDEX IF NOT EXISTS idx_subscriptions_next ON subscriptions (next_payment);
-"""),  # ✅ Новая таблица + индекс для уведомлений
