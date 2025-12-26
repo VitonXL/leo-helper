@@ -1,3 +1,4 @@
+# database.py
 import asyncpg
 import os
 from loguru import logger
@@ -62,11 +63,16 @@ async def init_db(pool):
                 id SERIAL PRIMARY KEY,
                 user_id BIGINT NOT NULL,
                 text TEXT NOT NULL,
-                time TIMESTAMPTZ NOT NULL,
                 created_at TIMESTAMPTZ DEFAULT NOW(),
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             );
         ''')
+        # Гарантируем наличие колонки `time`
+        await conn.execute("ALTER TABLE reminders ADD COLUMN IF NOT EXISTS time TIMESTAMPTZ;")
+        # Устанавливаем NOT NULL, если нужно (только если все строки уже имеют значение)
+        await conn.execute("UPDATE reminders SET time = created_at WHERE time IS NULL;")
+        await conn.execute("ALTER TABLE reminders ALTER COLUMN time SET NOT NULL;")
+        # Создаём индекс
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_reminders_time ON reminders (time);')
 
         # --- Таблица подписок ---
@@ -131,8 +137,7 @@ async def init_db(pool):
                 ticket_id TEXT UNIQUE
             );
         ''')
-
-        # Индексы
+        # Индексы (IF NOT EXISTS)
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_user ON support_tickets(user_id);')
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_status ON support_tickets(status);')
         await conn.execute('CREATE INDEX IF NOT EXISTS idx_support_ticket_id ON support_tickets(ticket_id);')
@@ -400,13 +405,6 @@ async def ensure_support_table_exists():
         except Exception as e:
             logger.error(f"❌ Ошибка при создании таблицы support_tickets: {e}")
 
-
-# === Глобальный пул подключений ===
-async def get_db_pool():
-    global _db_pool
-    if _db_pool is None:
-        _db_pool = await create_db_pool()
-    return _db_pool
 
 # --- Получение языка пользователя ---
 async def get_user_lang(pool, user_id: int) -> str:
