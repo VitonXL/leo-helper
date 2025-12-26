@@ -2,7 +2,13 @@
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
-from database import get_db_pool, get_referral_stats, get_user_settings, update_user_theme
+from database import (
+    get_db_pool,
+    get_referral_stats,
+    get_user_settings,
+    update_user_theme
+)
+from utils import generate_cabinet_link  # ✅ Импорт вынесен наверх
 
 # --- Локализация ---
 TEXTS = {
@@ -29,7 +35,6 @@ TEXTS = {
         "theme_dark": "Dark"
     }
 }
-
 
 # --- Клавиатуры ---
 def get_main_menu():
@@ -116,43 +121,36 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
 
     pool = await get_db_pool()
 
-    # Получаем настройки и рефералов
+    # Получаем настройки и статистику
     settings = await get_user_settings(pool, user.id)
     lang = settings["language"]
     theme = settings["theme"]
     referrals = await get_referral_stats(pool, user.id)
-    premium = "✅ есть" if settings.get("premium_expires") else "❌ нет"
+    premium = "✅ есть" if settings.get("premium_expires") else "❌ нет"  # ⚠️ 'premium_expires' нужно получать отдельно
+    link = generate_cabinet_link(user.id)
 
     # --- Главное меню ---
     if data == "menu_main":
-        await query.edit_message_text("📌 *Главное меню*", reply_markup=get_main_menu(), parse_mode='Markdown')
+        await query.edit_message_text(
+            TEXTS[lang]["menu_title"],
+            reply_markup=get_main_menu(),
+            parse_mode='Markdown'
+        )
 
     # --- Личный кабинет ---
     elif data == "menu_profile":
-        try:
-            from utils import generate_cabinet_link
-            link = generate_cabinet_link(user.id)
-            await query.edit_message_text(
-                "🔐 <b>Личный кабинет</b>\n\n"
-                "Откройте полный интерфейс управления:\n"
-                f"<a href='{link}'>Перейти в кабинет</a>\n\n"
-                "Тут вы можете:\n"
-                "• Проверить подписку\n"
-                "• Управлять рефералами\n"
-                "• Сменить тему\n"
-                "• Подключить GigaChat",
-                reply_markup=get_profile_menu(),
-                parse_mode='HTML',
-                disable_web_page_preview=False
-            )
-        except Exception as e:
-            await query.edit_message_text(
-                f"❌ Ошибка: не удалось сгенерировать ссылку\n{e}",
-                reply_markup=get_profile_menu()
-            )
+        await query.edit_message_text(
+            f"{TEXTS[lang]['profile_title']}\n\n"
+            f"{TEXTS[lang]['profile_intro']}\n"
+            f"{TEXTS[lang]['profile_web'].format(link=link)}\n\n"
+            f"{TEXTS[lang]['profile_desc']}",
+            reply_markup=get_profile_menu(),
+            parse_mode='HTML',
+            disable_web_page_preview=True
+        )
 
     elif data == "profile_premium":
-        await query.answer("💳 Подписка — скоро!", show_alert=False)
+        await query.answer("💳 Подписка — скоро!", show_alert=True)
         await query.edit_message_text(
             "💎 *Премиум-подписка*\n\n"
             "🔹 Все функции без ограничений\n"
@@ -165,11 +163,11 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "profile_referral":
-        await query.answer("🤝 Рефералы — скоро!", show_alert=False)
+        await query.answer("🤝 Рефералы — скоро!", show_alert=True)
         await query.edit_message_text(
-            "🔗 *Реферальная система*\n\n"
+            f"🔗 *Реферальная система*\n\n"
             "Приглашай друзей и получай бонусы!\n\n"
-            "🔗 Реф. ссылка: `t.me/Leo_aide_bot?start=ref123`\n"
+            f"🔗 Реф. ссылка: `t.me/Leo_aide_bot?start=ref{user.id}`\n"
             f"🎁 +3 дня за {referrals} друзей\n\n"
             "🛠 Активация скоро",
             reply_markup=get_profile_menu(),
@@ -177,7 +175,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "profile_settings":
-        await query.answer("🔐 Настройки — скоро!", show_alert=False)
+        await query.answer("🔐 Настройки — скоро!", show_alert=True)
         await query.edit_message_text(
             "⚙️ *Настройки аккаунта*\n\n"
             "• Смена имени\n"
@@ -201,7 +199,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
             parse_mode='Markdown'
         )
 
-    # --- Функционал ---
+    # --- Функции ---
     elif data == "menu_features":
         await query.edit_message_text(
             "🛠️ *Функции*\n\nВыбери инструмент:",
@@ -210,13 +208,11 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "features_weather":
-        await query.answer("🌤 Загрузка погоды...", show_alert=False)
+        await query.answer("🌤 Погода", show_alert=False)
         await query.edit_message_text(
             "🌤 *Погода*\n\n"
-            "Используй: `/weather Москва`\n\n"
-            "📍 Прогноз на 3 дня\n"
-            "🔔 Ежедневные уведомления\n\n"
-            "🛠 Реализуется",
+            "Используй: `/weather Москва` — получи прогноз\n\n"
+            "📍 Автоопределение по кнопке: `/weather`",
             reply_markup=get_features_menu(),
             parse_mode='Markdown'
         )
@@ -225,39 +221,37 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         await query.answer("💱 Курсы валют", show_alert=False)
         await query.edit_message_text(
             "💱 *Курсы валют*\n\n"
-            "Доступно: USD, EUR, CNY\n\n"
+            "Доступно: USD, EUR, CNY, GBP, JPY\n\n"
             "Используй: `/currency USD`",
             reply_markup=get_features_menu(),
             parse_mode='Markdown'
         )
 
     elif data == "features_reminders":
-        await query.answer("🔔 Напоминания — скоро!", show_alert=False)
+        await query.answer("🔔 Напоминания", show_alert=False)
         await query.edit_message_text(
             "🕰 *Напоминания*\n\n"
-            "Создай: `/remind 30 Встать`\n\n"
-            "📌 Сохраняются в облаке\n"
-            "🔔 Уведомления точно вовремя\n\n"
-            "🛠 Готовится к запуску",
+            "Используй: `/remind 1h30m Встреча`\n\n"
+            "📌 Текст сохраняется\n"
+            "🔔 Присылается точно вовремя\n\n"
+            "✅ Уже работает!",
             reply_markup=get_features_menu(),
             parse_mode='Markdown'
         )
 
     elif data == "features_subscriptions":
-        await query.answer("📋 Подписки — скоро!", show_alert=False)
+        await query.answer("📋 Подписки", show_alert=False)
         await query.edit_message_text(
             "🔔 *Отслеживание подписок*\n\n"
-            "Контролируй:\n"
-            "• YouTube\n"
-            "• Spotify\n"
-            "• Telegram Premium\n\n"
-            "🔔 Напоминание за 3 дня",
+            "Добавь: `/subscribe Spotify 249 1m`\n\n"
+            "📅 Напоминание за день\n"
+            "✅ Уже работает!",
             reply_markup=get_features_menu(),
             parse_mode='Markdown'
         )
 
     elif data == "features_telegram_games":
-        await query.answer("🎯 Игры — скоро!", show_alert=False)
+        await query.answer("🎯 Игры — скоро!", show_alert=True)
         await query.edit_message_text(
             "🎮 *Telegram Игры*\n\n"
             "Сыграй в:\n"
@@ -270,7 +264,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "features_news":
-        await query.answer("📰 Новости — скоро!", show_alert=False)
+        await query.answer("📰 Новости — скоро!", show_alert=True)
         await query.edit_message_text(
             "📰 *Новости*\n\n"
             "Темы:\n"
@@ -291,7 +285,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "premium_gigachat":
-        await query.answer("🤖 GigaChat — скоро!", show_alert=False)
+        await query.answer("🤖 GigaChat", show_alert=False)
         await query.edit_message_text(
             "🤖 *GigaChat*\n\n"
             "Задай любой вопрос:\n"
@@ -303,7 +297,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "premium_games":
-        await query.answer("🎮 Кастом-игры — скоро!", show_alert=False)
+        await query.answer("🎮 Кастом-игры — скоро!", show_alert=True)
         await query.edit_message_text(
             "🎯 *Кастомные игры*\n\n"
             "• Угадай мем\n"
@@ -315,7 +309,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "premium_movies":
-        await query.answer("🎬 Подбор фильмов — скоро!", show_alert=False)
+        await query.answer("🎬 Подбор фильмов — скоро!", show_alert=True)
         await query.edit_message_text(
             "🎬 *Подбор фильмов*\n\n"
             "Укажи жанр:\n"
@@ -328,7 +322,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
 
     # --- Безопасность ---
     elif data == "menu_antivirus":
-        await query.answer("🛡️ Безопасность — скоро!", show_alert=False)
+        await query.answer("🛡️ Безопасность — скоро!", show_alert=True)
         await query.edit_message_text(
             "🛡️ *Безопасность*\n\n"
             "• Проверка ссылок\n"
@@ -341,7 +335,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
 
     # --- Обход блокировок ---
     elif data == "menu_unlock":
-        await query.answer("🌐 Обход — скоро!", show_alert=False)
+        await query.answer("🌐 Обход — скоро!", show_alert=True)
         await query.edit_message_text(
             "🌐 *Обход блокировок*\n\n"
             "• Прокси-бот\n"
@@ -361,7 +355,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "settings_notifications":
-        await query.answer("🔔 Уведомления — скоро!", show_alert=False)
+        await query.answer("🔔 Уведомления — скоро!", show_alert=True)
         await query.edit_message_text(
             "🔔 *Уведомления*\n\n"
             "Статус: ❌ выключены\n\n"
@@ -371,7 +365,7 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
     elif data == "settings_language":
-        await query.answer("🌐 Язык — скоро!", show_alert=False)
+        await query.answer("🌐 Язык — скоро!", show_alert=True)
         await query.edit_message_text(
             "🌐 *Язык интерфейса*\n\n"
             "Доступно:\n"
@@ -379,14 +373,6 @@ async def handle_menu_callbacks(update: Update, context: ContextTypes.DEFAULT_TY
             "• English\n\n"
             "🛠 Переключение в разработке",
             reply_markup=get_settings_menu(),
-            parse_mode='Markdown'
-        )
-
-    # --- Назад в меню ---
-    elif data == "menu_main":
-        await query.edit_message_text(
-            "📌 *Главное меню*",
-            reply_markup=get_main_menu(),
             parse_mode='Markdown'
         )
 
