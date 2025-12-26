@@ -1,23 +1,15 @@
 # bot/main.py
 
-# 🔴 САМОЕ ПЕРВОЕ — добавляем /app в путь
 import sys
 import os
 
+# 🔴 САМОЕ ПЕРВОЕ — добавляем корневую директорию в путь
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
-# Теперь можно импортировать
+# Теперь можно импортировать из корня
 from bot.instance import application as global_app, bot as global_bot
-
-# Отладка
-print("🔧 Запуск бота...")
-print("📂 Текущая директория:", os.getcwd())
-print("📦 Содержимое:", os.listdir("."))
-print("🔍 Новый sys.path:", sys.path)
-
-# Остальные импорты
 from database import (
     create_db_pool,
     init_db,
@@ -29,24 +21,23 @@ from database import (
     cleanup_support_tickets,
     ensure_support_table_exists,
     get_db_pool,
+    get_user_lang,  # ✅ Добавлен: нужен для локализации напоминаний и подписок
 )
 
+# Фичи
 from features.menu import setup as setup_menu
 from features.admin import setup_admin_handlers
 from features.roles import setup_role_handlers
 from features.referrals import setup_referral_handlers
 from features.premium import setup_premium_handlers
 from features.help import setup as help_setup
-from features.help import handle_support_message  # ✅ Импорт для MessageHandler
+from features.help import handle_support_message  # ✅ Обработчик сообщений поддержки
 from features.currency import setup_currency_handlers
 from features.reminders import setup_reminder_handlers
 from features.subscriptions import setup_subscription_handlers
+from features.weather import setup_weather_handlers  # ✅ Добавлен: погода
 
-# ...
-setup_currency_handlers(app)
-setup_reminder_handlers(app)
-setup_subscription_handlers(app)
-
+# Telegram
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, MenuButtonWebApp, WebAppInfo
 from telegram.ext import (
     Application,
@@ -76,7 +67,7 @@ SUPPORT_FAQ = {
     "обновить": "Перезагрузите страницу или нажмите /start.",
 }
 
-# Обработчик FAQ — должен быть ПОСЛЕДНИМ!
+# --- Обработчик FAQ — должен быть ПОСЛЕДНИМ! ---
 async def handle_support_faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
@@ -95,7 +86,7 @@ async def debug_all_messages(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if update.message and update.message.text:
         logger.debug(f"📨 DEBUG: Входящее сообщение: '{update.message.text}' от user_id={update.effective_user.id}")
 
-# --- Отслеживание активности ---
+# --- Отслеживание активности пользователя ---
 async def track_user_activity(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if user:
@@ -118,7 +109,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     await add_or_update_user(db_pool, user)
 
-    # Реферал
+    # Обработка реферальной ссылки
     if context.args and context.args[0].startswith("ref"):
         referrer_id = int(context.args[0][3:])
         if referrer_id != user.id:
@@ -134,14 +125,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=get_start_keyboard()
     )
 
-# --- Фоновая задача: очистка ---
+# --- Фоновая задача: очистка неактивных пользователей и тикетов ---
 async def cleanup_task(context: ContextTypes.DEFAULT_TYPE):
     if not db_pool:
         return
     await delete_inactive_users(db_pool, days=90)
     await cleanup_support_tickets(db_pool, days=7)
 
-# --- Инициализация ---
+# --- Инициализация после запуска ---
 async def on_post_init(app: Application):
     global db_pool
     logger.info("🔧 Инициализация БД...")
@@ -157,7 +148,7 @@ async def on_post_init(app: Application):
     global_bot = app.bot
     logger.info("✅ Бот и application сохранены в bot.instance")
 
-    # Меню (≡)
+    # Устанавливаем кнопку меню (≡)
     try:
         await app.bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(
@@ -169,7 +160,7 @@ async def on_post_init(app: Application):
     except Exception as e:
         logger.error(f"❌ Не удалось установить menu button: {e}")
 
-    # Команды
+    # Устанавливаем команды
     await app.bot.set_my_commands([
         ("start", "🚀 Начать"),
         ("menu", "🏠 Открыть меню"),
@@ -177,11 +168,11 @@ async def on_post_init(app: Application):
     ])
     logger.info("✅ Команды бота установлены")
 
-    # Фоновая задача
+    # Запуск фоновой задачи
     app.job_queue.run_repeating(cleanup_task, interval=24 * 3600, first=10)
     logger.info("⏰ Фоновая задача: очистка — запущена")
 
-# --- Главная ---
+# --- Главная функция запуска ---
 def main():
     app = (
         Application.builder()
@@ -190,30 +181,34 @@ def main():
         .build()
     )
 
-    # Группа -2: дебаг
+    # Группа -2: дебаг всех сообщений
     app.add_handler(MessageHandler(filters.ALL, debug_all_messages), group=-2)
 
-    # Группа -1: активность
+    # Группа -1: отслеживание активности
     app.add_handler(TypeHandler(Update, track_user_activity), group=-1)
 
-    # Основные фичи — группа 0
+    # Группа 0: основные фичи
     help_setup(app)
     setup_menu(app)
     setup_admin_handlers(app)
     setup_role_handlers(app)
     setup_referral_handlers(app)
     setup_premium_handlers(app)
+    setup_currency_handlers(app)
+    setup_reminder_handlers(app)
+    setup_subscription_handlers(app)
+    setup_weather_handlers(app)  # ✅ Добавлено
 
     # Команда /start
     app.add_handler(CommandHandler("start", start), group=0)
 
-    # 🔥 Режим поддержки — группа 50
+    # Режим поддержки — группа 50
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support_message),
         group=50
     )
 
-    # 🔥 FAQ — САМЫЙ ПОСЛЕДНИЙ, группа 100
+    # FAQ — последний обработчик, группа 100
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support_faq),
         group=100
